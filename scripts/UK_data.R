@@ -183,16 +183,8 @@ model_ready_df <- Y_P_r_stex |>
   # Create a COVID Dummy to protect your structural coefficients
   mutate(covid_dummy = ifelse(Date %in% c("2020 Q1", "2020 Q2", "2020 Q3"), 1, 0)) |>
   drop_na() # Remove the first row where lag(inflation) is NA
+
 view(model_ready_df)
-
-
-
-
-
-
-
-
-
 
 
 
