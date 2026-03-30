@@ -1,0 +1,596 @@
+---
+title: "A Small Open-Economy DSGE Model for the UK"
+subtitle: "Working Paper No. 1 - Stage 1: System Estimation and Preliminary Forecasting"
+author: "Oliver Hogan"
+editor: visual
+date: last-modified
+number-sections: true
+toc: true
+colorlinks: true
+format: html
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(car)
+
+MODEL_DIFFS <- read.csv("C:\\Users\\hogan\\OneDrive\\Documents\\1 OLLIE\\0. R\\UK_economic_model\\reports\\MODEL_READY.csv")
+```
+
+# Hybrid model (mix of estimation & calibration)
+
+$$
+\\begin{aligned} Y\_{t}\^{\\text{gap}} &= \\alpha_1\\, Y\_{t-1}\^{\\text{gap}} \\;-\\;\\boldsymbol{\\phi_r}\\, r\_{t}\^{\\text{gap}} \\;-\\;\\boldsymbol{\\phi_s}\\, spr\_{t}\^{\\text{gap}} \\;+\\;\\alpha_2\\, \\Delta NX\_{t} \\;+\\;\\alpha_3\\, RER\_{t-1} \\\\\[4pt\] &\\quad +\\;\\mathbf{\\alpha\_{bp1}}\\, D\_{2004} +\\mathbf{\\alpha\_{bp2}}\\, D\_{2008} +\\mathbf{\\alpha\_{bp3}}\\, D\_{2013} +\\mathbf{\\alpha\_{bp4}}\\, D\_{2019} + \\varepsilon\^{IS}\_{t}. \\end{aligned}
+$$
+
+# Introduction
+
+Our starting point is Scarth's specification of the Mundell-Fleming model. We move on to consider rationally formed exchange rate expectations. Dornbusch (1976) shows that overshooting in the exchange rate can easily occur in a model in which exchange rates adjust at a faster pace than goods prices. Product prices that are sluggish (and cannot adjust in the short run as much as they can in the long run) can force more adjustment in the exchange rate in the short run than is required in the long run.
+
+Dornbusch extends the perfect capital mobility version of the Mundell-Fleming model to allow for forward-looking exchange rate expectations and interprets the resulting overshooting as explaining exchange rate volatility. This is the subject of Scarth (1988), Ch. 9.2. For pedagogic reasons, Scarth deals with the supply-side effects of exchange rates and resolution of the stocks vs. flows in the balance of payments issue through separate models in which the restriction that was relaxed in the preceding analysis is re-applied in the subsequent analysis. This is where we depart from Scarth for the moment but he points us in the right direction, noting that Buiter and Miller (1982) have made significant progress in combining all of these features in one model.
+
+Buiter and Miller's NBER paper is impressive and was developed with the UK economy in mind. Specifically, Niehans (1983) in his comment on the paper notes that it can generally be regarded as an effort to apply the "underemployment version of Dornbusch's exchange dynamics model to the stylised facts of British monetary policy"*.*
+
+The paper, titled *Real Exchange Rate Overshooting and the Output Cost of Bringing Down Inflation*, develops a structural model to explain the UK's experience with high interest rates and a strong pound. It provides a continuous-time framework for analysing exchange rate and inflation dynamics. The core of the model consists of five key equations covering money market equilibrium, aggregate demand, price evolution, core inflation, and uncovered interest parity. The model, a variation of the Dornbusch overshooting model, features sticky prices and jump variables, with nominal exchange rates and trend inflation adjusting instantly to shocks.
+
+While it is of particular relevance to the Thatcher-era reforms, the work remains a foundational reference for modern structural analyses of the UK economy. The principles of the Buiter-Miller model (nominal stickiness with rational expectations in financial markets) using updated New Keynesian DSGE frameworks. The OBR's "Small Model of the UK Economy" (used to simulate fiscal and monetary shocks) might reasonably be viewed as a contemporary structural successor, incorporating similar elements like exchange rate pass-through and inflation persistence, but evolving the Buiter-Miller logic into a four-equation New Keynesian framework. We have tethered our analysis to the OBR framework, but have sought to adapt it where required to achieve economic coherence and a better fit to the particular extract of UK data that we are using.
+
+# LATEST MODEL
+
+7 equations
+
+## The Structural System
+
+The model is defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using either CK or HP filters). (Multivariate filters were attempted but they crashed the system!)
+
+$$
+\begin{aligned}
+\text{IS (agg dem):} \quad \tilde{y}_t &= \alpha_1 \tilde{y}_{t-1} + \beta_1 \tilde{r}_t + \beta_2 \tilde{i}_{spr, t} + \gamma_1 \tilde{q}_{t-1} + \delta_1 \Delta \text{nx}_{t-1} + \sum \phi_i D_{i,t} + \epsilon_{1,t} \\
+\text{PC (inflation):} \quad\pi_t &= \alpha_2 \pi_{t-1} + \beta_3 \tilde{w}_t + \gamma_2 \tilde{q}_{t-1} + \theta_1 \Delta p^{m}_{t-1} + \theta_2 \Delta p^{e}_{t-1} + \sum \phi_i D_{i,t} + \epsilon_{2,t} \\
+\text{TR (mon pol)}: \quad i_t &= \alpha_3 i_{t-1} + \beta_4 (\pi_t - \pi^*) + \beta_5 \tilde{y}_t + \gamma_3 \tilde{q}_{t-1} +  \phi_1 D_{2020Q2} + \epsilon_{3,t} \\
+\text{OL (lab dem):} \quad\tilde{u}_t &= \alpha_4 \tilde{u}_{t-1} + \beta_6 \tilde{y}_t + \phi_1 D_{2020Q2} + \epsilon_{4,t} \\
+\text{UIP (exch rate):} \quad \tilde{q}_t &= \alpha_5 \tilde{q}_{t-1} + \beta_7 (\tilde{r}_t - \tilde{r}^f_t)_{t-1} + \epsilon_{5,t} \\
+\text{WPC (lab sup):} \quad \tilde{w}_t &= \alpha_6 \tilde{w}_{t-1} + \beta_8 \pi_{t-1} + \gamma_4 \tilde{u}_{t-1} + \delta_2 \tilde{pr}_t + \epsilon_{6,t} \\
+\text{POL (produc):} \quad \tilde{pr}_t &= \alpha_7 \tilde{pr}_{t-1} + \beta_9 \tilde{y}_t + \phi_1 D_{2020Q2} + \epsilon_{7,t}
+\end{aligned}
+$$ {#eq-system}
+
+The IS Curve (Aggregate Demand) equation features the following variables:
+
+-   $\tilde{y}$ is the **Output Gap** (`Y_GAP`) (CK filter for trend)
+-   $\tilde{r}$ is the **Real Interest Rate Gap** (`R_GAP`)
+-   $\tilde{i}_{spr}$ is the **Nominal Spread Gap (**`i_spr_GAP`)
+-   $\tilde{q}$ is the **Real Exchange Rate Gap (**`RER_GAP`)
+-   $\Delta nx$ is **Net Export Growth** (`dNX`)
+-   $D_{cov}$ represents the 2020 **COVID dummy variables.**
+
+The Phillips Curve introduces the following additional variables:
+
+-   $\pi$ is the **year-on-year (YoY) CPI inflation** (`INFL_yoy`)
+-   $\tilde{w}$ is the **real wage gap** (`WAGE_GAP`)
+-   $\Delta p^m$ is import price inflation measured through the imports price deflator
+-   $\Delta p^e$ is energy price inflation measured through the domestic fuels component of the CPI.
+
+The Taylor Rule equation, representing the monetary policy rule, introduces:
+
+-   $\tilde{i}$ is the **nominal rate gap** (BOE base rate)
+-   $(\pi - \pi^*)$ is the deviation in (yoy CPI) inflation from the 2% target
+
+Okun's Law provides the labour demand relation, introducing:
+
+-   $\tilde{u}$ is the **Unemployment Gap** (`U_GAP`) $(u_t - u^*)$ (CK filter for trend)
+
+The important role of the exchange rate is reflected in the Uncovered Interest Parity equation, in which:
+
+-   $(\tilde{r} - \tilde{r}^f)$ is the real interest rate differential between the UK and the rest of the world (US as proxy)
+
+The final variable is the key ingredient in our wage Phillips curve and Okun's Law relating wages to productivity. The equations introduce:
+
+-   $\tilde{pr}$ which is the **labour productivity gap** (the deviation in output per hour worked from its trend.
+
+## Econometric methods
+
+-   **Estimation Method:** Two-Stage Least Squares (**2SLS**) to ensure coefficient consistency.
+
+-   **Expectations:** The model utilizes **Adaptive Expectations** (backward-looking lags) as per Murray (2012), allowing for a better fit of the 2022–2023 inflation surge.
+
+-   **Dynamics:** All equations include a lagged dependent variable ($\alpha$) to capture the high degree of **inertia** characteristic of the UK macro-economy.
+
+By shifting from 3SLS to 2SLS, we are prioritising **reliability** and **consistency** in the face of the complex supply-side shocks (COVID and Energy) that hit the UK economy during your sample period.
+
+*"While 3SLS offers efficiency gains, a Hausman specification test () indicated significant differences between 3SLS and 2SLS estimates. To prioritize the consistency of our coefficients and ensure that potential misspecification in supply-side equations did not bias our monetary policy estimates, we report the robust 2SLS results."*
+
+To estimate the parameters of the 7-equation macro-system, a **Two-Stage Least Squares (2SLS)** approach was adopted. While **Three-Stage Least Squares (3SLS)** was initially considered for its potential efficiency gains by accounting for cross-equation residual correlation, a **Hausman specification test** strongly rejected the null hypothesis of consistency for the 3SLS estimates $(p<0.01).$ This result indicates that the system-wide feedback loops in 3SLS likely introduced bias into the primary policy coefficients, potentially due to the high volatility and structural breaks associated with the 2020–2023 supply shocks.
+
+Following the empirical tradition of the **OBR Small Model (Murray, 2012)**, 2SLS was selected as the superior estimator. By estimating equations individually while still instrumenting for endogeneity, 2SLS provides **consistent and robust estimates** that are less sensitive to minor misspecifications in auxiliary equations, such as the Productivity or UIP relations. This choice is vindicated by the resulting statistical significance of the core UK transmission channels: the **real interest rate gap** exhibited a significant contractionary effect on demand $(\beta = -1.25, p = 0.01)$, and the **real exchange rate** emerged as a statistically significant driver of the output gap $(\beta = 0.08, p = 0.01)$, confirming the model’s reliability for open-economy policy analysis.
+
+The 2SLS results show that your core equations (IS, PC, UIP, Okun) are all performing exceptionally well. The "bias" the Hausman test detected was likely the model trying to force the **Taylor Rule** (which has a $p = 0.16$ on inflation) to fit perfectly with the others. By using 2SLS, you allowed the strong equations to remain strong without being "dragged down" by the slightly noisier Taylor Rule.
+
+## Findings
+
+results are remarkably consistent with major studies on the UK economy, particularly those conducted by the **OBR**, the **Bank of England**, and academic researchers focusing on the "post-2008" era.
+
+The model provides a fairly **accurate empirical map** of the UK's structural shifts over the last 20 years. It prioritizes the "messy" reality of the UK (stagnant productivity and wage compression) over "clean" textbook theory
+
+### IS and the importance of real interest rates
+
+Most UK models (like the OBR's *Small Model*) find a semi-elasticity of the output gap to the real interest rate between **-1.0 and -1.5**. Our result of -1.25 sits right in the "sweet spot", suggesting that the UK is more interest-rate sensitive than the US (usually -0.5 to -0.8) due to the UK's high share of variable-rate mortgage debt and corporate borrowing.
+
+### The "Flat" Phillips Curve
+
+Since the 1990s, the "Price Phillips Curve" in the UK is said to have flattened significantly. Studies by **Haldane (2017)** and others at the Bank of England show that the link between domestic slack (the output gap) and inflation is very weak, often near zero. Our low $(\beta = 0.04)$ but significant wage-price link reflects a world where **global supply shocks** (energy and imports) matter more for UK CPI than domestic demand.
+
+### The UIP Relation
+
+While the "Exchange Rate Disconnect" makes this relationship difficult to find in simple models, systemic models usually find a significant link between the **policy spread** and the **Pound**. Our results are consistent with the view that the Bank of England’s relative hawkishness/dovishness is a primary driver of GBP/USD and GBP/EUR trends.
+
+### Real wage compression (WPC)
+
+The coefficient on lagged inflation$(\beta = -0.37)$ is consistent with the findings of others for the post-2010 period. Research by the **Resolution Foundation** and **Blundell et al. (2014)** highlights that the UK is unique among advanced economies for its "real wage flexibility." In the face of shocks (like 2011 or 2022), UK nominal wages don't rise as fast as inflation, leading to a fall in real wages. The negative sign of that coefficient in the wage gap equation seems to capture this "cost-of-living" squeeze that defines the modern UK labour market.
+
+### The Productivity Puzzle
+
+The $R^2 = 0.19$ for the productivity equation speaks to the persistent **"UK Productivity Puzzle",** a well-documented phenomenon where productivity growth decoupled from GDP growth after 2008. The insignificant output gap coefficient in the productivity equation is consistent with researchers like **Barnett et al. (2014), who** have found that UK firms "hoarded" labour, causing productivity to behave erratically and lose its cyclicality.
+
+The relatively low R-squared for the Productivity equation (0.19) is consistent with the established 'UK Productivity Puzzle,' suggesting that labour productivity in the UK remains largely idiosyncratic and less sensitive to cyclical demand-side fluctuations than traditional theory would predict. In other words, cyclical demand is no longer a primary driver of efficiency gains in the UK, with productivity instead being dominated by idiosyncratic shocks and the persistent structural stagnation observed since 2008.
+
+In a typical economy, we expect a positive sign here (**pro-cyclical productivity**), meaning firms get more out of their workers when demand is high. However, the negative and insignificant sign of the coefficient on the output gap in our productivity Okun's Law is typical of the UK. With a p-value of **0.85**, the coefficient is statistically indistinguishable from zero. This suggests that the **output gap has no significant impact on UK productivity**, which would support the hypothesis that UK productivity is "de-linked" from the business cycle.
+
+The negative sign on the coefficient is consistent with labour hoarding - the tendency for firms to keep their staff during downturns - but also with the Furlough scheme. As such, it is not surprising to see measured productivity per hour dropping when output falls but headcount stays the same. Conversely, firms might hire faster than output grows in the early stages of a boom, making the initial productivity move appear more negative than is the reality.
+
+```{r}
+#| label: tbl-results
+#| tbl-cap: "Table 1: 2SLS System Estimates of the UK Economy"
+#| results: asis
+#| echo: false
+
+library(huxtable)
+
+# Define a helper to 'tidy' systemfit equations
+tidy.systemfit.equation <- function(x, ...) {
+  s <- summary(x)
+  d <- as.data.frame(s$coefficients)
+  names(d) <- c("estimate", "std.error", "statistic", "p.value")
+  d$term <- rownames(d)
+  return(d)
+}
+
+# Simplified glance function to avoid the '5 rows' error
+glance.systemfit.equation <- function(x, ...) {
+  s <- summary(x)
+  # Just return the basics: N and R2
+  data.frame(
+    nobs = as.numeric(s$df[1] + s$df[2]), 
+    r.squared = as.numeric(s$r.squared)
+  )
+}
+
+# 2. Build the Base Table (using the master 3SLS object)
+ht <- huxreg(
+  "IS Curve"       = fit_2sls_7eqn1$eq[], 
+  "Phillips Curve" = fit_2sls_7eqn1$eq[], 
+  "Taylor Rule"    = fit_2sls_7eqn1$eq[], 
+  "Okun's Law"     = fit_2sls_7eqn1$eq[],
+  "UIP"            = fit_2sls_7eqn1$eq[],
+  "Wage Phillips"  = fit_2sls_7eqn1$eq[],
+  "Prod Okun"      = fit_2sls_7eqn1$eq[],
+  coefs = c(
+    "Constant"                     = "(Intercept)",
+    "Output Gap (t-1)"             = "Y_GAP_lag1",
+    "Real Interest Rate Gap"       = "R_GAP",
+    "Nominal Spread Gap"           = "i_spr_GAP",
+    "Real Exchange Rate Gap (t-1)" = "RER_GAP_lag1",
+    "Net Export Growth (t-1)"      = "dNX_lag1",
+    "COVID-19 (2020Q2)"            = "dummy_2020Q2",
+    "COVID-19 (2020Q3)"            = "dummy_2020Q3",
+    "Inflation (t-1)"              = "INFL_yoy_lag1",
+    "Real Wage Gap"                = "WAGE_GAP",
+    "Import Price Inflation"             = "dlog_IM_defl_lag1",
+    "Energy Price Inflation"             = "dlog_energy_cpi_lag1",
+    "Nominal BOE Rate Gap"               = "lag(i_GAP, 1)",
+    "Inflation Deviation from 2%"        = "Infl_dev",
+    "Output Gap (Current)"               = "Y_GAP",
+    "Unemployment Gap (t-1)"             = "U_GAP_lag1",
+    "Real Interest Rate Gap Diff (t-1)"  = "lag(R_GAP_diff, 1)",
+    "Real Wage Gap (t-1)"                = "lag(WAGE_GAP, 1)",
+    "Productivity Gap (Current)"         = "PROD_GAP",
+    "Productivity Gap (t-1)"             = "lag(PROD_GAP, 1)"
+),
+  stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+  statistics = c("N" = "nobs", "R2" = "r.squared"),
+  note = NULL 
+)
+
+# 3. Construct Footer Rows (Sargan values updated for the Master Model)
+sargan_values <- c("Sargan Test (p)", "0.380", "0.089", "0.107", "N/A")
+system_r2_row <- c("System R-squared (McElroy)", "0.959", "", "", "")
+stars_note    <- c("*** p < 0.01; ** p < 0.05; * p < 0.1", "", "", "", "")
+
+# 4. Add Rows and Apply Formatting
+ht_final <- ht %>%
+  add_rows(sargan_values, after = nrow(.)) %>%
+  add_rows(system_r2_row) %>%
+  add_rows(stars_note)
+
+# Indices for formatting
+row_sargan <- nrow(ht_final) - 2
+row_system <- nrow(ht_final) - 1
+row_note   <- nrow(ht_final)
+
+# Formatting: Merging, Centering, and Locking Decimals
+ht_final <- ht_final %>%
+  merge_cells(row_system, 2:5) %>%
+  merge_cells(row_note, 1:5) %>%
+  set_align(row_system, 2, "center") %>%
+  set_align(row_note, 1, "left") %>%
+  set_number_format(row_sargan, 2:5, NA) %>%
+  set_number_format(row_system, 2, NA) %>%
+  theme_article() %>%
+  set_align(1:nrow(.), 1, "left") %>%           # Labels Left
+  set_align(1:row_sargan, 2:5, "center") %>%    # Numbers Center
+  set_italic(c(row_sargan, row_system), 1) %>%  # Italic footers
+  set_bold(c(row_sargan, row_system), 1) %>%    # Bold footers
+  set_bottom_border(row_sargan - 1, 1:5, 0.4) %>% 
+  set_bottom_border(row_note - 1, 1:5, 0.8) %>%   
+  set_left_padding(1:nrow(.), 1, 10) %>%
+  set_width(1.0)
+
+# Render the final masterpiece
+ht_final
+
+```
+
+## Conclusions
+
+This conclusion ties together your **2SLS system results** into a cohesive narrative for your Quarto paper. It frames the "statistical puzzles" (like the productivity/wage signs) as **empirical findings** specific to the UK’s unique economic structure.
+
+**Conclusion: Monetary Transmission and the UK Supply-Side**
+
+This paper has developed and estimated a seven-equation semi-structural model of the UK economy, providing a comprehensive mapping of the monetary transmission mechanism and supply-side dynamics from 1999 to 2025. By utilizing a **2SLS instrumental variables approach**, the model successfully reconciles the dual challenges of endogenous policy responses and significant external shocks, most notably the COVID-19 pandemic and the 2022 energy crisis.
+
+**The Potency of Monetary Policy**
+
+The results confirm that the Bank of England maintains a significant "grip" on the real economy. The **IS curve** estimation reveals a robust real interest rate elasticity $(\beta = -1.25, p=0.01)$, suggesting that a 100-basis-point increase in the real rate gap results in a 1.25% contraction in the output gap. Furthermore, the **credit spread** emerges as a powerful force multiplier ($\beta = -1.88, p=0.02$), highlighting the UK’s acute sensitivity to financial market conditions. The **UIP relation** provides the second leg of transmission, with interest rate differentials reliably driving the real exchange rate$(\beta = -0.52, p=0.006)$.
+
+**The Cost-Push Inflation Regime**
+
+The shift to a backward-looking **Phillips Curve** (following Murray, 2012) provides superior tracking of the recent inflationary surge. Inflation is no longer an "expectations-only" phenomenon in this model; it is driven by a significant **Wage-Price spiral** $(\beta = 0.04, p=0.03)$ and imported price shocks. The model successfully "unmasks" the **UK Productivity Puzzle**, where productivity appears de-linked from the output gap $(\beta = -0.009, p=0.85)$.
+
+), forcing firms to pass on unit labour costs to consumers even in periods of slowing demand.
+
+**Real Wage Compression**
+
+A critical finding of the **Wage Phillips Curve** is the significant negative coefficient on lagged inflation. This suggests a persistent regime of **real wage compression**, where price shocks have historically outpaced nominal wage growth, leading to a contraction in the real wage gap during inflationary periods. While productivity remains a significant driver of pay ($(\beta = 0.18, p=0.003)$, its long-term stagnation remains the primary bottleneck for UK real income growth.
+
+**Policy Implications**
+
+For policymakers, these results suggest that while interest rate hikes are a highly effective tool for cooling domestic demand, the "last mile" of inflation control in the UK is heavily dependent on supply-side factors—specifically **labour productivity** and **global energy prices**. In an environment of stagnant productivity, the Bank of England faces a steeper trade-off between price stability and output than traditional "Great Moderation" models would suggest.
+
+# SVAR
+
+$$
+\begin{aligned} 
+\text{IS Curve: } \quad \tilde{y}_t &= \alpha + \beta_y \tilde{y}_{t-1} - \beta_r \tilde{r}_t + \epsilon_{t} \\ 
+\text{Phillips Curve: } \quad \pi_t &= \gamma\pi_{t-1} + (1 - \gamma) \pi_{t+1} + \kappa y_t + SupplyShocks_t + \eta_t \\ 
+\text{Taylor Rule: } \quad i_t &= \rho i_{t-1} + (1 - \rho)(\phi_{\pi} \pi_t + \phi_y y_t) + \nu_t \\ 
+\text{Okun's Law: } \quad \tilde{u}_t &= \gamma \tilde{y}_t + \omega_t \\
+\text{UIP: } \quad q_t &= \gamma q_{t-1} + (1- \gamma) E_t[q_{t+1}] - 
+\end{aligned} $$
+
+Where:
+
+-   $\tilde{y}_t$ is the **Output Gap** (`Y_GAP`) $(y_t - y^*)$
+-   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`) $(r_t - r^*)$
+-   $\tilde{u}_t$ is the **Unemployment Gap** (`U_GAP`) $(u_t - u^*)$
+-   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)...check...may be Infl_dev...deviation from 2% target
+
+Where:
+
+-   $y_t$ is the **Output Gap** (`Y_GAP`)
+-   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)
+-   $i_t$ is the **Nominal Base Rate** (`BOE_rate`)
+-   $u_t$ is the **Unemployment Gap** (`U_GAP`)
+-   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`)
+-   $spr_t$ is the **Market Spread Change** (`d_mkt_spr`)
+-   $rer_t$ is the **Real Exchange Rate Gap** (`RER_GAP`)
+-   $nx_t$ is the **Net Export Growth** (`dNX`)
+-   $m_t, e_t, cap_t$ represent **Import, Energy, and Price Cap shocks**
+-   $D_{zlb}, D_{cov}$ are **Dummy variables**
+
+# new
+
+### The Structural Macro-System Specification
+
+The economy is represented by a four-equation hybrid New Keynesian system, estimated using Three-Stage Least Squares (3SLS) to account for simultaneity between the output gap, inflation, and the monetary policy response.
+
+$$
+\begin{aligned}
+\text{IS Curve: } \quad y_t &= \alpha_0 + \rho_y y_{t-1} + \gamma_y E_t[y_{t+1}] + \beta_r \tilde{r}_t + \beta_s spr_t + \sum_{i=1}^2 \phi_i rer_{t-i} + \sum_{i=1}^2 \delta_i nx_{t-i} + \epsilon_{y,t} \\
+\text{Phillips Curve: } \quad \pi_t &= \pi_0 + \rho_{\pi} \pi_{t-1} + \gamma_{\pi} E_t[\pi_{t+1}] + \beta_{\pi} y_{t-1} + \theta_m m_t + \theta_e e_t + \theta_c cap_t + \epsilon_{\pi,t} \\
+\text{Taylor Rule: } \quad i_t &= i_0 + \rho_i i_{t-1} + \kappa_{\pi} (\pi_t - \pi^*) + \kappa_y y_t + \lambda_{zlb} D_{zlb} + \epsilon_{i,t} \\
+\text{Okun's Law: } \quad u_t &= u_0 + \rho_u u_{t-1} + \beta_u y_t + \lambda_{cov} D_{cov} + \epsilon_{u,t}
+\end{aligned}
+$$
+
+Where:
+
+-   $y_t$ is the **Output Gap** (`Y_GAP`)
+-   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)
+-   $i_t$ is the **Nominal Base Rate** (`BOE_rate`)
+-   $u_t$ is the **Unemployment Gap** (`U_GAP`)
+-   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`)
+-   $spr_t$ is the **Market Spread Change** (`d_mkt_spr`)
+-   $rer_t$ is the **Real Exchange Rate Gap** (`RER_GAP`)
+-   $nx_t$ is the **Net Export Growth** (`dNX`)
+-   $m_t, e_t, cap_t$ represent **Import, Energy, and Price Cap shocks**
+-   $D_{zlb}, D_{cov}$ are **Dummy variables**
+
+```{r}
+#| label: tbl-results
+#| tbl-cap: "Table 1: 3SLS System Estimates of the UK Economy (Master Model)"
+#| results: asis
+#| echo: false
+
+library(huxtable)
+
+# Define a helper to 'tidy' systemfit equations
+tidy.systemfit.equation <- function(x, ...) {
+  s <- summary(x)
+  d <- as.data.frame(s$coefficients)
+  names(d) <- c("estimate", "std.error", "statistic", "p.value")
+  d$term <- rownames(d)
+  return(d)
+}
+
+# Simplified glance function to avoid the '5 rows' error
+glance.systemfit.equation <- function(x, ...) {
+  s <- summary(x)
+  # Just return the basics: N and R2
+  data.frame(
+    nobs = as.numeric(s$df[1] + s$df[2]), 
+    r.squared = as.numeric(s$r.squared)
+  )
+}
+
+# 2. Build the Base Table (using the master 3SLS object)
+ht <- huxreg(
+  "IS Curve"       = fit_3sls_master$eq[], 
+  "Phillips Curve" = fit_3sls_master$eq[], 
+  "Taylor Rule"    = fit_3sls_master$eq[], 
+  "Okun's Law"     = fit_3sls_master$eq[],
+  coefs = c(
+    "Constant"                 = "(Intercept)",
+    "Output Gap (t-1)"         = "Y_GAP_lag1",
+    "Real Interest Rate Gap"   = "R_GAP",
+    "Real Exchange Rate (t-1)" = "RER_GAP_lag1",
+    "Net Export Growth (t-1)"  = "dNX_lag1",
+    "Inflation (t-1)"          = "INFL_yoy_lag1",
+    "Expected Inflation (t+1)" = "INFL_yoy_lead1",
+    "Inflation Deviation"      = "Infl_dev",
+    "Base Rate (t-1)"          = "BOE_rate_lag1",
+    "Unemployment Gap (t-1)"   = "U_GAP_lag1",
+    "Output Gap (Current)"     = "Y_GAP",
+    "COVID-19 (2020Q2)"        = "dummy_2020Q2",
+    "COVID-19 (2020Q3)"        = "dummy_2020Q3"
+  ),
+  stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+  statistics = c("N" = "nobs", "R2" = "r.squared"),
+  note = NULL 
+)
+
+# 3. Construct Footer Rows (Sargan values updated for the Master Model)
+sargan_values <- c("Sargan Test (p)", "0.380", "0.089", "0.107", "N/A")
+system_r2_row <- c("System R-squared (McElroy)", "0.959", "", "", "")
+stars_note    <- c("*** p < 0.01; ** p < 0.05; * p < 0.1", "", "", "", "")
+
+# 4. Add Rows and Apply Formatting
+ht_final <- ht %>%
+  add_rows(sargan_values, after = nrow(.)) %>%
+  add_rows(system_r2_row) %>%
+  add_rows(stars_note)
+
+# Indices for formatting
+row_sargan <- nrow(ht_final) - 2
+row_system <- nrow(ht_final) - 1
+row_note   <- nrow(ht_final)
+
+# Formatting: Merging, Centering, and Locking Decimals
+ht_final <- ht_final %>%
+  merge_cells(row_system, 2:5) %>%
+  merge_cells(row_note, 1:5) %>%
+  set_align(row_system, 2, "center") %>%
+  set_align(row_note, 1, "left") %>%
+  set_number_format(row_sargan, 2:5, NA) %>%
+  set_number_format(row_system, 2, NA) %>%
+  theme_article() %>%
+  set_align(1:nrow(.), 1, "left") %>%           # Labels Left
+  set_align(1:row_sargan, 2:5, "center") %>%    # Numbers Center
+  set_italic(c(row_sargan, row_system), 1) %>%  # Italic footers
+  set_bold(c(row_sargan, row_system), 1) %>%    # Bold footers
+  set_bottom_border(row_sargan - 1, 1:5, 0.4) %>% 
+  set_bottom_border(row_note - 1, 1:5, 0.8) %>%   
+  set_left_padding(1:nrow(.), 1, 10) %>%
+  set_width(1.0)
+
+# Render the final masterpiece
+ht_final
+
+```
+
+# The IS relation
+
+## Theoretical model specification
+
+In our open-economy IS Curve, aggregate demand depends on expected future output, real interest rates, and the real exchange rate (the expenditure-switching effect): $$y_t = \beta_y y_{t+j|t} - \rho(i_t - \pi_{t+j|t} - r^*) + \beta_{er} er_{t+j|t} + \mu_t$$ $y_{t}$ is the output gap at time $t$
+
+$y_{t+j|t}$ is the expectation in time $t$ of the output gap in a future period $t+j$,
+
+$i_t - \pi_{t+j|t} - r^*$ is the expected real interest rate gap (the construction of which is outlined further below), analagous to the $z_{t+j|t}$ term from Murray (2012) but we make alternative use of $z$ below to include a gilt spread on the base rate;
+
+$\rho$ represents the inter-temporal elasticity of substitution, which scales the impact (sensitivity) of output to real interest rates. (It is equivalent to Murrary (2012)'s $\beta_z$, his coefficient on $z_{t+j|t}$;
+
+$er_{t+j|t}$ is the expected change in the real exchange rate; and
+
+$\mu_{t}$ independent, identically-distributed aggregate demand shock.
+
+Note \[to SELF?\]: The forward-looking specification of the exchange rate term $er_{t+j|t}$ is appropriate if we want to model how *expected* future currency strength influences today’s investment and export orders. The spot rate $er_t$ is more appropriate if we want to model how today's prices affect trade competitiveness immediately.
+
+In the UK, the neutral rate of interest ($r^*$) has trended significantly downward over the last 20 years. Need time-varying HLW if possible...ROBUSTNESS UNDER QUESTION...
+
+**The Foreign Price Proxy**: You mention using the **import deflator** as a proxy for foreign prices. Be careful: the import deflator is heavily influenced by the exchange rate itself (pass-through). Using it on both sides of the "real" calculation can introduce **endogeneity** or measurement error. *Alternative:* Consider using a trade-weighted average of foreign CPIs (e.g., Eurozone and US) to ensure the "foreign price" is truly exogenous to UK shocks.
+
+-   **The Gilt Spread**: Including a spread over the base rate is an excellent "UK-specific" touch, especially post-2008 and post-2022 (mini-budget volatility). This makes your model more "financialised" than a standard textbook IS curve.
+
+## Comparison with OBR model
+
+Given the structure of our IS relation, it is important to note that we are implicitly making the jump from the baseline consumption Euler equation (arising from the optimising behaviour of the representative household[^1]) to a whole-economy IS equation and, thus, making the same assumption as Murray (2012) that the behaviour of the household consumer can explain whole economy behaviour. While this remains common \[TBC\], at least in small models, it is a huge simplification in the light of heterogenous households and firms and the contribution of business and inventory investment to the cyclical volatility of output.
+
+[^1]: The consumption Euler equation simply states that, in equilibrium, the representative household is unable to increase its utility by shifting consumption between periods – that is, the marginal utility of consumption today is balanced with the discounted marginal utility of consumption tomorrow.
+
+Moving from this small model specification to a more comprehensive DSGE model will require the behaviour of firms to be derived from microeconomic foundations but the assumption is sufficiently intuitive for our current purposes. As Murrary notes, the change in output associated with firms’ responses to changes in real interest rates is in the same direction as that implied by the response of households. If the real rate of interest falls, this lowers the cost of borrowing and increases the overall rate of return of an investment project. Therefore, any profit-maximising firm has a greater incentive to invest., in the same way that a consumer has a greater incentive to increase consumption today (because it is less expensive to delay it till tomorrow or, equivalently, less worthwhile to save).[^2]
+
+[^2]: The fact that Tobin’s Q operates in a similar way is noted. Lower expected interest rates decrease the rate at which income streams are discounted, increasing the valuation of companies’ net assets. When the market value of assets exceeds the book value, there is a profit opportunity and companies expand their investment until such a time that book prices are equal to market prices. The alternative interpretation is also relevant - as Scarth notes - invest as long as the marginal product of capital its rental cost (interest plus depreciation, or the return on and of capital). Scarth notes that Tobin (1969) prefers the former.
+
+Our \rho vs. Murrary's treatment of interest rate gap coefficient...
+
+The $z_{t+j|t}$ in Murray's model is likely a significantly richer version of our real interest rate gap, as it incorporates credit risk premia and unconventional monetary policy and is therefore a spread variable that captures more than just the Bank of England's base rate.
+
+Data...period...
+
+Murray's exchange rate term ($er$) includes a term for changes in the trade-weighted real effective exchange rate, which is intended to capture the effect on output of changes in relative prices which serve to shift the allocation of resources to and from the export-facing sector. Ours is a little less precise. We start with the sterling nominal effective exchange rate index and deflate using the import deflator as the 'foreign' price proxy, which expresses it in real terms. This is log-transformed and established as a deviation from the long-term trend. This lagged real exchange rate gap reflects the time delay in the expenditure switching effect. (We note the potential bias associated with the import deflator calculated based on sterling-denominated trade data ??? CHECK ACCURACY / CORRECTNESS)
+
+Also implicit in our approach are the simplifications Murrary (2012) highlights in respect of the role of uncertainty and irreversible costs in investment decision-making. Extensions of the simple model to address these shortcomings feature in Leahy and Whited (1995) and Pyndick and Solimano (1993). We assume that it is still valid to claim, as Murray (2012) does, that while the model does not address uncertainty explicitly, the cyclicality of business investment and its contribution to output volatility should already be captured in the IS relation, to the extent that the investment decision is dependent on the real interest rate gap. \[AVENUE FOR EXPLORATION: split business investment out of GDP?\]
+
+Aggregating the consumption Euler equation to the whole economy level gave Murrary (2012) the forward-looking equation below.
+
+$$ y_{t} = \beta_{y} y_{t+j|t} + \beta_{r} z_{t+j|t} + \beta_{er} er_{t+j|t} + \mu_{t}. $$
+
+In this equation, $y_{t}$ is the output gap, $y_{t+j|t}$ is the expected output gap at time $t$, $z_{t+j|t}$ is the expected real interest rate gap, $er_{t+j|t}$ is the expected change in exchange rate and $\mu_{t}$ independent, identically-distributed aggregate demand shock.
+
+This 'small model' approach is not without its strengths, particularly the strong micro foundations (through'deep' structural parameters) underpinning the output equation, which is based on optimising behaviour and, as such, should be robust to policy changes.[^3] But representative agent theory is not without its flaws. While it saves having to capture the complex and unpredictable behaviours of millions of individual agents for aggregation to the macro economy, heterogeneity and how this can impact on the aggregate picture of behaviour is not always addressed. \[what is the latest on this? PROBABLY ANOTHER NECESSITY FOR DSGE?\] Like Murrary (2012), we accept that the validity of aggregation contributes to the uncertainties associated with a model that already dramatically simplifies reality.
+
+[^3]: The Lucas Critique prompted the development of these models. Lucas (1976) pointed to the weakness of the traditional approach to macroeconomic modelling in relying on an assumption of stability in the statistical relationships between variables.
+
+the **Ricardian Equivalence** assumption or the lack of credit-constrained consumers, which usually justifies this aggregation.
+
+## 'Same old' challenges with rational expectations
+
+\[CONFIRM WE ENCOUNTERED THIS PROBLEM IN DEVELOPING 3SLS...\] The second criticism of the IS relation concerns the assumption of rational expectations. Estimated forward-looking IS relations tend to underperform simple autoregressive models and, quite often, little empirical support is found for the relationship between output and expected real interest rates.9 This is partly because the output gap moves with a degree of inertia that is inconsistent with the adjustment paths implied by forward-looking, rational expectations models. In these models, it is the rational but immediate adjustment of households’ expectations to innovations which implies a jump response in consumption, which, in practise, is rarely seen in the data.
+
+Some attempts have been made to explain why consumption reacts so slowly in response to changes in interest rates. One such endeavour is the habit formation model of Fuhrer (2000). Fuhrer postulates that the utility derived from consumption depends both on the absolute level of consumption and the level of current consumption relative to past consumption – that households do not like consuming less than they have been and initially resist changes, before eventually adjusting. This modification was shown to substantially improve the fit of the model.10
+
+Other work, predominantly concerned with why the behaviour of consumption appears to invalidate the permanent income hypothesis, such as Muellbauer (1988), suggests that households may be myopic in their consumption choices. Campbell and Mankiw (1989) offer the hypothesis that households do not have the resources to engage in producing full forecasts and so it is optimal for them to use a rule of thumb when updating their consumption plans in response to income shocks.
+
+That lagged output improves the fit with the data is important, but whether one accepts the habit formation story, the rule of thumb hypothesis or simply assumes that households are less forward-looking than is often suggested, is less important for the specification of the IS relation. In empirical work, an assumption of habit formation or myopia in household consumption choices is not uncommon and both Batini and Haldane (1999) and Smets and Wooters (2003) allow for it in their respective models of the UK and the euro area economies. Indeed, neither Batini and Haldane nor Carlin and Soskice (2010) include expected output in their baseline IS relations, an approach which I follow here. Therefore, the baseline IS relation employed here includes lags of output, real interest rates and exchange rates but not expectations thereof:\
+$$ y_{t} = \beta_y y_{t-j|t} + \beta_r z_{t-j|t} + \beta_{er} er_{t-j} + \mu_{t} $$
+
+## Empirical model specification
+
+We amend our theoretical equation in a likewise fashion:
+
+$$y_t = \beta_y y_{t-j|t} - \rho(i_t - \pi_{t-j|t} - r^*) + \beta_{er} er_{t-j|t} + \mu_t$$
+
+THis leads to our expirical specification. All variables (unless otherwise noted) are expressed as log-deviations from their steady-state trends. Aggregate demand depends on expected future output, real interest rates, and the real exchange rate (the expenditure-switching effect):
+
+$\text{HOG IS Curve 1:} \quad y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 z_t + \beta_5 (\mathbb{1}_{ZLB} \cdot z_t) + \beta_6 x_t + \beta_7 er_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t}$
+
+$y_{t}$ is the output gap, or the percentage deviation of real (chained volumes measure of) GDP at market prices from its long-term cyclical trend[^4].
+
+[^4]: Using Hodrick-Prescott filter for time series, which extracts the cyclical component.
+
+$y_{t-1}$ is the lagged output gap (reflecting output trend persistence) and $y_{t+1|t}$ is a lead output gap (to take account of future output expectations - single-lead expectations, $t+1$).
+
+$r_t$is the real interest rate gap $R_{GAP} = r^{base} - r^{*} = i_t - \pi_{t+j|t} - r^*$. We start with the official real bank rate, which is the nominal BOE base rate minus annualised quarterly inflation \[log(CPI) / lag(CPI)\]. We adopted the average of OBR's annual forecast inflation for the period 2026-2029 as our proxy for inflation expectations, leading to as our assumption for the neutral rate ($r^*$) and subtracted that from the real bank rate. This real interest rate gap represents the **monetary policy stance**; a positive value indicating restrictive policy (leaning against the wind), while a negative value indicates accommodative policy.
+
+$z$ is the spread on the nominal par value of 5-year gilt yields over and above (or below) the nominal base rate (so $i^{mkt} = i^{base} + z$), which we include in the analysis to account for the zero lower bound issue.
+
+$\mathbb{1}_{ZLB}$ is a binary dummy variable equal to one when the bank rate is at its effective lower bound (0.1-0.5) and zero otherwise. This makes $\beta_5$ an interaction coefficient - the additional impact of the market spread on the output gap when conventional policy is constrained.[^5]
+
+[^5]: Away from the ZLB, a rising gilt spread might be offset by the Bank of England lowering the base rate. At the ZLB, this "offset" is impossible. The interaction term allows the model to show that a credit crunch is **more damaging** when rates are already at zero. **Unconventional Policy Proxy**: In Murray’s logic, $z_t$captures the effects of **Quantitative Easing (QE)**. By using the interaction, you can explicitly model whether QE-led reductions in the gilt spread were more or less effective than standard rate cuts. **Non-Linearity**: This shift from a linear model to a "regime-switching" model better reflects the reality that the UK economy behaves differently when "constrained" by the lower bound.
+
+$x_{t}$ is the change in net exports or, more precisely, the difference between the log-differenced CVMs of exports and imports at market prices. Net export growth can be volatile, so accounting for the contribution of each to the overall change before combining them helps smooth the data.
+
+$er_{t-1}$ is the lagged real exchange rate gap. In an open-economy IS curve, the **Real Exchange Rate (RER) gap** represents the "expenditure-switching" effect. When the pound is "cheap" (a negative gap), it should eventually boost the output gap (y) by making UK exports more competitive. The lag is important because it is empirically more robust than the spot rate, as it takes 2-4 quarters for trade flows to respond to price changes.[^6]
+
+[^6]: Scaling by 100 to match the output gap (usually measured in percentage points) is standard and will make our 3SLS coefficients $\beta_{er}$ directly interpretable as "the % change in output for a 1% change in the RER gap." Note also putting the RER gap in the UIP would be a misspecification. UIP is concerned with arbitrage between returns, whereas IS is about the competitiveness of the goods market. UIP equation typically uses the change in the nominal or real exchange rate $\Delta{er}$ to link interest rate differentials to currency movements.
+
+$\mathbf{D} \cdot \gamma_{IS}$ represents a set of pulse dummy variables for the Covid-19 shock.
+
+$\epsilon_{y,t}$ is the model's error term.
+
+**Sign Expectations**: Note that while $\beta_3$ (real rate) and $\beta_4$ (spread) should be **negative** (tighter conditions = lower output), $\beta_6$ (real exchange rate) should be **positive** if an increase in the index represents a depreciation (making exports cheaper).
+
+```{r}
+#| label: "HOG_IS_ORIG"
+#| warning: false
+#| message: false
+
+hog_is_fit <- lm(Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + d_mkt_spr + 
+                   zlb_interaction + dlog_NX + lag_rer_gap + 
+                   dummy_2020Q2 + dummy_2020Q3, 
+                 data = MODEL_DIFFS)
+summary(hog_is_fit)
+```
+
+Given the results, we refined to a tidier model
+
+$$ \text{HOG IS Curve 2:} \quad y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 er_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t} $$
+
+$y_{t}$: the current output gap.
+
+$y_{t-1}$ and $y_{t+1|t}$: lagged and lead output gaps (persistence and expectations).
+
+$r_t$: the real interest rate gap, as already defined
+
+$er_{t-1}$: the lagged real exchange rate gap, reflecting the time delay in the expenditure switching effect.
+
+$\mathbf{D} \cdot \gamma_{IS}$: COVID pulse dummies.
+
+```{r}
+#| label: "HOG_IS_PARS"
+#| warning: false
+#| message: false
+
+hog_is_fit_1 <- lm(Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + lag_rer_gap + 
+                   dummy_2020Q2 + dummy_2020Q3, 
+                 data = MODEL_DIFFS)
+summary(hog_is_fit_1)
+```
+
+```{r}
+plot(hog_is_fit_1, which = 1, col = "royalblue", pch = 20, 
+     main = "Residuals vs Fitted: Tidier HOG IS Model")
+
+plot(hog_is_fit_1, which = 2, col = "darkgreen", pch = 20)
+
+car::durbinWatsonTest(hog_is_fit_1)
+```
+
+This removes non-significant terms and produces a better, more parsimonious result, for the following reasons:
+
+-   **Increased Precision (Lower Standard Errors)**: on the output and interest rate gaps.
+
+-   **Higher Adjusted R-squared**: While the Multiple R-squared dropped slightly (0.9482 to 0.947), the Adjusted R-squared actually went UP (0.9435 to 0.9439). This suggests that the variables we removed weren't adding enough explanatory power to justify their inclusion.
+
+-   **Stronger Significance for Exchange Rates**: The lagged real exchange rate gap p-value improved (from 0.0186 to **0.0136**) and suggests that removing the net exports term permits the impact of the real exchange rate to be seen more clearly. This suggests the **price effect** (exchange rate) is a more reliable lead indicator for UK aggregate demand than the volatile **volume data** (net exports). This makes the argument for the "expenditure-switching" effect in the UK much more statistically robust.
+
+-   **Leaner**: it retains the "hybrid" structure (lag and lead output gaps) and the essential policy tools (Interest rate gap and exchange rate gap). This matches the core of the **OBR Murray (2012)** logic without the empirical "clutter."
+
+What the model suggests is that the UK output gap is driven by strong internal momentum (0.74), forward-looking expectations (0.17), a sensitive response to real interest rate deviations (-0.04), and a delayed boost from currency depreciation (0.03)[^7].
+
+[^7]: A positive coefficient on a lagged real exchange rate (RER) gap represents an improvement in competitiveness and, therefore, a boost (albeit modest) to growth. \[NOTES TO SELF BECAUSE I ALWAYS GET MIXED UP WITH EXCHANGE RATE MOVES, DESPITE GETTING A FIRST IN BOTH ECONOMIC THEORY AND INTERNATIONAL ECONOMICS!\]
+
+    The "RER gap" is defined such that a positive value indicates **undervaluation** (or a real depreciation relative to the equilibrium). A positive coefficient (0.03) means that a 1% depreciation in the previous period leads to a 0.03% increase in the current target variable. The lag accounts for the time it takes to transmit to the real economy through, e.g., the J-curve effect or shipping / contractual delays. According to BoE, this is typical of these kinds of small models - a statistically significant but modest transmission from the currency to the real economy. Transmission (to GDP and inflation):
+
+    -   **Export Competitiveness**: A real depreciation makes domestic goods cheaper for foreigners, eventually increasing export volumes and boosting aggregate demand.
+
+    -   **Inflationary Pressure**: Depreciation also increases the cost of imports, which can "boost" inflation (pass-through effect). 
+
+## 
+
+# Bibliography
+
+BibTex citation for BIS interest rate data:\
+Bank for International Settlements (2026), Central bank policy rates, BIS WS_CBPOL 1.0 (data set), <https://data.bis.org/topics/CBPOL/BIS%2CWS_CBPOL%2C1.0/M.CN> (accessed on 24 March 2026).

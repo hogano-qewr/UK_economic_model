@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Oliver Hogan">
+<meta name="dcterms.date" content="2026-03-18">
+
+<title>A Small Open-Economy DSGE Model for the UK</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Working_Paper_No1_v1_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/popper.min.js"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Working_Paper_No1_v1_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Working_Paper_No1_v1_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Working_Paper_No1_v1_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Working_Paper_No1_v1_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Working_Paper_No1_v1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Working_Paper_No1_v1_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#the-is-relation" id="toc-the-is-relation" class="nav-link" data-scroll-target="#the-is-relation"><span class="header-section-number">2</span> The IS relation</a>
+  <ul class="collapse">
+  <li><a href="#theoretical-model-specification" id="toc-theoretical-model-specification" class="nav-link" data-scroll-target="#theoretical-model-specification"><span class="header-section-number">2.1</span> Theoretical model specification</a></li>
+  <li><a href="#comparison-with-obr-model" id="toc-comparison-with-obr-model" class="nav-link" data-scroll-target="#comparison-with-obr-model"><span class="header-section-number">2.2</span> Comparison with OBR model</a></li>
+  <li><a href="#same-old-challenges-with-rational-expectations" id="toc-same-old-challenges-with-rational-expectations" class="nav-link" data-scroll-target="#same-old-challenges-with-rational-expectations"><span class="header-section-number">2.3</span> ‘Same old’ challenges with rational expectations</a></li>
+  <li><a href="#empirical-model-specification" id="toc-empirical-model-specification" class="nav-link" data-scroll-target="#empirical-model-specification"><span class="header-section-number">2.4</span> Empirical model specification</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="header-section-number">2.5</span> </a></li>
+  </ul></li>
+  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1"><span class="header-section-number">3</span> </a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">A Small Open-Economy DSGE Model for the UK</h1>
+<p class="subtitle lead">Working Paper No.&nbsp;1 - Stage 1: System Estimation and Preliminary Forecasting</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Oliver Hogan </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 18, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Our starting point is Scarth’s specification of the Mundell-Fleming model. We move on to consider rationally formed exchange rate expectations. Dornbusch (1976) shows that overshooting in the exchange rate can easily occur in a model in which exchange rates adjust at a faster pace than goods prices. Product prices that are sluggish (and cannot adjust in the short run as much as they can in the long run) can force more adjustment in the exchange rate in the short run than is required in the long run.</p>
+<p>Dornbusch extends the perfect capital mobility version of the Mundell-Fleming model to allow for forward-looking exchange rate expectations and interprets the resulting overshooting as explaining exchange rate volatility. This is the subject of Scarth (1988), Ch. 9.2. For pedagogic reasons, Scarth deals with the supply-side effects of exchange rates and resolution of the stocks vs.&nbsp;flows in the balance of payments issue through separate models in which the restriction that was relaxed in the preceding analysis is re-applied in the subsequent analysis. This is where we depart from Scarth for the moment but he points us in the right direction, noting that Buiter and Miller (1982) have made significant progress in combining all of these features in one model.</p>
+<p>Buiter and Miller’s NBER paper is impressive and was developed with the UK economy in mind. Specifically, Niehans (1983) in his comment on the paper notes that it can generally be regarded as an effort to apply the “underemployment version of Dornbusch’s exchange dynamics model to the stylised facts of British monetary policy”<em>.</em></p>
+<p>The paper,&nbsp;titled <em>Real Exchange Rate Overshooting and the Output Cost of Bringing Down Inflation</em>, develops a structural model to explain the UK’s experience with high interest rates and a strong pound. It provides a continuous-time framework for analysing exchange rate and inflation dynamics. The core of the model consists of five key equations covering money market equilibrium, aggregate demand, price evolution, core inflation, and uncovered interest parity. The model, a variation of the Dornbusch overshooting model, features sticky prices and jump variables, with nominal exchange rates and trend inflation adjusting instantly to shocks.</p>
+<p>While it is of particular relevance to the Thatcher-era reforms, the work remains a foundational reference for modern structural analyses of the UK economy. The principles of the Buiter-Miller model (nominal stickiness with rational expectations in financial markets) using updated New Keynesian DSGE frameworks. The OBR’s “Small Model of the UK Economy” (used to simulate fiscal and monetary shocks) might reasonably be viewed as a contemporary structural successor, incorporating similar elements like exchange rate pass-through and inflation persistence, but evolving the Buiter-Miller logic into a four-equation New Keynesian framework. We have tethered our analysis to the OBR framework, but have sought to adapt it where required to better fit the data.</p>
+</section>
+<section id="the-is-relation" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> The IS relation</h1>
+<section id="theoretical-model-specification" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="theoretical-model-specification"><span class="header-section-number">2.1</span> Theoretical model specification</h2>
+<p>In our open-economy IS Curve, aggregate demand depends on expected future output, real interest rates, and the real exchange rate (the expenditure-switching effect): <span class="math display">\[y_t = \beta_y y_{t+j|t} - \rho(i_t - \pi_{t+j|t} - r^*) + \beta_{er} er_{t+j|t} + \mu_t\]</span> <span class="math inline">\(y_{t}\)</span> is the output gap at time <span class="math inline">\(t\)</span></p>
+<p><span class="math inline">\(y_{t+j|t}\)</span> is the expectation in time <span class="math inline">\(t\)</span> of the output gap in a future period <span class="math inline">\(t+j\)</span>,</p>
+<p><span class="math inline">\(i_t - \pi_{t+j|t} - r^*\)</span> is the expected real interest rate gap (the construction of which is outlined further below), analagous to the <span class="math inline">\(z_{t+j|t}\)</span> term from Murray (2012) but we make alternative use of <span class="math inline">\(z\)</span> below to include a gilt spread on the base rate;</p>
+<p><span class="math inline">\(\rho\)</span> represents the inter-temporal elasticity of substitution, which scales the impact (sensitivity) of output to real interest rates. (It is equivalent to Murrary (2012)’s <span class="math inline">\(\beta_z\)</span>, his coefficient on <span class="math inline">\(z_{t+j|t}\)</span>;</p>
+<p><span class="math inline">\(er_{t+j|t}\)</span> is the expected change in the real exchange rate; and</p>
+<p><span class="math inline">\(\mu_{t}\)</span> independent, identically-distributed aggregate demand shock.</p>
+<p>Note [to SELF?]: The forward-looking specification of the exchange rate term <span class="math inline">\(er_{t+j|t}\)</span> is appropriate if we want to model how <em>expected</em> future currency strength influences today’s investment and export orders. The spot rate <span class="math inline">\(er_t\)</span> is more appropriate if we want to model how today’s prices affect trade competitiveness immediately.</p>
+</section>
+<section id="comparison-with-obr-model" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="comparison-with-obr-model"><span class="header-section-number">2.2</span> Comparison with OBR model</h2>
+<p>Given the structure of our IS relation, it is important to note that we are implicitly making the jump from the baseline consumption Euler equation (arising from the optimising behaviour of the representative household<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) to a whole-economy IS equation and, thus, making the same assumption as Murray (2012) that the behaviour of the household consumer can explain whole economy behaviour. While this remains common [TBC], at least in small models, it is a huge simplification in the light of heterogenous households and firms and the contribution of business and inventory investment to the cyclical volatility of output.</p>
+<p>Moving from this small model specification to a more comprehensive DSGE model will require the behaviour of firms to be derived from microeconomic foundations but the assumption is sufficiently intuitive for our current purposes. As Murrary notes, the change in output associated with firms’ responses to changes in real interest rates is in the same direction as that implied by the response of households. If the real rate of interest falls, this lowers the cost of borrowing and increases the overall rate of return of an investment project. Therefore, any profit-maximising firm has a greater incentive to invest., in the same way that a consumer has a greater incentive to increase consumption today (because it is less expensive to delay it till tomorrow or, equivalently, less worthwhile to save).<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>Our vs.&nbsp;Murrary’s treatment of interest rate gap coefficient…</p>
+<p>The <span class="math inline">\(z_{t+j|t}\)</span> in Murray’s model is likely a significantly richer version of our real interest rate gap, as it incorporates credit risk premia and unconventional monetary policy and is therefore a spread variable that captures more than just the Bank of England’s base rate.</p>
+<p>Data…period…</p>
+<p>Murray’s exchange rate term (<span class="math inline">\(er\)</span>) includes a term for changes in the trade-weighted real effective exchange rate, which is intended to capture the effect on output of changes in relative prices which serve to shift the allocation of resources to and from the export-facing sector. Ours is a little less precise. We start with the sterling nominal effective exchange rate index and deflate using the import deflator as the ‘foreign’ price proxy, which expresses it in real terms. This is log-transformed and established as a deviation from the long-term trend. This lagged real exchange rate gap reflects the time delay in the expenditure switching effect. (We note the potential bias associated with the import deflator calculated based on sterling-denominated trade data ??? CHECK ACCURACY / CORRECTNESS)</p>
+<p>Also implicit in our approach are the simplifications Murrary (2012) highlights in respect of the role of uncertainty and irreversible costs in investment decision-making. Extensions of the simple model to address these shortcomings feature in Leahy and Whited (1995) and Pyndick and Solimano (1993). We assume that it is still valid to claim, as Murray (2012) does, that while the model does not address uncertainty explicitly, the cyclicality of business investment and its contribution to output volatility should already be captured in the IS relation, to the extent that the investment decision is dependent on the real interest rate gap. [AVENUE FOR EXPLORATION: split business investment out of GDP?]</p>
+<p>Aggregating the consumption Euler equation to the whole economy level gave Murrary (2012) the forward-looking equation below.</p>
+<p><span class="math display">\[ y_{t} = \beta_{y} y_{t+j|t} + \beta_{r} z_{t+j|t} + \beta_{er} er_{t+j|t} + \mu_{t}. \]</span></p>
+<p>In this equation, <span class="math inline">\(y_{t}\)</span> is the output gap, <span class="math inline">\(y_{t+j|t}\)</span> is the expected output gap at time <span class="math inline">\(t\)</span>, <span class="math inline">\(z_{t+j|t}\)</span> is the expected real interest rate gap, <span class="math inline">\(er_{t+j|t}\)</span> is the expected change in exchange rate and <span class="math inline">\(\mu_{t}\)</span> independent, identically-distributed aggregate demand shock.</p>
+<p>This ‘small model’ approach is not without its strengths, particularly the strong micro foundations (through’deep’ structural parameters) underpinning the output equation, which is based on optimising behaviour and, as such, should be robust to policy changes.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> But representative agent theory is not without its flaws. While it saves having to capture the complex and unpredictable behaviours of millions of individual agents for aggregation to the macro economy, heterogeneity and how this can impact on the aggregate picture of behaviour is not always addressed. [what is the latest on this? PROBABLY ANOTHER NECESSITY FOR DSGE?] Like Murrary (2012), we accept that the validity of aggregation contributes to the uncertainties associated with a model that already dramatically simplifies reality.</p>
+</section>
+<section id="same-old-challenges-with-rational-expectations" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="same-old-challenges-with-rational-expectations"><span class="header-section-number">2.3</span> ‘Same old’ challenges with rational expectations</h2>
+<p>[CONFIRM WE ENCOUNTERED THIS PROBLEM IN DEVELOPING 3SLS…] The second criticism of the IS relation concerns the assumption of rational expectations. Estimated forward-looking IS relations tend to underperform simple autoregressive models and, quite often, little empirical support is found for the relationship between output and expected real interest rates.9 This is partly because the output gap moves with a degree of inertia that is inconsistent with the adjustment paths implied by forward-looking, rational expectations models. In these models, it is the rational but immediate adjustment of households’ expectations to innovations which implies a jump response in consumption, which, in practise, is rarely seen in the data.</p>
+<p>Some attempts have been made to explain why consumption reacts so slowly in response to changes in interest rates. One such endeavour is the habit formation model of Fuhrer (2000). Fuhrer postulates that the utility derived from consumption depends both on the absolute level of consumption and the level of current consumption relative to past consumption – that households do not like consuming less than they have been and initially resist changes, before eventually adjusting. This modification was shown to substantially improve the fit of the model.10</p>
+<p>Other work, predominantly concerned with why the behaviour of consumption appears to invalidate the permanent income hypothesis, such as Muellbauer (1988), suggests that households may be myopic in their consumption choices. Campbell and Mankiw (1989) offer the hypothesis that households do not have the resources to engage in producing full forecasts and so it is optimal for them to use a rule of thumb when updating their consumption plans in response to income shocks.</p>
+<p>That lagged output improves the fit with the data is important, but whether one accepts the habit formation story, the rule of thumb hypothesis or simply assumes that households are less forward-looking than is often suggested, is less important for the specification of the IS relation. In empirical work, an assumption of habit formation or myopia in household consumption choices is not uncommon and both Batini and Haldane (1999) and Smets and Wooters (2003) allow for it in their respective models of the UK and the euro area economies. Indeed, neither Batini and Haldane nor Carlin and Soskice (2010) include expected output in their baseline IS relations, an approach which I follow here. Therefore, the baseline IS relation employed here includes lags of output, real interest rates and exchange rates but not expectations thereof:<br>
+<span class="math display">\[ y_{t} = \beta_y y_{t-j|t} + \beta_r z_{t-j|t} + \beta_{er} er_{t-j} + \mu_{t} \]</span></p>
+</section>
+<section id="empirical-model-specification" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="empirical-model-specification"><span class="header-section-number">2.4</span> Empirical model specification</h2>
+<p>We amend our theoretical equation in a likewise fashion:</p>
+<p><span class="math display">\[y_t = \beta_y y_{t-j|t} - \rho(i_t - \pi_{t-j|t} - r^*) + \beta_{er} er_{t-j|t} + \mu_t\]</span></p>
+<p>THis leads to our expirical specification. All variables (unless otherwise noted) are expressed as log-deviations from their steady-state trends. Aggregate demand depends on expected future output, real interest rates, and the real exchange rate (the expenditure-switching effect):</p>
+<p><span class="math inline">\(\text{HOG IS Curve 1:} \quad y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 z_t + \beta_5 (\mathbb{1}_{ZLB} \cdot z_t) + \beta_6 x_t + \beta_7 er_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t}\)</span></p>
+<p><span class="math inline">\(y_{t}\)</span> is the output gap, or the percentage deviation of real (chained volumes measure of) GDP at market prices from its long-term cyclical trend<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p><span class="math inline">\(y_{t-1}\)</span> is the lagged output gap (reflecting output trend persistence) and <span class="math inline">\(y_{t+1|t}\)</span> is a lead output gap (to take account of future output expectations).</p>
+<p><span class="math inline">\(r_t\)</span>is the real interest rate gap <span class="math inline">\(R_{GAP} = r^{base} - r^{*} = i_t - \pi_{t+j|t} - r^*\)</span>. We start with the official real bank rate, which is the nominal BOE base rate minus annualised quarterly inflation [log(CPI) / lag(CPI)]. We calculated the trend of GDP growth to establish <span class="math inline">\(r^*\)</span> and subtracted that from the real bank rate. This real interest rate gap represents the&nbsp;<strong>monetary policy stance</strong>; a positive value indicating restrictive policy (leaning against the wind), while a negative value indicates accommodative policy.</p>
+<p><span class="math inline">\(z\)</span> is the spread on the nominal par value of 5-year gilt yields over and above (or below) the nominal base rate (so <span class="math inline">\(i^{mkt} = i^{base} + z\)</span>), which we include in the analysis to account for the zero lower bound issue.</p>
+<p><span class="math inline">\(\mathbb{1}_{ZLB}\)</span> is a binary dummy variable equal to one when the bank rate is at its effective lower bound (0.1-0.5) and zero otherwise. This makes <span class="math inline">\(\beta_5\)</span> an interaction coefficient - the additional impact of the market spread on the output gap when conventional policy is constrained.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<p><span class="math inline">\(x_{t}\)</span> is the change in net exports or, more precisely, the difference between the log-differenced CVMs of exports and imports at market prices. Net export growth can be volatile, so accounting for the contribution of each to the overall change before combining them helps smooth the data.</p>
+<p><span class="math inline">\(er_{t-1}\)</span> is the lagged real exchange rate gap.</p>
+<p><span class="math inline">\(\mathbf{D} \cdot \gamma_{IS}\)</span> represents a set of pulse dummy variables for the Covid-19 shock.</p>
+<p><span class="math inline">\(\epsilon_{y,t}\)</span> is the model’s error term.</p>
+<p><strong>Sign Expectations</strong>: Note that while <span class="math inline">\(\beta_3\)</span> (real rate) and <span class="math inline">\(\beta_4\)</span> (spread) should be <strong>negative</strong> (tighter conditions = lower output), <span class="math inline">\(\beta_6\)</span> (real exchange rate) should be <strong>positive</strong> if an increase in the index represents a depreciation (making exports cheaper).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>hog_is_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_GAP <span class="sc">~</span> lag_Y_gap <span class="sc">+</span> lead_Y_gap <span class="sc">+</span> R_GAP <span class="sc">+</span> d_mkt_spr <span class="sc">+</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                   zlb_interaction <span class="sc">+</span> dlog_NX <span class="sc">+</span> lag_rer_gap <span class="sc">+</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                   dummy_2020Q2 <span class="sc">+</span> dummy_2020Q3, </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> MODEL_DIFFS)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(hog_is_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + d_mkt_spr + 
+    zlb_interaction + dlog_NX + lag_rer_gap + dummy_2020Q2 + 
+    dummy_2020Q3, data = MODEL_DIFFS)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.9084 -0.2827 -0.0210  0.3047  3.9634 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)       0.097588   0.063228   1.543   0.1259    
+lag_Y_gap         0.737002   0.037071  19.881  &lt; 2e-16 ***
+lead_Y_gap        0.161280   0.025737   6.267 9.39e-09 ***
+R_GAP            -0.043978   0.017517  -2.511   0.0137 *  
+d_mkt_spr        -0.286867   0.185454  -1.547   0.1251    
+zlb_interaction   0.309782   0.398508   0.777   0.4388    
+dlog_NX           0.002412   0.017392   0.139   0.8900    
+lag_rer_gap       0.026482   0.011241   2.356   0.0204 *  
+dummy_2020Q2    -21.381522   0.730492 -29.270  &lt; 2e-16 ***
+dummy_2020Q3     10.413883   1.056273   9.859  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.6502 on 100 degrees of freedom
+Multiple R-squared:  0.9481,    Adjusted R-squared:  0.9434 
+F-statistic:   203 on 9 and 100 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Given the results, we refined to a tidier model</p>
+<p><span class="math display">\[ \text{HOG IS Curve 2:} \quad y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 er_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t} \]</span></p>
+<p><span class="math inline">\(y_{t}\)</span>: the current output gap.</p>
+<p><span class="math inline">\(y_{t-1}\)</span> and <span class="math inline">\(y_{t+1|t}\)</span>: lagged and lead output gaps (persistence and expectations).</p>
+<p><span class="math inline">\(r_t\)</span>: the real interest rate gap, as already defined</p>
+<p><span class="math inline">\(er_{t-1}\)</span>: the lagged real exchange rate gap, reflecting the time delay in the expenditure switching effect.</p>
+<p><span class="math inline">\(\mathbf{D} \cdot \gamma_{IS}\)</span>: COVID pulse dummies.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>hog_is_fit_1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_GAP <span class="sc">~</span> lag_Y_gap <span class="sc">+</span> lead_Y_gap <span class="sc">+</span> R_GAP <span class="sc">+</span> lag_rer_gap <span class="sc">+</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                   dummy_2020Q2 <span class="sc">+</span> dummy_2020Q3, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> MODEL_DIFFS)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(hog_is_fit_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + lag_rer_gap + 
+    dummy_2020Q2 + dummy_2020Q3, data = MODEL_DIFFS)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8784 -0.2421 -0.0074  0.2931  4.0037 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)    0.10277    0.06284   1.635   0.1050    
+lag_Y_gap      0.73986    0.03682  20.095  &lt; 2e-16 ***
+lead_Y_gap     0.16704    0.02489   6.712 1.07e-09 ***
+R_GAP         -0.04095    0.01717  -2.385   0.0189 *  
+lag_rer_gap    0.02741    0.01112   2.465   0.0154 *  
+dummy_2020Q2 -21.31428    0.67311 -31.666  &lt; 2e-16 ***
+dummy_2020Q3  10.46627    1.02527  10.208  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.6484 on 103 degrees of freedom
+Multiple R-squared:  0.9469,    Adjusted R-squared:  0.9438 
+F-statistic: 305.9 on 6 and 103 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hog_is_fit_1, <span class="at">which =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="st">"royalblue"</span>, <span class="at">pch =</span> <span class="dv">20</span>, </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Residuals vs Fitted: Tidier HOG IS Model"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Working_Paper_No1_v1_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hog_is_fit_1, <span class="at">which =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"darkgreen"</span>, <span class="at">pch =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: not plotting observations with leverage one:
+  93, 94</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Working_Paper_No1_v1_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>car<span class="sc">::</span><span class="fu">durbinWatsonTest</span>(hog_is_fit_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> lag Autocorrelation D-W Statistic p-value
+   1     -0.05045058      2.097277    0.75
+ Alternative hypothesis: rho != 0</code></pre>
+</div>
+</div>
+<p>This removes non-significant terms and produces a better, more parsimonious result, for the following reasons:</p>
+<ul>
+<li><p><strong>Increased Precision (Lower Standard Errors)</strong>: on the output and interest rate gaps.</p></li>
+<li><p><strong>Higher Adjusted R-squared</strong>: While the Multiple R-squared dropped slightly (0.9482 to 0.947), the Adjusted R-squared actually went UP&nbsp;(0.9435 to 0.9439). This suggests that the variables we removed weren’t adding enough explanatory power to justify their inclusion.</p></li>
+<li><p><strong>Stronger Significance for Exchange Rates</strong>: The lagged real exchange rate gap p-value improved (from 0.0186 to <strong>0.0136</strong>) and suggests that removing the net exports term permits the impact of the real exchange rate to be seen more clearly. This suggests the&nbsp;<strong>price effect</strong>&nbsp;(exchange rate) is a more reliable lead indicator for UK aggregate demand than the volatile&nbsp;<strong>volume data</strong>&nbsp;(net exports). This makes the argument for the “expenditure-switching” effect in the UK much more statistically robust.</p></li>
+<li><p><strong>Leaner</strong>: it retains the “hybrid” structure (lag and lead output gaps) and the essential policy tools (Interest rate gap and exchange rate gap). This matches the core of the <strong>OBR Murray (2012)</strong> logic without the empirical “clutter.”</p></li>
+</ul>
+<p>What the model suggests is that the UK output gap is driven by strong internal momentum (0.74), forward-looking expectations (0.17), a sensitive response to real interest rate deviations (-0.04), and a delayed boost from currency depreciation (0.03)<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+</section>
+<section id="section" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="section"><span class="header-section-number">2.5</span> </h2>
+</section>
+</section>
+<section id="section-1" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> </h1>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The consumption Euler equation simply states that, in equilibrium, the representative household is unable to increase its utility by shifting consumption between periods – that is, the marginal utility of consumption today is balanced with the discounted marginal utility of consumption tomorrow.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The fact that Tobin’s Q operates in a similar way is noted. Lower expected interest rates decrease the rate at which income streams are discounted, increasing the valuation of companies’ net assets. When the market value of assets exceeds the book value, there is a profit opportunity and companies expand their investment until such a time that book prices are equal to market prices. The alternative interpretation is also relevant - as Scarth notes - invest as long as the marginal product of capital its rental cost (interest plus depreciation, or the return on and of capital). Scarth notes that Tobin (1969) prefers the former.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The Lucas Critique prompted the development of these models. Lucas (1976) pointed to the weakness of the traditional approach to macroeconomic modelling in relying on an assumption of stability in the statistical relationships between variables.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Using Hodrick-Prescott filter for time series, which extracts the cyclical component.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Away from the ZLB, a rising gilt spread might be offset by the Bank of England lowering the base rate. At the ZLB, this “offset” is impossible. The interaction term allows the model to show that a credit crunch is <strong>more damaging</strong> when rates are already at zero. <strong>Unconventional Policy Proxy</strong>: In Murray’s logic, <span class="math inline">\(z_t\)</span>captures the effects of <strong>Quantitative Easing (QE)</strong>. By using the interaction, you can explicitly model whether QE-led reductions in the gilt spread were more or less effective than standard rate cuts. <strong>Non-Linearity</strong>: This shift from a linear model to a “regime-switching” model better reflects the reality that the UK economy behaves differently when “constrained” by the lower bound.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>A positive coefficient on a lagged real exchange rate (RER) gap represents an improvement in competitiveness and, therefore, a boost (albeit modest) to growth. [NOTES TO SELF BECAUSE I ALWAYS GET MIXED UP WITH EXCHANGE RATE MOVES, DESPITE GETTING A FIRST IN BOTH ECONOMIC THEORY AND INTERNATIONAL ECONOMICS!]</p>
+<p>The “RER gap” is defined such that a positive value indicates <strong>undervaluation</strong> (or a real depreciation relative to the equilibrium). A positive coefficient (0.03) means that a 1% depreciation in the previous period leads to a 0.03% increase in the current target variable. The lag accounts for the time it takes to transmit to the real economy through, e.g., the J-curve effect or shipping / contractual delays. According to BoE, this is typical of these kinds of small models - a statistically significant but modest transmission from the currency to the real economy. Transmission (to GDP and inflation):</p>
+<ul>
+<li><p><strong>Export Competitiveness</strong>: A real depreciation makes domestic goods cheaper for foreigners, eventually increasing export volumes and boosting aggregate demand.</p></li>
+<li><p><strong>Inflationary Pressure</strong>: Depreciation also increases the cost of imports, which can “boost” inflation (pass-through effect).&nbsp;</p></li>
+</ul>
+<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

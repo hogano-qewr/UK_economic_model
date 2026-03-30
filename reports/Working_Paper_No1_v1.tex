@@ -1,0 +1,430 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={A Small Open-Economy DSGE Model for the UK},
+  pdfauthor={Working Paper No.~1},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{A Small Open-Economy DSGE Model for the UK}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Stage 1: System Estimation and Preliminary Forecasting}
+\author{Working Paper No.~1}
+\date{2026-03-14}
+\begin{document}
+\maketitle
+
+\renewcommand*\contentsname{Table of contents}
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+
+\section{1. Introduction}\label{introduction}
+
+\ldots{}
+
+\section{2. The Theoretical Structural
+Model}\label{the-theoretical-structural-model}
+
+Following the structural modeling tradition of @Scarth1988, we define
+the UK economy as a Small Open Economy (SOE) characterized by nominal
+rigidities and rational expectations. The model consists of a system of
+stochastic behavioural equations and non-stochastic national accounting
+identities.
+
+\subsection{2.1 Stochastic Behavioural
+Equations}\label{stochastic-behavioural-equations}
+
+The core dynamics are driven by forward-looking agents and the
+Mundell-Fleming extension for open-economy linkages. All variables
+(unless otherwise noted) are expressed as log-deviations from their
+steady-state trends.
+
+\textbf{The Open-Economy IS Curve:} Aggregate demand depends on expected
+future output, real interest rates, and the real exchange rate (the
+expenditure-switching effect):
+\[y_t = E_t y_{t+1} - \sigma(r_t - E_t \pi_{t+1}) + \gamma q_t + \epsilon^y_t\]
+where \(q_t\) is the real exchange rate and \(\sigma\) represents the
+intertemporal elasticity of substitution.
+
+\textbf{The Rational Expectations Phillips Curve (REPC):} Inflation is
+driven by forward-looking expectations and domestic demand pressure (the
+output gap):
+\[\pi_t = \beta E_t \pi_{t+1} + \kappa y_t + \epsilon^\pi_t\]
+
+\textbf{Uncovered Interest Parity (UIP):} To close the capital account
+under rational expectations, the domestic interest rate differential
+must equal the expected depreciation of the currency:
+\[r_t - r^*_t = E_t e_{t+1} - e_t + \phi_t\] where \(\phi_t\) represents
+a stochastic risk premium.
+
+\subsection{2.2 National Accounting
+Identities}\label{national-accounting-identities}
+
+A critical departure in this paper is the explicit inclusion of national
+accounting identities as non-stochastic constraints within the 3SLS
+estimation framework. These identities ensure the structural model
+remains consistent with the ONS dataset.
+
+\textbf{The Production-Tax Identity:} We define Gross Domestic Product
+(\(y_t\)) as the sum of the Gross Value Added of industries (\(y^d_t\))
+and net taxes on products (\(T_t\)):
+\[y_t = \omega y^d_t + (1-\omega) T_t\] where \(\omega\) represents the
+steady-state share of GVA in total output.
+
+\textbf{The Expenditure Identity:} To ensure the IS story is fully
+closed, aggregate output must also satisfy the expenditure equilibrium:
+\[y_t = c_{y}c_t + i_{y}i_t + g_{y}g_t + nx_t\] where the coefficients
+denote the shares of consumption, investment, government spending, and
+net exports in total GDP.
+
+By defining both the production side (\(y^d + T\)) and the expenditure
+side (\(c + i + g + nx\)), the model accounts for the ``double-entry''
+nature of the UK national accounts, providing a more robust set of
+instruments for the 3SLS estimation.
+
+\section{3. The empirical model}\label{the-empirical-model}
+
+\subsection{3.1 Variables}\label{variables}
+
+check against formulation above, but this is a working list of variables
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(knitr)}
+\FunctionTok{library}\NormalTok{(tibble)}
+
+\CommentTok{\# We use double backslashes (\textbackslash{}\textbackslash{}) so R treats them as literal LaTeX commands}
+\NormalTok{var\_mapping }\OtherTok{\textless{}{-}} \FunctionTok{tribble}\NormalTok{(}
+  \SpecialCharTok{\textasciitilde{}}\StringTok{"Math Notation"}\NormalTok{, }\SpecialCharTok{\textasciitilde{}}\StringTok{"R Variable"}\NormalTok{,     }\SpecialCharTok{\textasciitilde{}}\StringTok{"Description"}\NormalTok{,                }\SpecialCharTok{\textasciitilde{}}\StringTok{"Classification"}\NormalTok{,}
+  \StringTok{"$y\_t$"}\NormalTok{,          }\StringTok{"Y\_GAP"}\NormalTok{,          }\StringTok{"Output Gap"}\NormalTok{,                  }\StringTok{"Endogenous"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{pi\_t$"}\NormalTok{,       }\StringTok{"Infl\_dev"}\NormalTok{,       }\StringTok{"Inflation Deviation"}\NormalTok{,         }\StringTok{"Endogenous"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Delta i\_t$"}\NormalTok{,  }\StringTok{"d\_BOE\_rate"}\NormalTok{,     }\StringTok{"Change in Bank Rate"}\NormalTok{,         }\StringTok{"Endogenous"}\NormalTok{,}
+  \StringTok{"$u\_t$"}\NormalTok{,          }\StringTok{"U\_GAP"}\NormalTok{,          }\StringTok{"Unemployment Gap"}\NormalTok{,            }\StringTok{"Endogenous"}\NormalTok{,}
+  \StringTok{"$r\_t$"}\NormalTok{,          }\StringTok{"real\_BOE\_r"}\NormalTok{,     }\StringTok{"Ex{-}ante Real Interest Rate"}\NormalTok{,  }\StringTok{"Exogenous"}\NormalTok{,}
+  \StringTok{"$spr\_t$"}\NormalTok{,        }\StringTok{"d\_mkt\_spr"}\NormalTok{,      }\StringTok{"Market Credit Spread"}\NormalTok{,        }\StringTok{"Exogenous"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Delta nx\_t$"}\NormalTok{, }\StringTok{"dlog\_NX"}\NormalTok{,        }\StringTok{"Growth in Net Exports"}\NormalTok{,       }\StringTok{"Exogenous"}\NormalTok{,}
+  \StringTok{"$q\_t$"}\NormalTok{,          }\StringTok{"rer\_gap"}\NormalTok{,        }\StringTok{"Real Exchange Rate Gap"}\NormalTok{,      }\StringTok{"Exogenous"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{pi\^{}\{e\}\_t$"}\NormalTok{,   }\StringTok{"dlog\_energy\_cpi"}\NormalTok{,}\StringTok{"Energy Price Inflation"}\NormalTok{,      }\StringTok{"Instrument"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Delta m\_t$"}\NormalTok{,  }\StringTok{"dlog\_IM\_defl"}\NormalTok{,   }\StringTok{"Import Price Growth"}\NormalTok{,         }\StringTok{"Instrument"}\NormalTok{,}
+  \StringTok{"$}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Delta c\_t$"}\NormalTok{,  }\StringTok{"dlog\_cap"}\NormalTok{,       }\StringTok{"Capacity Utilization Growth"}\NormalTok{, }\StringTok{"Instrument"}\NormalTok{,}
+  \StringTok{"$D\_\{2020\}$"}\NormalTok{,     }\StringTok{"dummy\_2020Q2/3"}\NormalTok{, }\StringTok{"Structural Dummies (COVID)"}\NormalTok{,  }\StringTok{"Exogenous"}
+\NormalTok{)}
+
+\FunctionTok{kable}\NormalTok{(var\_mapping, }\AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1918}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2192}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3836}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2055}}@{}}
+
+\caption{\label{tbl-variable-mapping}System Variables: Mapping and
+Classification for Working Paper No.~1}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Math Notation
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Classification
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(y_t\) & Y\_GAP & Output Gap & Endogenous \\
+\(\pi_t\) & Infl\_dev & Inflation Deviation & Endogenous \\
+\(\Delta i_t\) & d\_BOE\_rate & Change in Bank Rate & Endogenous \\
+\(u_t\) & U\_GAP & Unemployment Gap & Endogenous \\
+\(r_t\) & real\_BOE\_r & Ex-ante Real Interest Rate & Exogenous \\
+\(spr_t\) & d\_mkt\_spr & Market Credit Spread & Exogenous \\
+\(\Delta nx_t\) & dlog\_NX & Growth in Net Exports & Exogenous \\
+\(q_t\) & rer\_gap & Real Exchange Rate Gap & Exogenous \\
+\(\pi^{e}_t\) & dlog\_energy\_cpi & Energy Price Inflation &
+Instrument \\
+\(\Delta m_t\) & dlog\_IM\_defl & Import Price Growth & Instrument \\
+\(\Delta c_t\) & dlog\_cap & Capacity Utilization Growth & Instrument \\
+\(D_{2020}\) & dummy\_2020Q2/3 & Structural Dummies (COVID) &
+Exogenous \\
+
+\end{longtable}
+
+\subsection{3.2 Structural Equations}\label{structural-equations}
+
+The structural system for our model is defined as follows:
+
+\subsubsection{National Accounting
+Constraints}\label{national-accounting-constraints}
+
+To ensure the empirical model is consistent with UK National Accounts,
+the estimated output gap (\(y_t\)) is subject to two fundamental
+identities:
+
+\[
+y_t = \omega y^d_t + (1-\omega) \tau_t + \xi_{p,t} \tag{Production Constraint}
+\]
+
+\[
+y_t = w_c c_t + w_i i_t + w_g g_t + w_{nx} nx_t + \xi_{e,t} \tag{Expenditure Constraint}
+\]
+
+Where \(\omega\) and \(w_j\) are the steady-state shares derived from
+the ONS dataset, and \(\xi_t\) represents the statistical discrepancy
+(the `check' variables in our data).
+
+\subsubsection{Behavioral Equations}\label{behavioral-equations}
+
+The core dynamics are captured by the following four-equation system,
+which incorporates both forward-looking rational expectations and
+backward-looking persistence:
+
+\[
+\begin{aligned}
+\text{IS Curve:} \quad & y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 spr_t + \beta_5 \Delta nx_t + \beta_6 q_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t} \\
+\text{Phillips Curve:} \quad & \pi_t = \delta_1 \pi_{t-1} + \delta_2 \pi_{t-2} + \delta_3 y_t + \delta_4 \pi^{e}_t + \delta_5 \Delta m_t + \delta_6 \Delta c_t + \epsilon_{\pi,t} \\
+\text{Taylor Rule:} \quad & \Delta i_t = \theta_1 i_{t-1} + \theta_2 \pi_t + \theta_3 y_t + \theta_4 spr_t + \gamma_{3} D_{20Q2} + \epsilon_{i,t} \\
+\text{Okun's Law:} \quad & u_t = \alpha_1 u_{t-1} + \alpha_2 y_t + \epsilon_{u,t}
+\end{aligned}
+\]
+
+Where \(\omega\) and \(w_j\) are the steady-state shares derived from
+the ONS dataset, and \(\xi_t\) represents the statistical discrepancy
+(the `check' variables in our data).
+
+\subsection{3.3 Data}\label{data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{DSGE\_3SLS\_DATA }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"C:}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Users}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{hogan}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{OneDrive}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{Documents}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{1 OLLIE}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{0. R}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{UK\_economic\_model}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{reports}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{MODEL\_DIFFS.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{3.4 3SLS model estimation}\label{sls-model-estimation}
+
+\subsection{3.5 Review of robustness}\label{review-of-robustness}
+
+\section{4. Simulations and impulse response
+functions}\label{simulations-and-impulse-response-functions}
+
+\ldots{}
+
+\section{5. Forecasts and forecasting
+performance}\label{forecasts-and-forecasting-performance}
+
+\section{6. Conclusion and next steps}\label{conclusion-and-next-steps}
+
+
+
+
+\end{document}

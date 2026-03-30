@@ -1,0 +1,299 @@
+---
+title: "UK DSGE-Lite Macroeconomic Model"
+subtitle: "3SLS Structural Estimation of the IS-PC-TR-OK System"
+author: "Your Name"
+date: last-modified
+format: 
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
+---
+
+# Executive Summary
+
+This report details the structural estimation of a four-equation macroeconomic model for the UK economy (1997–2024). We use **Three-Stage Least Squares (3SLS)** to address endogeneity between the output gap, inflation, and monetary policy.
+
+## The Structural Model
+
+The system consists of: 1. **IS Curve**: Demand driven by lags, leads, and Net Exports. 2. **Phillips Curve**: Inflation deviation from the 2% target, driven by supply shocks. 3. **Taylor Rule**: Bank of England reaction function (Interest Rate Smoothing). 4. **Okun's Law**: The link between output and unemployment.
+
+## 3SLS Estimation Results
+
+The model was estimated using an instrument set including lagged macro variables and exogenous supply shocks.
+
+### Key Findings
+
+1\. The Phillips Curve (PC) The Phillips Curve achieved a high of 0.60. Inertia: Significant second-lag persistence ( ). Supply Dominance: Inflation is heavily driven by the Energy Price Cap and Import Prices, rather than domestic demand-pull.
+
+2\. The Taylor Rule (TR) The Bank of England shows significant reaction to Inflation Deviations ( ) but is primarily a Financial Stabiliser, reacting most strongly to the Market Spread ( ).
+
+3\. Net Exports (NX) The UK remains an open-economy model; the trade balance is the most significant driver of the Output Gap ( ).
+
+# Introduction
+
+...
+
+# Data and variables
+
+Our **endogenous** variables (determined simultaneously in the model):
+
+-   `Y_GAP` (Output Gap)
+-   `dlog_CPI_index` (Inflation)
+-   `BOE_rate` (Interest Rate)
+-   `U_GAP` (Unemployment Gap)
+-   `lead_Y_gap` and `lead_pi` (Expectations are typically treated as endogenous in DSGE-lite models).
+
+The **instruments** used to purge the model of endogeneit includes all exogenous and lagged (predetermined) variables. These are (TBC):
+
+-   **Lags:** `lag_Y_gap`, `lag_U_gap`, `lag_BOE`
+
+-   **External/Policy Shocks:** `d_mkt_spr`, `dlog_NX`, `dlog_cap_adj`, `dlog_IM_defl`
+
+-   **Dummies:** `covid_dummy` (I recommend adding this to help the model handle the 2020 volatility).
+
+# The New Keynesian model structure
+
+In setting about building a DSGE model for the UK economy, our starting point is to develop and estimate a coherent macroeconomic model. The system of equations are designed to reflect the stochastic macroeconomic and rational expectations extensions of the Mundell-Fleming model, as set out in Scarth (1988), Chapters 8-9.
+
+## The structural equations
+
+$$
+\begin{aligned}
+\text{IS:} \quad & y_t = \alpha_1 y_{t-1} + \alpha_2 E_t y_{t+1} - \alpha_3 r_t + \alpha_4 q_{t-1} + \epsilon_{y,t} \\[10pt]
+\text{PC:} \quad & \pi_t = \beta_1 \pi_{t-1} + \beta_2 \pi_{t-2} + \beta_3 y_t + \beta_4 z_t + \epsilon_{\pi,t} \\[10pt]
+\text{TR:} \quad & \Delta i_t = \gamma_1 ( \pi_t - \pi^* ) + \gamma_2 y_t + \gamma_3 \text{spread}_t + \epsilon_{i,t} \\[10pt]
+\text{OL:} \quad & u_t - \bar{u} = \delta_1 (u_{t-1} - \bar{u}) - \delta_2 y_t + \epsilon_{u,t}
+\end{aligned}
+$$
+
+The key features of our four equations are:
+
+Our IS curve includes a market spread on 5-year gilts over the BOE base rate, thus accounting for...
+
+Structural Phillips Curve,.
+
+The Monetary Policy (Taylor) Rule, include lag_BOE because central banks prefer "interest rate smoothing"...
+
+Okun's Law: The link between Output and Unemployment...
+
+We use quarterly UK data for the period 1997–2024. Q4 2024 was the latest quarter for which data were available for all variables.
+
+## Three-Stage Least Squares (code and outputs)
+
+We use **Three-Stage Least Squares (3SLS)** to address endogeneity between the output gap, inflation, and monetary policy.
+
+### The IS Curve
+
+The $R2$ for the **IS Curve** is 0.93, and the **Residual Standard Error dropped from 2.18 to 0.77** with the inclusion of COVID pulse dummies within the structural equations, and to \<0.76 with the inclusion of the Sterling real exchange rate. ADD CAVEAT AROUND FACT THAT THIS IS NOT A 'PURE' MEASURE OF RELATIVE PRICES AS IT BASED ON STERLING VALUE OF IMPORTS! ALTERNATIVE - IMPROVE DATA WITH us/eu WEIGHTED INDEX PERHAPS
+
+We had been allowing the model to "guess" about the COVID period. Now it is treated as a unique event, which allows the other 106 quarters of data to speak much more clearly.
+
+Our real exchange rate variable **`rer_gap`** is based on using the **Import Price Deflator** as a proxy for a foreign prices index, which makes our real exchange rate formula a measure of UK competitiveness relative to import costs. The real exchange rate coefficient **`rer_gap` (0.022)** is admittedly not "statistically significant" at the 5% level (p=0.11), but a p-value of 0.11 **suggestive (borderline significant).** More importantly, the **sign is positive**, which is theoretically correct: a real sterling depreciation (increase in the **`rer_gap`**) stimulates output.
+
+**The 'IS persistence' coefficient,** reflected through the `lag_Y_gap,` stands at **0.69**, a reasonably realistic level of "stickiness" for the UK economy, but something that needs reviewing and testing. It builds in the presumption that GDP growth today is a strong predictor of growth tomorrow.
+
+Our net exports variable **(`dlog_NX`)** remains insignificant following these changes. The coefficient even has a slightly negative sign. This would support the proposition that the real exchange rate (rer_gap) is a better predictor of the output gap than the trade volumes data or, in other words, the exchange rate better captures relative competitiveness better than cyclical trade numbers.
+
+#### Note on approahc to real exchange rate
+
+**Why it works well**
+
+-   **Direct Link**: The import deflator is literally the price of the "foreign basket" once it hits UK shores. In many UK macro models, it is used specifically to show how external shocks (like energy price spikes) transmit to domestic inflation.
+
+-   **Trade-Weighted by Nature**: Because the deflator is calculated based on what the UK actually imports, it is inherently "trade-weighted". This saves you the headache of manually weighting CPIs from the US, EU, and China.
+
+**The Catch (The "Terms of Trade" Trap)**
+
+The import deflator is not a "pure" foreign price; it is influenced by **Sterling's value itself**.
+
+If Sterling crashes, your import deflator will shoot up, even if prices in New York or Paris haven't changed. **Impact on your IS Model**: This can create **collinearity**. If your RER calculation uses a deflator that already moves one-for-one with the exchange rate, your RER series might look "flatter" than it should.
+
+With coefficients that aren't significant, the next step will be to check if **Unit Labour Costs (ULC)** provide a cleaner signal for competitiveness, as some IMF research suggests ULC-based rates have a stronger link to the trade balance than CPI-based ones
+
+### The Phillips Curve
+
+The **Phillips Curve** achieved a strong result. The $R2$ of 0.60 is arguably a solid result for a structural inflation equation in 3SLS. Key points on the Phillips Curve:
+
+-   our PC is being driven almost entirely by **external costs**.
+
+-   **`dlog_energy_cpi`** and **`dlog_IM_defl`** are highly significant. This confirms that UK inflation is "imported" via energy and goods.
+
+-   **`Y_GAP` (-0.007)**: The Phillips Curve is "flat." The output gap isn't driving inflation; global prices are. This is a major finding for your Quarto doc!
+
+#Following to be checked for continued relevance / replace-augment based on post-rer model findings above...#
+
+-   **The "Memory" of UK Inflation** is captured through the second lag (`lag(Infl_dev, 2)`) with a coefficient of **0.48**, which is **highly** (statistically) **significant** $(p<0.001)$ . This suggests an "echo" effect in UK inflation - a shock today doesn't just hit next quarter; it has a secondary push six months later. The intercept value of -0.89 suggests that lags are doing the heavy lifting of explaining the inflation trend (a good sign of a model that is "self-centering".
+
+-   A **"supply side** trifecta" of statistically significant cost-push variables reflecting the facts that, for a small open economy like the UK, the exchange rate and global costs matter, energy costs are important (including the quarterly movements in Ofgem's energy price cap).
+
+    -   Import Prices $(0.13; p<0.001)$
+
+    -   Energy CPI $(0.06; p<0.001)$
+
+    -   Energy Cap $(-1.67; p<0.01)$
+
+The energy cap result is suggestive the price cap significantly dampens the deviation from the target.
+
+The only thing that remains "stubborn" is the **`Y_GAP`** in the Phillips Curve $(-0.01; p=0.66)$ . In many UK models, this is common: domestic demand is often "drowned out" by massive global supply shocks. We've retained this "Cost-Push" Phillips Curve on the presumption that it's pretty accurate reflection of the UK over the last decade.
+
+### The "Taylor Rule"
+
+\[post-rer conclusion...\]
+
+**The Taylor Rule (TR): The "Spread" Discovery**
+
+-   **`d_mkt_spr` (-0.61)**: This is your strongest result in the Taylor Rule. It shows the Bank of England reacts aggressively to **market stress/credit spreads**. When spreads widen, the BoE offsets it by lowering or holding back the base rate. This is a very "DSGE-lite" way of showing the BoE cares about financial stability.\]
+
+\[Ensure below consistent with and appropriately augments above, checking results...\]
+
+This shows the Bank of England reacting to deviations from the inflation target `Infl_dev` $(0.138; p=0.014)$. The iterative process of arriving at this result suggests that the policy equation is robust to different specifications of the inflation process. This is consistent with the following monetary policy signal - even after controlling for the 2020 crash, the Bank of England's systematic reaction to inflation deviations remains fairly solid. However, the magnitude and statistical significance of the coefficient on the market spread (in 5-year gilt yields over the BOE base rate is consistent with the proposition that the Bank is primarily a financial stabiliser, reacting most strongly to this variable in the model.
+
+In our monetary policy (Taylor) rule, the `dummy_2020Q2` is **insignificant** $(p=0.583)$. This is interesting because it suggests that the Bank of England's *change* in rates (`d_BOE_rate`) during the lockdown was actually **predicted** by the existing Taylor Rule variables (the crash in the output gap and inflation). The BoE didn't do anything "unexpectedly" different from their normal reaction function; they just followed the data down.
+
+### Okun's Law
+
+\[post-rer conclusions...\]
+
+-   **`Y_GAP` (-0.02)**: Highly significant. A 1% increase in the output gap reduces the unemployment gap by about 0.02 percentage points. It’s a bit "sticky," but the sign and significance are perfect.
+
+\[below to be reviewed...\]
+
+The coefficient on `Y_GAP` in Okun's law dropped to **-0.019**. This seems realistic—it suggests that for every 1% of extra GDP, unemployment falls by about 0.02 percentage points in the short run, with a long-run effect driven by the high persistence of `lag_U_gap` (0.81).
+
+# Annex: The model's code
+
+This is how we coded the model that has produced the most coherent outputs so far. This is still subject to testing.
+
+```{r setup}
+library(systemfit)
+library(tidyverse)
+library(broom)
+
+# Load your data here
+MODEL_DIFFS <- read_csv("MODEL_DIFFS.csv") 
+
+
+## 1. System equations
+
+# The IS Curve Equation
+eq_IS     <- as.formula("Y_GAP ~ lag_Y_gap + lead_Y_gap + real_BOE_r + d_mkt_spr + dlog_NX")
+
+# The Phillips Curve Equation (first & second lags to capture deeper inertia)
+eq_PC_v2 <- as.formula("Infl_dev ~ lag(Infl_dev) + lag(Infl_dev, 2) + Y_GAP + dlog_energy_cpi + dlog_IM_defl + dlog_cap_adj")
+
+# Taylor Rule Equation (MP reaction to (Infl_dev) from tgt 2% instead of raw CPI
+eq_Taylor <- as.formula("d_BOE_rate ~ lag_BOE + Infl_dev + Y_GAP + d_mkt_spr")
+
+# Okun's Law equation
+eq_Okun   <- as.formula("U_GAP ~ lag_U_gap + Y_GAP")
+
+
+## 2. Generate the system list
+system_v2 <- list(IS = eq_IS, PC = eq_PC_v2, TR = eq_Taylor, OK = eq_Okun)
+
+## 3. Define the Instrument Set
+instr_v2 <- ~ lag_Y_gap + lag_U_gap + lag(Y_GAP, 2) + lag_BOE + 
+  lag(Infl_dev) + lag(Infl_dev, 2) + dlog_energy_cpi + 
+  dlog_IM_defl + d_mkt_spr + dlog_NX + 
+  dlog_cap_adj + covid_dummy
+
+## 4. Run the 3SLS
+fit_3sls_v2 <- systemfit(system_v2, 
+                         method = "3SLS", 
+                         inst = instr_v2, 
+                         data = MODEL_DIFFS)
+summary(fit_3sls_v2)
+
+
+
+library(car)
+wald_test <- linearHypothesis(fit_3sls_v2, "PC_lag(Infl_dev) + PC_lag(Infl_dev, 2) = 1")
+```
+
+### Wald test
+
+The p-value \< 0.001 is a massive result. It effectively kills the "textbook" New Keynesian assumption that UK inflation is a random walk with a vertical long-run Phillips Curve \[???\]
+
+The two lags sum to **0.417** ($(p<0.001)$. Since this is significantly less than **1**, your model is making a very strong claim:
+
+1.  **Extreme Anchor**: UK inflation is "mean-reverting" toward the 2% target. If a shock hits, the system naturally pulls it back rather than letting it spiral.
+
+2.  **The "Echo" Effect**: Notice that the first lag is negative and the second is positive. This suggests a "sawtooth" or "overshooting" pattern in UK pricing—inflation spikes, over-corrects, and then settles.
+
+3.  **Policy Space**: This result gives the Bank of England more "room" to breathe. Because inflation doesn't have a "unit root" (it doesn't stay where it's pushed), the BoE doesn't have to crash the economy quite as hard to bring prices back to target.
+
+**Robustness Check: The "Over-Identification" Test**
+
+Since we have 10+ instruments for 4 equations, we are **over-identified**. We need to make sure your instruments aren't just "strong" but also **valid** (uncorrelated with the error term). We ran the **Sargan (or Hansen J) Test** in `systemfit`.
+
+```{r}
+{r}
+#| label: tbl-summary-stats
+#| tbl-cap: "Descriptive Statistics of the Model Variables"
+#| warning: false
+
+library(modelsummary)
+
+# 1. Define the variables with clean names
+table_data <- MODEL_DIFFS %>%
+  dplyr::select(
+    `Output Gap (y)` = Y_GAP,
+    `Inflation Deviation (pi)` = Infl_dev,
+    `Interest Rate Change (delta i)` = d_BOE_rate,
+    `Real Exchange Rate Gap (q)` = rer_gap,
+    `Unemployment Gap (u)` = U_GAP,
+    `Market Spread (spr)` = d_mkt_spr
+  )
+
+# 2. Define a named list of functions (This avoids the 'object not found' error)
+# The names on the left will be the column headers in your table
+P_stats <- list(
+  "Mean" = function(x) mean(x, na.rm = TRUE),
+  "SD"   = function(x) sd(x, na.rm = TRUE),
+  "Min"  = function(x) min(x, na.rm = TRUE),
+  "Max"  = function(x) max(x, na.rm = TRUE),
+  "N"    = function(x) length(na.omit(x))
+)
+
+# 3. Use 'datasummary' with the defined list
+datasummary(
+  All(table_data) ~ Mean + SD + Min + Max + N, 
+  data = table_data,
+  fmt = 3
+)
+
+{r}
+
+#| label: fig-residuals
+#| fig-cap: "System Residuals over Time: Identifying Structural Breaks"
+
+library(ggplot2)
+library(patchwork)
+
+# Extract residuals from the 3SLS fit
+resids <- as.data.frame(residuals(fit_3sls))
+resids <- resids |> 
+  mutate(Date_Num = row_number()) # Create a sequence for steady plotting
+  
+# Helper function for plotting
+plot_res <- function(data, var, title) {
+  ggplot(data, aes(x = Date_Num, y = .data[[var]])) +
+    geom_line(color = "steelblue") +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(title = title, y = "Residual", x = "") +
+    theme_minimal()
+}
+
+p1 <- plot_res(resids, "IS", "IS Curve Residuals")
+p2 <- plot_res(resids, "PC", "Phillips Curve Residuals")
+p3 <- plot_res(resids, "TR", "Taylor Rule Residuals")
+p4 <- plot_res(resids, "OK", "Okun's Law Residuals")
+
+(p1 | p2) / (p3 | p4)
+
+
+
+```
+
+### 

@@ -1,0 +1,307 @@
+---
+title: "DUMP_WP1"---
+author: "Oliver Hogan"
+editor: visual
+date: last-modified
+number-sections: true
+toc: true
+colorlinks: true
+format: html
+editor: visual
+---
+
+# Phillips Curve
+
+The New Keynesian Phillips Curve (NKPC) relates current inflation to expectations of future inflation and marginal cost pressures. That the inflation process is forward-looking follows from the price-setting behaviour of firms, which is assumed to follow Calvo (1983). The basic premise is that in each period a firm has a fixed probability that it will keep its price unchanged, so firms set prices now with a view to the future because they know that they may not be able to change their prices in the subsequent period. \[11: Note that this probability is independent of the general level of inflation. This seems unlikely, and has implications for the model, such as the potential non-neutrality of money.\] The probability of changing/not changing price each period is independent of the time elapsed since the firm last changed its price, and this attribute simplifies the aggregation of individual firm behaviour to the whole-economy level. This gives an equation of the form, $\pi_{t} = \lambda_{\pi} \pi_{t+j|t} + \lambda_{y} y_{t} + \epsilon_{t}$ (eq.-OBR04), where $\pi_{t}$ is the rate of inflation at time t and $\pi_{t+j|t}$ is the expectation of inflation conditioned on information available at time t.
+
+Murrary assumes that real marginal cost pressures drive the inflation process, consistent with Gali and Gertler (1999) and that these cost pressures are well-represented by the output gap $y_{t}$ . There are other measures which could be used – Batini et al. (2005) use the labour share of income in their estimate of the Phillips curve, which has the advantage of being directly observable. \[12: It is also the case that, under certain assumptions, the labour share (the average product of labour) is proportional to real marginal cost in an economy characterised by a Cobb-Douglas production function.\] But using the labour share for forecasting with this model would not be possible because it does not capture the evolution of the labour market, so the output gap is preferred. The error term, $\epsilon_{t}$ , is an independent, identically-distributed inflation shock.
+
+As with the IS relation, the purely forward-looking version of this equation fits the data poorly – failing to capture the observed inertia of inflation. The equation specification implies that a high degree of persistence in either movements in the output gap or changes in inflation expectations could produce an inertial path for inflation, but leaves open the possibility of large jumps. It also implies that inflation should lead the output gap, which is the opposite of what we observe in the data; both empirical evidence and conventional wisdom suggests that monetary policy affects inflation only with a lag, rather than instantaneously.
+
+A model that does not adequately capture the persistence of inflation would be of little use to forecasters. Therefore, in what follows, I relax the restrictive assumption that households and firms are completely forward-looking. This approach is consistent with the approach I have taken to expectations in the IS relation.
+
+The hybrid version of the New Keynesian Phillips Curve, used in a number of empirical estimates of the equation (Gali and Gertler (1999)) modifies the standard NKPC formulation by allowing a proportion of firms to use a rule of thumb when setting prices. This modification provides a theoretical justification for the presence of an inflation lag in the first order condition of the NKPC. Intuitively, the inclusion of lags of inflation serves to act as a proxy for the rational expectation of future values of the driving variable. The resulting equation therefore includes a backward-looking term and a coefficient, $\zeta$ , that determines the weight placed on past inflation relative to inflation expectations in the inflation process (eq.-OBR05):$\pi_{t} = \zeta \pi_{t-j} + (1 - \zeta) \pi_{t+j|t} + \lambda_{y} y_{t-j} + \epsilon_{t}$ .
+
+Murrary takes a slightly different approach to the Gali and Gertler set-up and adopts the prior expectation that agents in the economy expect that monetary policy is able to return inflation to target at some time horizon (typically assumed to be around two years). Therefore, I use equation 2.6 and set $\pi_{t+j|t}$ equal to the inflation target, $\pi^*$. \[SAME APPROACH ADOPTED BY HOGAN\]
+
+To allow for the effect of exchange rate pass-through to prices, Murray include the change in the trade-weighted nominal effective exchange rate. That the Phillips curve can be augmented in this way is demonstrated formally in Batini et al. (2005). \[OUR SPEC IS DIFFERENT AT PRESENT, BUT THIS COULD IMPROVE OUR ESTIMATES IF WE ADOPTED...?\]
+
+\$ \\text{OBR Phillips Curve:} \\quad \\pi\_{t} = \\zeta \\pi\_{t-j} + (1 - \\zeta) \\pi\^\* + \\lambda\_{y} y\_{t-j} + \\lambda\_{e} \\Delta e\_{t-j} + \\epsilon\_{t} \$
+
+**HOW DOES THIS OBR VERSION COMPARE TO OUR first draft EMPIRICAL SPEC (amended from below to make consistent with OBR):**
+
+We have two working versions of the Phillips curve, the purpose of which is to show that the version with a second lag that \[...\] appears to fit our cut of the UK data better than which includes forward-looking expectations. The former, which focuses on persistence, produces a higher $R^2=0.56$ than any other formulation, including HOG Phillips Curve 2 below. \[RESULTS TO BE CONFIRMED...\]
+
+$$ \text{HOG Phillips Curve 1:} \quad \pi_t = \delta_1 \pi_{t-1} + \delta_2 \pi_{t-2} + \delta_3 y_t + \delta_4 \pi^{e}_t + \delta_5 \Delta m_t + \delta_6 \Delta \bar{ec}_t + \epsilon_{\pi,t} $$
+
+$$ \text{HOG Phillips Curve 2:} \quad \pi_t = \delta_1 \pi_{t-1} + \delta_2 \pi_{t+1} + \delta_3 y_t + \delta_4 \pi^{e}_t + \delta_5 \Delta m_t + \delta_6 \Delta \bar{ec}_t + \epsilon_{\pi,t} $$
+
+$\pi_{t}$ in our Phillips curve is already specified as the deviation of inflation from its 2% target. This was motivated by our Wald test, which showed the expectations weights don't sum to 1. This usually means expectations is "stealing" the explanatory power of the other variables because it is so highly correlated with them.
+
+Persistence and deeper inertia are reflected in $\pi_{t-1}$ and $\pi_{t-2}$, respectively, with inflation expectations represented by $\pi_{t+1}$ .
+
+$y_{t}$ is the output gap from the IS curve.
+
+$\pi^{e}_t$ is the log-differenced index values for domestic fuels component of the CPI. We also also testing the usefulness of the electricity system price.
+
+$\Delta m_t$ is the log-differenced index values of the import prices deflator. This needs to be monitored as the data are not independent of the exchange rate, with the deflator index being calculated based the sterling cost of imports.
+
+$\bar{ec}_t$ is the Ofgem energy price cap (dual fuel by direct debit, average GB household, excl. VAT).
+
+$\epsilon_{\pi,t}$ is the model's error term for our Phillips curve.
+
+# Uncovered interest parity
+
+MURRAY: There is a vast literature surrounding the performance of models concerned with forecasting movements in exchange rates. In their seminal paper, Meese and Rogoff (1983) show that the forecast performance of economic models of the exchange rate is typically worse than simply assuming the future exchange rate will be whatever it is at the moment – a random walk model.
+
+A more recent study, Cheung et al (2005), compared the forecast performance of a wide range of models put forward in the 1990s and showed that little progress has been made. Emphasising that while some structural models appear to outperform a random walk model at very long horizons, short-term movements remain unpredictable. This finding reaffirms the Obstfeld and Rogoff (1995) observation that deviations from absolute purchasing power parity - which simply states that the prices of tradable goods and services across countries should be equal - can persist for decades.13 Furthermore, Hauner et al (2011) find that the forecasts produced by a number of models of exchange rates are only weakly correlated with ‘Consensus’ forecasts of the exchange rate.
+
+With this in mind, Murray makes no serious attempt to forecast the exchange rate here, beyond the simplest possible specification of a no arbitrage condition – uncovered interest parity (UIP). Notwithstanding these forecasting difficulties, the exchange rate has an important bearing on economic developments: the recent history of the sterling exchange rate is one of prolonged periods of relative stability, punctuated by relatively rapid and substantial adjustments (in 1992, 1996-7 and 2008-9), and I therefore include it in the IS and Phillips relations. This should improve the model’s short-term unconstrained forecast, but also permit the simulation of exchange rate shocks.
+
+Equation 2.7 is the UIP condition that gives the forecast interest rate, which is consistent with the equation used in the OBR’s main macroeconomic model, $e_t = e_{t-1} + i^f - i + \mathcal{P}_t$ (#eq-OBR07), in which where $e$ is the log nominal exchange rate, $i^f$ is the foreign interest rate, $i$ is the domestic policy rate and $\mathcal{P}$ is an independent and identically-distributed exchange rate shock. \[OR A RISK PREMIUM SHOCK...? HOW DOES THIS RELATE TO OUR CURRENT USE OF GILT SPREAD?\]
+
+The equation is based on the idea that, if an interest rate differential exists, the nominal rate of return on domestic and foreign assets is equalised by movements in the nominal exchange rate.\[14: Note that the UIP condition is only an argument about the expected change in the exchange rate – it does not pin down its level.\] In this model foreign interest rates are assumed to be exogenous and, in steady-state, are equal to the steady-state domestic nominal interest rate. \[15: This assumption seems reasonable given that, for example, the US and the euro area are approximately targeting the same medium term inflation rate, and exhibit broadly equivalent productivity growth.\] \[STILL REASONABLE?\]
+
+For the purposes of including changes in the real exchange rate in the IS relations it is necessary to have a forecast of foreign inflation. This is input to the model exogenously and assumed to have a steady-state rate consistent with the domestic inflation target. This, combined with the interest parity condition, ensures the stability of the steady-state real exchange rate. This is a similar assumption to that made by Carlin and Soskice (2010).
+
+For the purposes of augmenting the IS relation, the change in the real exchange rate is given by the identity, \[#eq-OBR08\]
+
+$\text{OBR UIP:} \quad \Delta er_t = (e_t - e_{t-1}) - (\pi_t - \pi^{f}_t)$ ,
+
+where the change in the log real exchange rate is given by the change in the log nominal exchange rate and the relative rate of inflation. Foreign prices are an exogenous input to the model.
+
+\[IN HOGAN THEORETICAL MODEL FOR UK, BUT NOT IN EMPIRICAL MODEL STRUCTURE AT THE MOMENT...\]
+
+# Taylor rule: monetary policy reaction function
+
+MURRARY (2012): Taylor (1993) observed that the conduct of monetary policy can be well-captured by a simple rule relating interest rates to inflation and the output gap. Following Taylor’s paper there began a concerted academic effort to assess this class of policy rules and their implications for optimal monetary policy. However, some form of Taylor’s original rule, which is entirely backward-looking, remains the default specification for the behaviour of the central bank in many economic models.
+
+Taylor (1993) observed that the conduct of monetary policy can be well-captured by a simple rule relating interest rates to inflation and the output gap. Following Taylor’s paper there began a concerted academic effort to assess this class of policy rules and their implications for optimal monetary policy. However, some form of Taylor’s original rule, which is entirely backward-looking, remains the default specification for the behaviour of the central bank in many economic models.
+
+As well as being a reasonable empirical description of the conduct of monetary policy, Svensson (1997) and others have shown that the Taylor class of rules can also be derived from the inflation targeting central bank’s optimisation problem. Simply allowing for the lag structure associated with the monetary transmission mechanism gives the forward-looking Taylor rule specified in \[#eq-OBR09\]: $\mathrm{i}_t = \bar{\mathrm{i}}_{t-j} + \gamma_{\mathrm{y}} \mathrm{y}_{t+j|t} + \gamma_{\pi} (\pi_{t+k|t} - \pi^*)$ in which where $\mathrm{i}_t$ is Bank Rate, $\bar{\mathrm{i}}_{t-j}$ is the equilibrium nominal rate of interest, $\mathrm{y}_{t+j|t}$ is the output gap forecast at the relevant time horizon and $\mathrm{\pi}_{t+k|t} - \pi^*$ is the forecast deviation of inflation from target. \[16: The specification is slightly different from the original Taylor rule but consistent with Nelson and Nikolov (2002).\], \[17: use effective bank rate in place of actual bank rate to account for the effects of credit spreads and unconventional monetary policy on lending rates to the wider economy. I discuss this in more detail from section 3.1.\]
+
+\[NOTE: The paper uses distinct typographical conventions to differentiate between the **spread-adjusted** (simple difference) rates used in the model's logic and the **actual observable** nominal rates: **Equation 2.7** This uses the italicised to represent the **nominal interest rate** specifically as it functions within the Taylor rule and the model's behavioral equations. In this context, it often represents a "growth-corrected" or "simple difference" rate used to calculate the output gap or monetary policy response. **Equation 2.9 (Non-italicised i):** The non-italicised version refers to the **actual nominal rate** (often the Bank Rate or a market rate like LIBOR) as observed in the real world. This is the "headline" rate before any model-specific adjustments or simple difference calculations are applied.\]
+
+Unlike the IS and Phillips relations, I do not include an exchange rate term in the specification of the Taylor rule. In this model, the central bank responds to movements in the exchange rate only indirectly, via its effect on output and domestically-generated inflation. This is consistent with the Taylor (2001) finding that the inclusion of exchange rates does little to improve the stabilisation of output and inflation and is possibly detrimental.
+
+\[MURRAY IN INTEREST RATE SMOOTHING...\] A substantial literature also exists on the observed inertia of interest rate setting by central banks around the world, see for example Goodfriend (1991). In what follows, I adopt the same approach as Clarida, Gali and Gertler (1999), which is to assume the presence of a policy rate smoothing parameter in the central bank’s reaction function. They suggest this smoothing arises from a desire to avoid the credibility costs associated with large policy reversals, a desire to minimise disruption to capital markets and the time it takes build a consensus to support a policy change. \[18: In a rational expectations context, Woodford (2003) shows that it can be optimal for a central bank to move the current policy rate less in response to demand and inflation shocks if, at the same time, the changes are characterised by a high level of persistence. Such an argument critically depends upon the forward-looking expectations of agents in the economy, which is not a feature of this model.\]
+
+Later discussions have identified ways in which interest rate smoothing might be optimal for a central bank in the presence of parameter uncertainty. Svensson (1999), for example, shows that parameter uncertainty for an inflation-targeting central bank dampens the policy response, confirming what Brainard (1967) first described. Soderstrom (2002) extends this analysis to a dual-mandate central bank with output in its loss function. He finds that uncertainty over inflation dynamics tends to heighten the response to inflation deviations (in case expectations become unanchored) but uncertainty over output dynamics encourages caution.
+
+Regardless of the precise motive, the inclusion of central banks’ smoothing of policy rates in their reaction functions significantly improves the fit with the data. Equation 2.10 captures interest rate inertia as in Clarida et al (1999), \[#eq-OBR10\] $\mathrm{i}_t = (1 - \psi) \mathrm{i}^{*}_t + \psi \mathrm{i}_{t-1}$ in which $\mathrm{i}_t$ is the interest rate set, $\psi$ is the smoothing parameter, $\mathrm{i}^*_t$ is the interest rate implied by the reaction function (absent smoothing) and $\mathrm{i}_{t-1}$ is the interest rate set in the preceding period.
+
+Substituting the generalised Taylor rule in to equation 2.10 as the \* t i term gives the central bank reaction function with policy rate smoothing equation 2.11:
+
+$\text{OBR Taylor:} \quad \mathrm{i}_t = (1 - \psi)\bar{\mathrm{i}}_t + (1 - \psi) \gamma_{\mathrm{y}} \mathrm{y}_{t+j|t} + (1 - \psi) \gamma_{\pi} (\pi_{t+j|t} - \pi^*) + \psi \mathrm{i}_{t-1}$
+
+The functional form presented in equation 2.11 implies that the central bank is more forward-looking than other agents in the economy. This assumption is consistent with the observation that central banks spend a substantially larger share of their resources attempting to forecast the evolution of output and inflation than do households or firms. This choice of modelling approach implies that the central bank could exploit the adaptive expectations of private agents - the classic time-inconsistency problem. This is one of the inevitable drawbacks of building a model that retains some use for forecasting. However, the primary purpose of this model is not to assess the effects of monetary policy regime change. The macroeconomic framework is well-established in the United Kingdom and this supports the validity of using a model of this type.
+
+OUR CURRENT SPEC: NEED TO REVIEW...have only amended lagged i in the below...ours is BASED ON ITALICISED i ...
+
+$$ \text{HOG Taylor Rule:} \quad \Delta i_t = \theta_1 + \theta_2 \pi_t + \theta_3 y_t + \theta_4 spr_t + \gamma_3 D_{20Q2} + \psi_1 i_{t-1} + \epsilon_{i,t} $$
+
+# Okun's law
+
+Not explicitly featured in OBR model
+
+Link between output and unemployment.
+
+$\text{HOG Okun:} \quad u_t = \alpha_1 u_{t-1} + \alpha_2 y_t + \epsilon_{u,t}$
+
+## 3. Theoretical structure of our UK model
+
+The core dynamics are driven by forward-looking agents and the Mundell-Fleming extension for open-economy linkages. All variables (unless otherwise noted) are expressed as log-deviations from their steady-state trends
+
+**The Open-Economy IS Curve:** Aggregate demand depends on expected future output, real interest rates, and the real exchange rate (the expenditure-switching effect): $$y_t = E_t y_{t+1} - \sigma(r_t - E_t \pi_{t+1}) + \gamma q_t + \epsilon^y_t$$ where $q_t$ is the real exchange rate and $\sigma$ represents the inter-temporal elasticity of substitution.
+
+**The Rational Expectations Phillips Curve (REPC):** Inflation is driven by forward-looking expectations and domestic demand pressure (the output gap): $$\pi_t = \beta E_t \pi_{t+1} + \kappa y_t + \epsilon^\pi_t$$
+
+**Uncovered Interest Parity (UIP):** To close the capital account under rational expectations, the domestic interest rate differential must equal the expected depreciation of the currency: $$r_t - r^*_t = E_t e_{t+1} - e_t + \phi_t$$ where $\phi_t$ represents a stochastic risk premium.
+
+### 2.2 National Accounting Identities
+
+A critical departure in this paper is the explicit inclusion of national accounting identities as non-stochastic constraints within the 3SLS estimation framework. These identities ensure the structural model remains consistent with the ONS dataset.
+
+**The Production-Tax Identity:** We define Gross Domestic Product ($y_t$) as the sum of the Gross Value Added of industries ($y^d_t$) and net taxes on products ($T_t$): $$y_t = \omega y^d_t + (1-\omega) T_t$$ where $\omega$ represents the steady-state share of GVA in total output.
+
+**The Expenditure Identity:** To ensure the IS story is fully closed, aggregate output must also satisfy the expenditure equilibrium: $$y_t = c_{y}c_t + i_{y}i_t + g_{y}g_t + nx_t$$ where the coefficients denote the shares of consumption, investment, government spending, and net exports in total GDP.
+
+By defining both the production side ($y^d + T$) and the expenditure side ($c + i + g + nx$), the model accounts for the "double-entry" nature of the UK national accounts, providing a more robust set of instruments for the 3SLS estimation.
+
+## 3. The empirical model
+
+### 3.1 Variables
+
+`{r} echo=FALSE  message=FALSE warning=FALSE  library(knitr) library(tibble)  var_mapping <- tribble(   ~"Math Notation", ~"R Variable",      ~"Description",                 ~"Classification",   "$y_t$",          "Y_GAP",           "Output Gap",                    "Endogenous",   "$\\pi_t$",       "Infl_dev",        "Inflation Deviation",           "Endogenous",   "$\\Delta i_t$",  "d_BOE_rate",      "Change in Bank Rate",           "Endogenous",   "$u_t$",          "U_GAP",           "Unemployment Gap",              "Endogenous",   "$r_t$",          "real_BOE_r",      "Ex-ante Real Interest Rate",    "Exogenous",   "$spr_t$",        "d_mkt_spr",       "Market Credit Spread",          "Exogenous",   "$\\Delta nx_t$", "dlog_NX",         "Growth in Net Exports",         "Exogenous",   "$q_t$",          "rer_gap",         "Real Exchange Rate Gap",        "Exogenous",   "$c_t, i_t, g_t$","c_gap, i_g, g_g", "Expenditure Gap Components",    "Identity Constrained",   "$y^d_t, T_t$",   "gva_g, tax_g",    "Production/Tax Components",     "Identity Constrained",   "$\\pi^{e}_t$",   "dlog_energy_cpi", "Energy Price Inflation",        "Instrument",   "$\\Delta m_t$",  "dlog_IM_defl",    "Import Price Growth",           "Instrument",   "$\\Delta c_t$",  "dlog_cap",        "Capacity Utilization Growth",   "Instrument",   "$D_{2020}$",     "dummy_2020Q2/3",  "Structural Dummies (COVID)",    "Exogenous" )  kable(var_mapping, escape = FALSE, caption = "Table 1: System Variables: Mapping and Classification")}`
+
+### 3.2 Structural Equations
+
+The structural system for our model is defined as follows:
+
+#### National Accounting Constraints
+
+To ensure the empirical model is consistent with UK National Accounts, the estimated output gap ($y_t$) is subject to two fundamental identities:
+
+$$ y_t = \omega y^d_t + (1-\omega) \tau_t + \xi_{p,t} \tag{Production Constraint} $$
+
+$$ y_t = w_c c_t + w_i i_t + w_g g_t + w_{nx} nx_t + \xi_{e,t} \tag{Expenditure Constraint} $$
+
+Where $\omega$ and $w_j$ are the steady-state shares derived from the ONS dataset, and $\xi_t$ represents the statistical discrepancy (the 'check' variables in our data).
+
+#### Behavioral Equations
+
+The core dynamics are captured by the following four-equation system, which incorporates both forward-looking rational expectations and backward-looking persistence:
+
+$$ \begin{aligned} \text{IS Curve:} \quad & y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 spr_t + \beta_5 \Delta nx_t + \beta_6 q_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t} \\ \text{Phillips Curve:} \quad & \pi_t = \delta_1 \pi_{t-1} + \delta_2 \pi_{t-2} + \delta_3 y_t + \delta_4 \pi^{e}_t + \delta_5 \Delta m_t + \delta_6 \Delta c_t + \epsilon_{\pi,t} \\ \text{Taylor Rule:} \quad & \Delta i_t = \theta_1 i_{t-1} + \theta_2 \pi_t + \theta_3 y_t + \theta_4 spr_t + \gamma_{3} D_{20Q2} + \epsilon_{i,t} \\ \text{Okun's Law:} \quad & u_t = \alpha_1 u_{t-1} + \alpha_2 y_t + \epsilon_{u,t} \end{aligned} $$
+
+Where $\omega$ and $w_j$ are the steady-state shares derived from the ONS dataset, and $\xi_t$ represents the statistical discrepancy (the 'check' variables in our data).
+
+### 3.3 Data
+
+### 3.4 3SLS model estimation
+
+...
+
+### 3.5 Review of robustness
+
+...
+
+## 4. Simulations and impulse response functions
+
+...
+
+## 5. Forecasts and forecasting performance
+
+...
+
+## 6. Conclusion and next steps
+
+...
+
+# Appendix I - Scarth
+
+## The Theoretical Structural Model
+
+Following the structural modelling tradition of @Scarth1988, we define the UK economy as a Small Open Economy (SOE) characterized by nominal rigidities and rational expectations. The model consists of a system of stochastic behavioural equations and non-stochastic national accounting identities.
+
+### Scarth's specification of the Mundell-Fleming Model
+
+Scarth (1988, Ch. 8) notes that the standard model is a simplification of the system defined by the following 8 equations. As Scarth does, we wanted to go through this complex system, establish the simplified version to help us understand what we should expect at the basic level, before introducing forward-looking agents and rational expectations.
+
+$$  Y = C(Y^d) + I(r) + G + X\left(\frac{EP^x}{P^d}\right) - \left(\frac{EP^m}{P^d}\right) \cdot IM\left(Y^d, \frac{EP^m}{P^d}\right) $$
+
+$$ Y^d = P^dY/P $$
+
+$$ P = \gamma P^d + (1 - \gamma)EP^m $$
+
+$$ P.L(Y,r) = D + R $$
+
+$$ \dot{R} = P^d \left[X\left(\frac{EP^x}{P^d}\right) - \left(\frac{EP^m}{P^d}\right) \cdot IM\left(Y^d, \frac{EP^m}{P^d}\right)\right] + K\left(r - r^f - \frac{E^*}{\dot{E}}\right) $$
+
+$$ Y = F(N) $$
+
+$$ \bar{W} = P^d \cdot F_N(N) $$
+
+#### GDP $(Y)$, national income $(Y^d)$ and prices $(P)$
+
+Equation 1.1 is the aggregate demand equals aggregate supply condition for the domestically produced good, whose price is $P^d$ and is purchased by domestic households, firms, government or by foreigners via exports). Spending by these groups of agents $(C,I,G,X)$ includes spending on domestic products and imports, so imports ($IM)$ are subtracted to avoid overstating demand for the domestically produced good. The domestic good and the imported good are distinct products so the netting off must accomplished in domestic goods units (for consistency with $C,I,G$ and $X$):
+
+-   Imports are multiplied by their price to yield their value in units of foreign exchange $(IM \cdot P^m)$
+
+-   $E$ is the domestic currency price of one unit of foreign currency (the exchange rate), so $IM \cdot EP^m$ is the cost of imports in domestic currency units.
+
+-   Dividing this by $P^d$ means imports are measured in the same physical units as the domestically produced good.
+
+Five of the eight endogenous variables in this model are introduced within this equation, those being $Y,Y^d,P^d,E$ and $r$. Changes in the exchange rate catalyse substitution effects and income effects.
+
+The substitution effects are obtained by assuming $X_{E} = \frac{\partial X}{\partial (EP^x/P^d)} > 0$ and $IM_{E} = \frac{\partial IM}{\partial (EP^m/P^d)} < 0$. (The special case of purchasing power parity - $P^d = EP^x$ - obtains if the domestic good for export is indistinguishable from the goods available elsewhere, such that the foreign demand function for the domestic product is infinitely elastic, $X_{E}\to\infty$ ,meaning the domestic good faces perfect competition in foreign markets.)
+
+Equations 1.2 and 1.3 specify the income effects of exchange rate changes. Domestic income $Y^d$ derives from sales of domestic output $Y$ valued at the ratio of domestic prices $P^d$ to general prices $P$ (a weighted average between domestic prices and the prices of imports $P^m$). This makes $Y^d$ the real spending power of $Y$ (the total value of real production) and $P^dY$ the nominal value of income from production. In eq. 8.3, $\gamma$ is the average propensity to spend on domestic goods, making $1-\gamma$ the average propensity to spend on imported goods and these are used to define the general level of prices facing domestic agents for eq. 1.2. Scarth (1988) notes that this open economy income effect of the exchange rate is referred to as the Laursen/Metzler effect. In a closed economy, $\gamma = 1$ , so $Y^d = Y$ when taxes are ignored.
+
+The role of interest rates in determining investment spending by firms features through $I(r)$.
+
+#### Money demand and supply
+
+The LM curve is represented by eq. 8.4. Scarth defines it this way so that the central bank balance sheet is used to define the money supply. The RHS is the bank's assets: the quantity of government bonds $D$ and the official stock of foreign exchange reserves $R$ (measured in domestic currency units). When the central bank purchases these assets, its liabilities (consisting of the stock of high-powered money, i.e., the monetary base) increase in a one-for-one manner. The private banking system is ignored so the monetary base $P \cdot L$ and the money supply are the same variable.
+
+#### Intrinsic dynamics
+
+These are represented in eq. 1.5, a monetary policy rule. It states that the change in (official holdings) of foreign exchange reserves $\dot{R}$ must equal the excess of the sources over the uses of foreign exchange that flow into and out of the economy in each market period. This change in reserve holdings is the **balance of payments** is measured in domestic currency units. Foreign exchange is used for imports. It is earned through the sale of goods $(X - IM)$ and financial assets to the rest of the world. Net exports constitute the current account of the balance of payments: $$ BOP_{cur} = P^d \left[X\left(\frac{EP^x}{P^d}\right) - \left(\frac{EP^m}{P^d}\right) \cdot IM\left(Y^d, \frac{EP^m}{P^d}\right)\right] $$
+
+The capital account - the inflow of foreign exchange that follows from the net sales of financial assets to foreigners - is represented by:
+
+$$ BOP_{cap} = K\left(r - r^f - \frac{\dot{E}}{E}\right)$$ As such, net capital inflows are assumed to depend positively on the yield differential between foreign and domestic bonds. For the domestic resident, the yield on a domestic bond in $r$ and the yield on a foreign bond is $r^f + \dot{E} / E$ (the direct interest payment plus a capital gain if the foreign currency appreciates in the holding period of the bonds.
+
+For the moment, we continue without rational expectations meaning an assumption that interest rates are observable in each moment so there is no need for agents for forecast them. When these are introduced, $\dot{E}$ (the actual percentage change in the exchange rate) will be replaced by $\bar{E}$ (the expected percentage change). \[N.B. notation for expected TBC.\]
+
+Scarth notes that the simultaneous satisfaction of eq. 1.4 and the net capital inflow function $(BOP_{cap})$ can be likened to the clearing of the domestic bond market. To illustrate this, assume domestic residents hold only domestic money and domestic bonds but that foreigners hold their money, their bonds and our (domestic) bonds. If the stock-flow misspecification (because $\dot R$ is a flow and $R$ is a stock) is tolerated (corrected later), $K$ must be interpreted as specifying foreign demand for domestic bonds.
+
+It is often assumed that the domestic economy is small vis-a-vis the world bond market - perfect capital mobility exists - a situation that can be specified in one of two ways:
+
+1.  Deriving the general multiplier and then letting $K_{r} = \frac{\partial K}{\partial (r-r^f-\dot{E}{E})} \to \infty$ ; or
+
+2.  Assume perfect capital mobility from the outset by setting $r = r^f + \frac{\dot{E}}{E}$ and dropping eq. 1.5 from the analysis. That equation would essentially be overridden by an assumption of completely passive behaviour on the part of foreign bond holders.
+
+#### Production technology and the labour market
+
+The production function is represented by eq. 1. 6 is the production function and eq. 1.7 is the labour market-clearing condition. This is a Keynesian specification since it has employment $N$determined by the intersection of the labour demand curve and the given money wage line $\bar{W}$. Also in the specification only the price of the domestically produced good is of interest to firms in calculating the marginal revenue product of labour.
+
+### Simplifications
+
+The eight endogenous variables in this model are $Y,Y^d,P,P^d,N$ and $r$ plus $E$ if exchange rates are flexible (or $R$ and $\dot{R}$ if exchange rates are fixed[^1]). Scarth notes that this is a fairly complex system and deals with the simplifications used by Mundell and Fleming, at least implicitly. These are:
+
+[^1]: In this case, the stock of reserves $R$ would be predetermined by previous history in the short run and the balance of payments $\dot{R}$ is endogenous. The long run is defined by the condition that endogenous variables stay constant, so $\dot{R}=0$ by definition. In this case, $R$ is reinterpreted to denote the final equilibrium value of reserves and is endogenous.
+
+1.  With fixed coefficients technology $F_{NN}=0$, which combined with eq. 1.7 implies that $P^d$ is constant and can be set at unity;
+
+2.  To eliminate the Laursen/Metzler effect, it is assumed that $\gamma = P^x = P^m = 1$, making the domestic consumer price index $P$ also equal unity at $Y^d=Y \implies$ there are horizontal marginal cost curves at home and abroad. The model is not entirely fixed-price as long as the exchange rate remains flexible. Scarth notes the "embarrassment" of making the second assumption, which is a misspecification since $\gamma$ cannot equal one unless imports do not exist.
+
+3.  Ignore speculation in the foreign exchange market, which allows the $\dot{E}/E$ to disappear in eq. 1.5.
+
+This allows the model to be simplified to three equations.
+
+$$ \begin{aligned} Y &= C(Y) + I(r) + G + X(E) - E \cdot IM(Y,E)\\ L(Y,r) &= D + R\\ \dot{R} &= X(E) - E \cdot IM(Y,E) + K(r - r^f) \end{aligned} $$
+
+Continuing with Scarth's approach, we take the total differential of these equations and arrange them in matrix form:
+
+$$ \begin{bmatrix}   I-C_{Y}+E \cdot IM_{Y} & -I_{r} & 0 \\   L_{Y} & L_{Y} & 0 \\ -E \cdot IM_{Y} & K_{r} & -1 \end{bmatrix} \begin{bmatrix}   dY \\   dr \\ d \dot{R} \end{bmatrix} = \begin{bmatrix}   1 & 0 & 0 & A & 0 \\   0 & 1 & 1 & 0 & 0 \\ 0 & 0 & 0 & -A & K_{r} \end{bmatrix} \begin{bmatrix}   dG \\   dD \\ dR \\ dE \\ dr^f \end{bmatrix}, $$
+
+where $A=X_{E} - E \cdot IM_{E} - IM \gtrless 0$. Scarth goes on to consider three cases: (i) the impact period in a fixed exchange rate regime; (ii) full equilibrium under fixed exchange rates; and (iii) flexible exchange rates.
+
+### Flexible exchange rates
+
+We focus on (iii) given its obvious applicability to the UK. Flexible exchange rates involves assuming no central bank intervention in the foreign exchange market, meaning no CB asset trades, no intrinsic dynamics and thus no distinction between the impact period and full equilibrium.
+
+#### Fiscal and monetary multipliers
+
+The matrices of eq. 1.11 are rearranged so that the LHS matrix has columns in $dY, dr$ and $dE$ - the three endogenous variables under flexible exchange rates:$$ \begin{bmatrix}   I-C_{Y}+E \cdot IM_{Y} & -I_{r} & A \\   L_{Y} & L_{Y} & 0 \\ -E \cdot IM_{Y} & K_{r} & -A \end{bmatrix} \begin{bmatrix}   dY \\   dr \\ dE \end{bmatrix} = \begin{bmatrix}   1 & 0 & 0 & 0 & 0 \\   0 & 1 & 1 & 0 & 0 \\ 0 & 0 & 0 & -1 & K_{r} \end{bmatrix} \begin{bmatrix}   dG \\   dD \\ dR \\ d\dot{R} \\ dr^f \end{bmatrix}, $$
+
+The monetary and fiscal multipliers are (using Cramer's rule):
+
+$$ \begin{aligned} \frac{dy}{dG} &= \frac{L_{r}}{L_{r}(1-C_{Y}) + I_{r}L_{Y} - K_{r}L_{Y}} > 0 ; \\ \frac{dY}{dD} &= \frac{I_{r} - K_{r}}{L_{r}(1-C_{Y}) + I_{r}L_{Y} - K_{r}L_{Y}} > 0. \end{aligned} $$
+
+The derivation of both involve a cancelling off of expression $A\gtrless 0$, meaning a presumption that $A\neq 0$.
+
+In the case of perfect capital mobility, $K_{r} \to \infty$, these multipliers become $dY/DG \to 0$ and $dY/dD \to 1/L_{Y}$. Scarth notes that this means there is a set of assumptions under which the simplistic quantity theory of money applies and fiscal policy does not matter. In other words, as if the LM curve is vertical (monetarist view).
+
+#### Dynamic convergence
+
+The floating exchange rate model involves no intrinsic dynamics so out-of-equilibrium assumptions are made to perform stability analysis. This is done through sluggish market-adjustment assumptions:
+
+$$ \begin{aligned} \dot Y &= a(C + I + G + X - E \cdot IM - Y) ; \\ \dot{E} &= b(X - E \cdot IM + K). \end{aligned} $$
+
+We note that $a>0$ and $b<0$ represent the speed of adjustment of, respectively, the real and monetary economies, so that these equations state that (a) output increases when aggregate demand exceeds aggregate supply; and (b) the value of the domestic currency rises ($E$ falls) when there is an excess supply of foreign exchange (a balance of payments surplus).
+
+The full equilibrium version of the model (eqns. 1.8 and 1.10) involves the assumption that the adjustment parameters are infinitely large. Substituting in the functions for consumption, investment, exports, imports and net capital inflows and using the LM relationship (eq. 1.9) to eliminate the interest rate leaves two differential equations for output and the exchange rate. The standard stability requirements - that the determinant of the matrix be positive and the trace negative hold if and only if the expression $A>0$. Scarth notes that, as such, the presumption of stability ensures that $A \neq 0$.
+
+# DUMP
+
+\####
+
+Dornbusch's model is defined by the following equations, with all variables except interest rates being measured in logarithms.
+
+$$ \begin{aligned}  y &= a + b(e + p^f - p) - hr; \\ m - p &= ky - gr; \\ r &= r^f + \dot e; \\ \dot p &= f(y - \bar y).  \end{aligned} $$
+
+In this setup, eq. 2.01 defines a standard IS relation: aggregate demand depends positively on the terms of trade and negatively on the interest rate. Eqs. 2.02 and 2.04 are standard LM and Phillips curve relationships. Eq. 2.03 is the interest parity condition. Two simplifications / issues are implicit in this system.
+
+\####
