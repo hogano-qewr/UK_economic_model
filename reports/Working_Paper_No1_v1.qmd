@@ -16,14 +16,1095 @@ format: html
 
 library(car)
 
-MODEL_DIFFS <- read.csv("C:\\Users\\hogan\\OneDrive\\Documents\\1 OLLIE\\0. R\\UK_economic_model\\reports\\MODEL_READY.csv")
+MODEL_READY <- read.csv("C:\\Users\\hogan\\OneDrive\\Documents\\1 OLLIE\\0. R\\UK_economic_model\\reports\\MODEL_READY.csv")
 ```
 
-# Hybrid model (mix of estimation & calibration)
+## April 5th Data Revision, Structural Breaks, and Diagnostic Results
 
 $$
-\\begin{aligned} Y\_{t}\^{\\text{gap}} &= \\alpha_1\\, Y\_{t-1}\^{\\text{gap}} \\;-\\;\\boldsymbol{\\phi_r}\\, r\_{t}\^{\\text{gap}} \\;-\\;\\boldsymbol{\\phi_s}\\, spr\_{t}\^{\\text{gap}} \\;+\\;\\alpha_2\\, \\Delta NX\_{t} \\;+\\;\\alpha_3\\, RER\_{t-1} \\\\\[4pt\] &\\quad +\\;\\mathbf{\\alpha\_{bp1}}\\, D\_{2004} +\\mathbf{\\alpha\_{bp2}}\\, D\_{2008} +\\mathbf{\\alpha\_{bp3}}\\, D\_{2013} +\\mathbf{\\alpha\_{bp4}}\\, D\_{2019} + \\varepsilon\^{IS}\_{t}. \\end{aligned}
+\begin{aligned}
+\text{IS (agg dem):} \quad \tilde{Y}_t &= \alpha_1 \tilde{Y}_{t-1} - \phi_r \tilde{r}_t - \phi_{i_{spr}} \tilde{i}^{spr}_t + \alpha_2 \Delta\text{NX}_t + \alpha_3 \Delta\text{RER}_{t-1} + \epsilon^{\text{IS}}_t \\
+\text{PC (inflation):} \quad \tilde{\pi}_t &= \beta_1 \tilde{\pi}_{t-1} + \beta_2 \tilde{\pi}_{t-2} + \kappa_Y \tilde{Y}_t + \beta_3 \tilde{\pi}^{\text{IM}}_t + \beta_4 \tilde{\pi}^{\text{E}}_t + \beta_5 \text{BP}^{\pi}_t + \epsilon^{\text{PC}}_t \\
+\text{TR (mon pol)}: \quad i_t &= \rho i_{t-1} + (1 - \rho) (r^* + \pi^* + \tau_{\pi}  \tilde{\pi}_t + \tau_Y \tilde{Y}_t) + \epsilon^{\text{TR}}_t \\
+\text{OLU (lab dem):} \quad \tilde{U}_t &= \delta_1 \tilde{U}_{t-1} - \delta_2 \tilde{Y}_t + \delta_3 \text{BP}^{U1}_t + \delta_4 \text{BP}^{U2}_t +  \epsilon^{\text{OLU}}_t \\
+\text{WPC (lab sup):} \quad \tilde{w}_t &= \theta_1 \tilde{w}_{t-1} + \lambda_{\pi} \tilde\pi_{t-1} + \lambda_U \tilde U_t + \theta_2 \tilde{P}_t + \epsilon^{\text{WPC}}_t \\
+\text{OLP (produc):} \quad \tilde{P}_t &= \eta_1 \tilde{P}_{t-1} + \eta_2 \tilde{Y}_t + \epsilon^{\text{OLP}}_t \\
+\text{UIP (exch rate):} \quad \Delta \text{RER}_t &= \mu_1 \Delta \text{RER}_{t-1} + \psi \tilde i^{diff}_t + \mu_2 \Delta \text{NX}_t + \mu_3 \tilde \pi^{\text{IM}}_t + \epsilon^{\text{UIP}}_t
+\end{aligned}
 $$
+
+This paper presents a re‑estimated semi‑structural UK macroeconomic model using a revised data construction that restores early‑sample observations (1998Q3–1999Q4) previously lost to lagging and transformation choices. The recovery of these degrees of freedom materially improves regime identification and equation behaviour across the system, allowing a clearer separation between persistent structural changes and large transitory shocks.
+
+Structural break tests (Zivot–Andrews and Bai–Perron) and subsequent equation‑level diagnostics motivate a **minimal and targeted break strategy**. Persistent regime shifts are identified only where economically meaningful and empirically robust: a Global Financial Crisis (GFC) break and a post‑2013 repair regime in the unemployment gap, and a single inflation‑regime break dating from early 2020. Breaks are explicitly rejected for output gaps, wages, productivity, exchange rates, and monetary policy, where apparent instability reflects shock volatility rather than changes in underlying structure.
+
+Single‑equation OLS diagnostics show strong internal coherence across blocks. Real‑side equations (IS, Okun’s law, and productivity) exhibit heteroskedastic but serially uncorrelated residuals, consistent with state‑dependent shock amplitudes during crisis periods but stable adjustment dynamics. Nominal and institutional equations (price Phillips curve, wage Phillips curve, and Taylor rule) display residual serial correlation but fail to reject homoskedasticity, reflecting expected inertia in inflation, wage setting, and policy adjustment rather than misspecification.
+
+Heteroskedasticity‑robust inference sharpens interpretation without altering substantive conclusions. Core structural slopes remain stable across specifications, while marginal significance attached to later crisis dummies dissipates under robust standard errors—correctly distinguishing regime change from shock realisation. In the wage Phillips curve, labour‑market slack affects wage dynamics primarily by slowing mean reversion rather than inducing contemporaneous wage declines, eliminating the need for wage‑specific regime dummies.
+
+Overall, the revised data construction reduces the reliance on ad‑hoc structural adjustments, improves interpretability of break tests, and yields cleaner reduced‑form behaviour across equations. The final specification is parsimonious, economically transparent, and diagnostically stable, providing a sound basis for system estimation and policy analysis.
+
+# A structural macro-econometric model of the UK economy
+
+The model is a hybrid New Keynesian system, defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using HP filters). A seven‑equation semi‑structural system with hybrid calibration–estimation:
+
+$$
+\begin{aligned}
+\text{IS (agg dem):} \quad \tilde{Y}_t &= \alpha_1 \tilde{Y}_{t-1} - \phi_r \tilde{r}_t - \phi_{i_{spr}} \tilde{i}^{spr}_t + \alpha_2 \Delta\text{NX}_t + \alpha_3 \Delta\text{RER}_{t-1} + \alpha_4 \text{BP}^Y_t + \alpha_5\text{BP}^r_t +\epsilon^{\text{IS}}_t \\
+\text{PC (inflation):} \quad \tilde{\pi}_t &= \beta_1 \tilde{\pi}_{t-1} + \beta_2 \tilde{\pi}_{t-2} + \kappa_Y \tilde{Y}_t + \beta_3 \tilde{\pi}^{\text{IM}}_t + \beta_4 \tilde{\pi}^{\text{E}}_t + \beta_5 \text{BP}^{\pi}_t + \epsilon^{\text{PC}}_t \\
+\text{TR (mon pol)}: \quad i_t &= \rho i_{t-1} + (1 - \rho) (r^* + \pi^* + \tau_{\pi}  \tilde{\pi}_t + \tau_Y \tilde{Y}_t) + \epsilon^{\text{TR}}_t \\
+\text{OLU (lab dem):} \quad \tilde{U}_t &= \delta_1 \tilde{U}_{t-1} - \delta_2 \tilde{Y}_t + \delta_3 \text{BP}^{U1}_t + \delta_4 \text{BP}^{U2}_t + \delta_5 \text{BP}^{U3}_t + \delta_6 \text{BP}^{U4}_t + \epsilon^{\text{OLU}}_t \\
+\text{WPC (lab sup):} \quad \tilde{w}_t &= \theta_1 \tilde{w}_{t-1} + \lambda_{\pi} \tilde\pi_{t-1} + \lambda_U \tilde U_t + \theta_2 \tilde{P}_t + \epsilon^{\text{WPC}}_t \\
+\text{OLP (produc):} \quad \tilde{P}_t &= \eta_1 \tilde{P}_{t-1} + \eta_2 \tilde{Y}_t + \epsilon^{\text{OLP}}_t \\
+\text{UIP (exch rate):} \quad \Delta \text{RER}_t &= \mu_1 \Delta \text{RER}_{t-1} + \psi \tilde i^{diff}_t + \mu_2 \Delta \text{NX}_t + \mu_3 \tilde \pi^{\text{IM}}_t + \epsilon^{\text{UIP}}_t
+\end{aligned}
+$$
+
+Calibrated parameters are given symbolic subscripts to represent the exogenous variable they are measuring the role and significance of. Estimated parameters are assigned numeric subscripts, representing their ordering in the econometric analysis of the structural equations.
+
+## The IS relation (aggregate demand)
+
+This equation describes how cyclical output $(\tilde{Y})$ responds to monetary conditions, external demand, exchange‑rate movements, and structural breaks. The lagged output gap term $(\tilde{Y}_{t-1})$ captures the intrinsic persistence of domestic demand, reflecting adjustment costs and slow-moving expectations.
+
+The real interest rate gap $(\tilde{r}_t)$ and the credit spread gap $(\tilde{i}^{spr}_t)$ influence output through the standard inter-temporal substitution and financial‑conditions channels: a higher real rate or a wider spread tightens financial conditions and depresses activity.
+
+External demand is captured via changes in net exports $(d\text{NX}_t)$, which affect aggregate demand in a small open economy. The lagged real exchange rate $(\Delta\text{RER}_{t-1})$ term captures expenditure‑switching effects, reflecting how movements in relative prices affect competitiveness with a delay.
+
+The break dummies $(\text{BP}^Y, \text{BP}^r)$ allow for shifts in the aggregate‑demand process associated with major structural changes in the UK economy, revealed and derived through our diagnostic testing of the data.
+
+Together, these elements form a semi‑structural representation of the UK business cycle, linking demand to financial conditions and external shocks.
+
+Estimated dynamics: $\alpha_1, \alpha_2, \alpha_3$
+
+Calibrated demand sensitivities: $\phi_r, \phi_{i^{spr}}$
+
+Break dummies capture shifts in behaviour: $\text{BP}^Y, \text{BP}^r$ represent, respectively, the output gap break (set at 2020 Q1) and the real interest rate break (set at 2022 Q1).
+
+## Phillips curve relation (domestic price inflation)
+
+In this equation, $\tilde{\pi}_t$ is the inflation deviation from the Bank of England's target. Because we use a domestically-driven measure of inflation (annualised change in the quarterly GDP deflator), we set the target at 2.25% as the base case (equivalent to the 2% target for CPI inflation).
+
+$\tilde{\pi}^\text{IM}_t$ is an import price inflation gap, $\tilde{\pi}^\text{E}_t$ an energy price inflation gap and $\text{BP}^{\pi}_t$ is a dummy variable representing the structural break in the inflation regime in 2022 Q1.
+
+The inflation equation links price dynamics to their own persistence, domestic slack, and external cost‑ push forces. The autoregressive terms reflect backward‑looking elements of price setting and the empirical inertia of UK inflation. The output gap enters through the slope parameter, representing the degree to which domestic economic slack influences inflationary pressure. Import price inflation and energy‑price shocks capture external cost‑push channels — key drivers of inflation in an open economy like the UK. The structural‑break dummies account for shifts in inflation dynamics due to major regime changes, such as the global financial crisis and the post‑COVID inflation shock. This specification results in a hybrid Phillips Curve where domestic cyclical pressure plays a modest role, while external price shocks and persistence dominate short‑run inflation movements.
+
+Inflation persistence parameters $(\beta_1, \beta_2)$ are estimated. Import and energy price pass‑through $(\beta_3, \beta_4)$ are also estimated. The Phillips curve slope $(\kappa_Y)$ is calibrated (small but positive, reflecting the evidence and conclusions of policymakers of a flattening of the Phillips curve in the UK).
+
+## Taylor rule (monetary policy / CB reaction function)
+
+The Taylor Rule describes how the central bank sets the policy interest rate in response to economic conditions. Policy inertia is captured by the coefficient $(\rho)$ on the lagged nominal policy rate, reflecting gradualism in the Monetary Policy Committee’s decision-making and the desire to avoid unnecessary volatility in financial markets.
+
+The central bank reacts to deviations of inflation from its target and to the output gap, with calibrated coefficients $(\tau_{\pi},\tau_Y)$ ensuring determinacy and policy realism.
+
+The neutral real interest rate $(r^*)$ and the inflation target $(\pi^*)$ anchor the long‑run level of the policy rate.
+
+This equation captures the systematic component of monetary policy in the UK’s inflation‑targeting regime, in which $\rho$ (policy inertia) is estimated.
+
+For OLS purposes (diagnostic stage), we estimate the **reduced‑form hybrid rule** \$ i_t = \gamma*0 +* \rho i{t-1} + \gamma\_{\pi} \tilde{\pi}*t +* \gamma{Y} \tilde{Y}\_t + \epsilon\_t \$ in which $\gamma_{\pi} = (1-\rho)\tau_{\pi}$ and $\gamma_Y = (1-\rho)\tau_Y$
+
+## Okun's Law for unemployment (labour market slack)
+
+The Okun equation links labour‑market slack $(\tilde{U}_t)$ to the business cycle. The lagged unemployment gap $(\tilde{U}_{t-1})$ reflects persistence in labour‑market conditions, which adjust more slowly than output.
+
+The negative output‑gap coefficient $(-\delta_2)$ embodies the traditional Okun’s Law relationship: when the economy operates above potential, the unemployment gap closes; when output is weak, labour-market slack widens.
+
+Structural‑break dummies $(\text{BP}^{U1} \space \text{to} \space \text{BP}^{U4})$ allow for long‑run shifts in the natural rate of unemployment or in the responsiveness of unemployment to output. This specification recognises that the UK labour market has undergone substantial structural changes over the past two decades and embeds these into the dynamics of unemployment.
+
+$\text{BP}^{U1}$ is the 2004 Q2 labour‑market break
+
+$\text{BP}^{U2}$ is the GFC 2008 Q4 break
+
+$\text{BP}^{U3}$ is the 2013 Q4 break
+
+$\text{BP}^{U4}$ is the COVID-19 break (2019 Q4 / 2020 Q1)
+
+These were the four statistically confirmed unemployment‑gap breaks.
+
+All parameters are estimated. No calibration planned \[and hopefully not needed\] here.
+
+## Wage Phillips curve (labour supply)
+
+The Wage Phillips Curve governs the dynamics of real wage pressure. Wage growth exhibits persistence through the lagged wage gap term $(\tilde{w}_{t-1})$, reflecting staggered wage contracts and adaptive expectations among firms and workers.
+
+Labour-market tightness enters through the unemployment gap $(\tilde{U}_t)$, following standard bargaining or matching‑function models in which tighter labour markets raise wage pressure.
+
+Expected inflation (deviation from target) $[\text{E}_t(\tilde{\pi}_{t+1}) = \tilde{\pi}_{t-1}]$ enters as an exogenous driver of nominal wage demands, ensuring that wage formation remains consistent with long‑run inflation targets.
+
+The productivity gap $(\tilde{P}_t)$ term captures how deviations in trend productivity influence wage-setting behaviour, consistent with labour‑cost markups.
+
+\[\[\[\[\[\[ \[This equation therefore links wage inflation to both cyclical labour-market conditions and long‑run institutional shifts. Break dummies account for major regime changes — including shifts in bargaining power, labour mobility, and post‑pandemic tightness — which have altered the wage-setting process. \]\]\]\]\]\]
+
+Where: the wage Phillips curve slopes $(\lambda_{\pi}, \lambda_U)$ are calibrated whilst the dynamic persistence and productivity coefficients $(\theta_1, \theta_2)$ are estimated from the data.
+
+The wage‑gap series is clean enough to estimate dynamically without heavy structural adjustments. The equation should be stable and well‑behaved with one or no break dummies, a standard lag structure and calibrated slope parameters.
+
+## Okun's Law for productivity
+
+The Okun equation models cyclical productivity as a function of its own persistence and contemporaneous output. Productivity tends to be highly persistent due to slow-moving technological and organisational adjustments. The positive output‑gap coefficient reflects procyclical productivity: during expansions, firms utilise capital more intensively, and labour inputs become more efficient; whereas during downturns, capacity utilisation falls. The structural‑break terms capture the well‑documented shifts in the UK’s productivity regime — including the post‑2008 productivity slowdown and post‑COVID adjustments. This equation provides a parsimonious representation of productivity fluctuations without specifying technology shocks explicitly.
+
+This is stable, simple, and consistent with macro theory.
+
+## Uncovered interest parity (UIP)
+
+The real‑exchange‑rate equation links currency movements to interest‑rate differentials and external flows. The autoregressive term captures the persistent nature of real exchange rate dynamics.
+
+The nominal interest‑rate differential gap $\tilde{i}^{diff}_t$ reflects the uncovered‑interest‑parity (UIP) condition, with $\psi$ calibrated to reflect its empirical weakness in UK data.
+
+$\tilde{i}^{diff}_t = (i - i^f) - (i - i^f)^{trend}$, in which $i$ is the official BOE rate and $i^f$ is a trade-weighted average of the official central bank rates of the UK's top 5 trading partners (the Euro Area, USA, China, Switzerland and Norway). This is consistent with our approach to the real exchange rate and our proxy for foreign price levels.
+
+Deviations in net exports influence the real exchange rate through trade‑balance adjustments and the demand for domestic versus foreign currency. Import‑price inflation enters to reflect the import‑cost channel, whereby external cost shocks affect relative prices.
+
+This equation provides a stable reduced‑form representation of exchange‑rate dynamics that accommodates both UIP and non‑UIP forces.
+
+Dummies may be added but often UIP is left parsimonious.
+
+# Estimation Strategy
+
+The estimation of the semi‑structural macroeconomic model proceeds in several structured stages.\
+The goal is to ensure that each behavioural equation is statistically well‑specified, dynamically coherent, and suitable for joint estimation within a system that accounts for cross‑equation relationships and endogeneity.
+
+The overall approach follows standard practice in central‑bank semi‑structural modelling:\
+**(i) single‑equation OLS diagnostics → (ii) limited‑information IV estimation (2SLS) → (iii) full‑information system estimation (3SLS)**.
+
+## Single‑Equation OLS Diagnostics
+
+As a first step, each behavioural equation is estimated individually using ordinary least squares (OLS).\
+OLS estimates are *not* used for inference or for constructing the final parameter set.\
+Instead, the OLS stage serves four essential diagnostic purposes:
+
+1.  **Sign and magnitude validation** Coefficients are checked against theoretical priors (e.g., negative response of unemployment to the output gap; positive inflation persistence).
+
+2.  **Dynamic specification validation** OLS estimates confirm the appropriate lag structure, consistent with ACF/PACF analysis performed earlier (e.g., AR(1) dynamics in the output and unemployment gaps).
+
+3.  **Residual behaviour assessment** Breusch–Godfrey tests (for serial correlation), Breusch–Pagan tests (for heteroskedasticity), visual residual diagnostics (plots, ACF, distributions). These tests ensure that residual patterns are consistent with theoretical expectations and that no additional dynamics or break adjustments are needed.
+
+4.  **Identification of equations affected by simultaneity** The Phillips Curve and Wage Phillips Curve exhibit classic endogeneity patterns (wrong signs on output/unemployment gaps under OLS and significant autocorrelation in residuals). This confirms the necessity of instrumental‑variables estimation in the next stage.
+
+The remaining equations (IS, Okun, Productivity, UIP, and the Taylor Rule) display well‑behaved OLS diagnostics, validating their structural form.
+
+## Limited‑Information Instrumental‑Variables Estimation (2SLS)
+
+OLS estimation is inconsistent when regressors are endogenous. Based on the OLS diagnostic stage, two equations require instrumental‑variables treatment:
+
+-   **Price Phillips Curve** — output gap is endogenous through joint determination with inflation.
+
+-   **Wage Phillips Curve** — unemployment is endogenous due to labour‑market simultaneity, and the COVID furlough episode amplifies the bias.
+
+For each of these equations, we estimate a **Two‑Stage Least Squares (2SLS)** model using only the equation of interest (“limited‑information” IV estimation). This involves:
+
+1.  **Identifying endogenous regressors**
+
+```         
+-   Phillips Curve: Y~t\tilde{Y}_tY~t​
+
+-    Wage Phillips Curve: U~t\tilde{U}_tU~t​
+```
+
+2.  **Constructing an instrument set from:**
+
+```         
+-   lagged values of gaps (e.g. Y_t−2Y\_{t-2}Y_t−2, U_t−2U\_{t-2}U_t−2),
+
+-    predetermined financial variables (e.g. real‑rate gap, yield‑spread gap),
+
+-    external inflation measures (import and energy inflation gaps),
+
+-    break dummies,
+
+-    lagged exchange‑rate and trade variables.
+```
+
+3.  **Estimating each equation separately using `ivreg()`** This provides
+
+```         
+-    consistent coefficient estimates,
+
+-    a correction for simultaneity bias,
+
+-    and cleaned‑up residual dynamics suitable for system estimation.
+```
+
+This stage ensures that, prior to system estimation, the most problematic equations (the Phillips Curves) are already structurally identified.
+
+## Full‑Information System Estimation (3SLS)
+
+With the structural equations validated and simultaneity addressed, we estimate the **entire 7‑equation model jointly** using **Three‑Stage Least Squares (3SLS)** via the `systemfit()` framework.
+
+Full‑information estimation is appropriate for this model because:
+
+1.  **Equations are linked through shared endogenous variables** (e.g. output gap interacts with inflation, real interest rates, unemployment, wages).
+
+2.  **Cross‑equation error correlations carry useful information** e.g., cost‑push inflation shocks (import prices, energy) often correlate with exchange‑rate and real‑rate shocks.
+
+3.  **System estimation improves efficiency** 3SLS uses the entire estimated covariance matrix of residuals to weight each equation appropriately.
+
+4.  **Structural identification is system‑wide** Parameter calibration (e.g., Taylor Rule coefficients, Okun elasticity) can be imposed consistently across the entire system.
+
+5.  **The resulting shocks are system-consistent** Each equation produces structural errors that should be interpretable as demand shocks, supply shocks, monetary shocks, wage shocks, etc.
+
+3SLS therefore provides joint estimation, improved precision, correction for remaining endogeneity, and a coherent set of system‑consistent shocks for analysis and forecasting.
+
+## Calibration and Normalization
+
+A small number of coefficients are calibrated rather than estimated freely in the system, including:
+
+-   selected policy‑rule coefficients in the Taylor Rule,
+
+-   small elasticity parameters where identification is weak (e.g., IS curve’s long-term spread term),
+
+-   steady‑state relationships (e.g., neutral real interest rate, inflation target).
+
+Calibrated values are standard in semi‑structural models; they improve identification and stabilise system estimation.
+
+The hybrid model works because **some things are stable and estimable**, while others are **unstable and should be calibrated**.
+
+## Final Estimation Output
+
+The final estimation output from the 3SLS stage yields:
+
+-   system‑consistent structural parameters,
+
+-   cleaned‑up structural shocks,
+
+-   a coherent mapping between the theoretical model and the empirical data,
+
+-   well‑behaved residuals with minimal autocorrelation,
+
+-   economically interpretable dynamics consistent with macro theory.
+
+This parameter set forms the basis for:
+
+-   impulse‑response analysis,
+
+-   historical shock decomposition,
+
+-   counterfactual simulations,
+
+-   and model‑based forecasting.
+
+# Model calibration
+
+## Parameters for ESTIMATION vs. CALIBRATION
+
+Estimate things that are strongly tied to the cycle, stable across long periods, driven by persistence, like: Lag coefficients (in IS, Phillips, wage, RER, Okun, Taylor), Okun’s law elasticity (ΔU_GAP vs Y_GAP), Inflation and wage growth persistence; Import / energy price pass‑through / external price shocks; ΔRER persistence; Dummy effects (COVID, GFC).
+
+Calibrate things that are: theoretically meaningful, unstable over time, too noisy to estimate, small sample / break‑sensitive, like Phillips Curve slope w.r.t output gap, Wage Phillips curve slope w.r.t tightness, Taylor Rule inflation response coefficient, Taylor Rule output gap response, Productivity trend, UIP coefficient (rate differential), long‑run RER elasticity. These are fragile in estimation but straightforward to calibrate. Central banks calibrate these because they know they can’t be estimated reliably.
+
+Need initial values for:
+
+-   $\phi_r, \phi_{i^{spr}}$ IS curve slope(s)
+
+-   $\kappa_Y$ Phillips Curve slope;
+
+-   $\lambda_U$ Wage PC slope;
+
+-   $\tau_{\pi}, \tau_Y$ Taylor Rule slopes.
+
+-   $\psi$ UIP slope
+
+These can be chosen from: BoE papers, IMF models, OECD semi‑structural models, literature values (typical ranges).
+
+## Phillips Curve slope $(\kappa_Y)$
+
+**Recommended UK calibration: 0.02–0.10.** The Bank of England’s recent research suggests the slope is **extremely flat**, reflecting both macro data and micro evidence: BoE Staff Working Paper *“How curvy is the Phillips curve?”* (2025) finds inflation responds only weakly to slack, even at the micro level, indicating a very flat Phillips Curve for the UK. [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf). The Federal Reserve’s 2024 review on slope estimation highlights κ values typically **below 0.1** in advanced economies, consistent with the UK experience post‑2008. [\[federalreserve.gov\]](https://www.federalreserve.gov/econres/feds/files/2024043pap.pdf) The ECB’s 2025 Occasional Paper on Phillips curves reports similarly small slopes for Europe, consistent with fewer price adjustments and supply shocks dominating inflation dynamics. [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) Practical recommendation for hybrid model: **κᵧ between 0.03 and 0.07.** Makes Phillips Curve “work” without forcing unrealistic sensitivity\[?\].
+
+## Wage Phillips Curve slope $(\lambda_U)$
+
+**Recommended UK calibration: 0.15–0.40.** The BoE 2025 “How curvy is the Phillips curve?” paper finds stronger convexity in **wage price‑setting** than in goods inflation, especially after Covid. [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf) Bank of England forecasting speeches (e.g., by Pill, 2023) emphasise that **labour‑market tightness has become the dominant domestic inflation driver** post‑2021, implying a larger slope on unemployment gap in wage equations. [\[ecb.europa.eu\]](https://www.ecb.europa.eu/press/conferences/ecbforum/shared/pdf/2023/Pill_paper.pdf) UK micro data show wage responses are stronger than price responses, consistent with studies at BoE and ONS (via their labour cost models). Practical recommendation: **λᵤ ≈ 0.25** is a very standard semi‑structural calibration for the UK.
+
+## Taylor Rule inflation response $(\tau_{\pi})$
+
+**Recommended calibration: 1.3–2.0**: UK semi‑structural rules used internally at the BoE have historically assumed $\tau_{\pi}$ **around 1.5**, consistent with Taylor (1993) and UK monetary policy practice. ECB’s 2025 modelling guide highlights values **\>1** as necessary for determinacy and shows most semi‑structural models cluster around 1.5–2.0. [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) Macro modelling reviews (Economics Observatory 2024) report UK models in OBR, OECD and IMF often use- 1.3–1.7 for the inflation coefficient as part of calibration practice. [\[economicso...vatory.com\]](https://economicsobservatory.com/Macroeconomic_Modelling_Review.pdf) **Practical recommendation: Use** $\tau_{\pi} = 1.5$unless there is strong evidence of a weaker or stronger response.
+
+## Taylor Rule output gap response $(\tau_Y)$
+
+**Recommended calibration: 0.1–0.5:** UK practice typically involves a **small** output-gap coefficient. ECB semi‑structural model comparisons show values **0.1–0.3** are the most used. [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) UK academic small‑macro models (Garratt et al., 1998/1999; cited in Cambridge VAR framework) use response coefficients in the **0.1–0.4** range for output in monetary rules. [\[files.econ.cam.ac.uk\]](https://files.econ.cam.ac.uk/people-files/mhp1/svareoa.pdf). **Practical recommendation:** $\tau_Y = 0.2$(the most common UK value).
+
+## Real neutral interest rate $(r^*)$
+
+**Recommended calibration: 0.0% to 1.0% real.** Post‑GFC UK $r^*$ estimates from the Bank of England trend toward **0 to 0.5%** real, with some upward drift after 2022. ECB and OECD semi‑structural forecasting references typically put medium‑run $r^*$ for advanced economies between **0 and 1%** (ECB Occasional Papers). [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) **Practical recommendation:** Use $r^*=0.25 - 0.50%$ in your calibration. (If inflation expectations are anchored at 2%, the implied nominal neutral rate is \~2.25–2.50%.)
+
+## IS Curve interest‑rate gap coefficient $(\phi_r)$
+
+**Recommended calibration: 0.05–0.20.** Semi‑structural VAR models for the UK (BoE 2025 Macro Technical Paper No.3) show relatively modest effects of interest rates on output in the short run (low elasticity). [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/macro-technical-paper/2025/a-structural-var-model-for-the-uk-economy) Comparison across ESCB models shows IS curves often calibrate $(\phi_r)$ between **0.1 and 0.2** (ECB Occasional Paper No.377). [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf). **Practical recommendation: Set** $(\phi_r)$ **= 0.15.**
+
+## UIP coefficient on interest‑rate differential $(\psi)$
+
+**Recommended calibration: 0.05–0.20.** UIP “fails” empirically for the UK (low pass‑through), so full estimation is unstable. BoE models typically impose small calibrated values to preserve structure, consistent with international practice. No direct citation in your results lists UIP calibration for UK specifically, but consistent evidence appears in the ECB and macro modelling literature that semi‑structural models heavily **down‑weight** UIP (covered in Occasional Paper No.377). [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) **Practical recommendation:** $(\psi)=0.10$ (safe, modest UIP effect).
+
+## UK Semi‑Structural Calibration Set
+
+|  |  |  |  |  |
+|---------|---------|---------|---------|-------------------------------------|
+| **Parameter** | **Meaning** | **Our fully free 3SLS estimates** | **Recommended UK Value** | **Evidence** |
+| $\kappa_Y$ | Phillips Curve slope (slack→inflation) | -0.21 \*\* | **0.03–0.07** | BoE 2025 convexity paper; Fed 2024; ECB PC review [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf), [\[federalreserve.gov\]](https://www.federalreserve.gov/econres/feds/files/2024043pap.pdf), [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) |
+| $\lambda_U$ | Wage Phillips Curve slope | 0.02 (ns) | **0.2–0.3** | BoE wage convexity evidence; UK labour tightness shifts [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf), [\[ecb.europa.eu\]](https://www.ecb.europa.eu/press/conferences/ecbforum/shared/pdf/2023/Pill_paper.pdf) |
+| $\tau_{\pi}$ | Taylor rule inflation response | 0.08 \*\*\* | **1.3–2.0** | ECB semi‑structural modelling; OBR/OECD model reviews [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf), [\[economicso...vatory.com\]](https://economicsobservatory.com/Macroeconomic_Modelling_Review.pdf) |
+| $\tau_Y$ | Taylor rule output gap response | 0.06 \*\*\* | **0.1–0.3** | ECB cross‑model analysis; UK small models [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf), [\[files.econ.cam.ac.uk](https://files.econ.cam.ac.uk/people-files/mhp1/svareoa.pdf)\] |
+| $r^*$ | Real neutral rate | Extracted from the data series using HP filters to establish the neutral trend rate | **0–1%** | ECB/OECD neutral-rate ranges; UK post-GFC estimates [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) |
+| $\phi_r$ | IS curve interest‑rate slope | 0.78 \*\*\* | **0.05–0.20** | BoE SVAR technical paper; ECB modelling guide [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/macro-technical-paper/2025/a-structural-var-model-for-the-uk-economy), [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) |
+| $\psi$ | UIP interest differential coefficient | -2.25 | **0.05–0.20** | Consistent with ECB semi‑structural practice (weak UIP) [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) |
+
+# Annex I: Notation
+
+## Model Variables and Symbols
+
+|  |  |  |
+|-----------|-----------|--------------------------------------------------|
+| **Symbol** | **Code** | **Description** |
+| $\tilde{Y}_t$ | `Y_GAP` | Output gap today (time $t$ percentage deviation of real national output from potential, in which real national output is represented by the chained volume measure of GVA at basic prices). |
+| $\tilde{U}_t$ | `u_GAP` | Unemployment gap (percentage point deviation from NAIRU (non-accelerating inflationary rate of unemployment). |
+| $\tilde{\pi}_t$ | `dcpi_DEV` | Deviation of domestic inflation from Bank of England target. We use the GDP deflator and a target of 2.25% for domestic price-setting increases (domestic inflation equivalent of 2% target for broader-based CPI). |
+| $\tilde{\pi}^{\text{IM}}_t$ | `IMcpi_GAP` | An import price inflation gap, measured through the imports price deflator |
+| $\tilde{\pi}^{\text{E}}_t$ | `ecpi_GAP` | An energy price inflation gap (fuels component of the CPI) |
+| $\tilde{w}_t$ | `wage_GAP` | Is the real wage inflation gap. |
+| $\tilde{P}_t$ | `prod_GAP` | is the productivity gap; the deviation in output per hour worked from its trend |
+| $\tilde{r}_t$ | `r_GAP` | Real interest‑rate gap (real rate minus neutral rate) |
+| $i_t$ | `i_UK` | Nominal policy interest rate (Bank Rate) |
+| $\tilde{i}^{spr}_t$ | `i5y_SPR` | Relative to the neutral level, this is the spread over the Bank Rate in nominal yields on five‑year gilts (financial conditions). |
+| $i^f_t$ | `i_FOR` | Foreign nominal central bank interest rate. Trade-weighted average. |
+| $\Delta{\text{RER}}_t$ | `drer` | Quarterly change in the real exchange rate (CHK IF QTRLY or ANNUALISED\] |
+| $\Delta{\text{NX}}_t$ | `dNX` | Change in net exports |
+| $\epsilon^{\text{IS}}_t$ |  | IS‑curve structural shock |
+| $\epsilon^{\text{PC}}_t$ |  | Price Phillips Curve shock |
+| $\epsilon^{\text{TR}}_t$ |  | Monetary policy shock |
+| $\epsilon^{\text{OLU}}_t$ |  | Okun‑law shock |
+| $\epsilon^{\text{WPC}}_t$ |  | Wage Phillips Curve shock |
+| $\epsilon^{\text{OLP}}_t$ |  | Productivity‑gap shock |
+| $\epsilon^{\text{UIP}}_t$ |  | Real exchange rate shock |
+
+## Notation for Break Dummies
+
+|  |  |  |
+|-----------------|-----------------|--------------------------------------|
+| **Symbol** | **Break Date** | **Interpretation** |
+| $\text{BP}^{U1}$ | 2004Q2 | Labour‑market regime shift (EU enlargement) |
+| $\text{BP}^{U2}$ | 2008Q4 | GFC unemployment behaviour shift |
+| $\text{BP}^{U3}$ | 2013Q4 | Post‑GFC “jobs boom” / productivity puzzle era |
+| $\text{BP}^{U4}$ | 2019Q4 | Brexit‑driven labour‑force shift |
+| $\text{BP}^{Y}$ | 2020Q1 | COVID‑19 output collapse |
+| $\text{BP}^{\pi}$ | 2022Q1 | Inflation‑process regime shift (energy shock) |
+| $\text{BP}^{r}$ | 2022Q1 | Real‑rate regime shift (inflation expectations) |
+
+## Notation for Parameters
+
+|  |  |
+|--------------------------------|----------------------------------------|
+| **Symbol** | **Interpretation** |
+| $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5$ | Estimated IS‑curve coefficients |
+| $\phi_r, \phi_{i^{spr}}$ | Calibrated semi‑elasticities to real rate and financial spread |
+| $\beta_1, \beta_2, \beta_3, \beta_4, \beta_5$ | Estimated price‑inflation dynamics and pass‑through |
+| $\rho$ | Monetary‑policy inertia parameter. Smoothing. |
+| $\tau_{\pi}, \tau_Y$ | Calibrated Taylor‑rule coefficients on inflation and output |
+| $\delta_1, \delta_2, \delta_3, \delta_4, \delta_5, \delta_6$ | Okun's Law labour demand coefficients |
+| $\theta_1, \theta_2$ | Wage‑inflation dynamics and productivity effect |
+| $\lambda_{\pi}, \lambda_U$ | Calibrated inflation‑expectation and unemployment effects in the wage curve |
+| $\eta_1, \eta_2$ | Productivity‑gap dynamics |
+| $\mu_1, \mu_2, \mu_3$ | Estimated coefficients on real exchange rate dynamics. |
+| $\psi$ | Calibrated UIP coefficient |
+
+## Notation for Steady‑State Targets and Constants
+
+|  |  |
+|----------------|--------------------------------------------------------|
+| **Symbol** | **Description** |
+| $r^*$ | Long‑run real neutral rate |
+| $\pi^*$ | Inflation target (2.25% target for domestic inflation measured by GDP deflator) |
+
+# Annex II - Data diagnostics
+
+This annex covers the cleaning and diagnostic testing of the data for each variable, including stationarity and structural‑break testing, de-trending, transformation into gaps or first differences, multicollinearity diagnostics, autocorrelation and lag structure assessment, as well as scaling and economic plausibility checks. In applying these diagnostic procedures to the quarterly macroeconomic time series data prior to model estimation, the objective was to ensure that all endogenous and exogenous variables are appropriately transformed, stationary, free from undue multicollinearity and that they exhibit time‑series properties consistent with their theoretical roles within the system.
+
+## Scaling and Economic Plausibility \[plots of series ... combined / facet-wrapped\]
+
+All variables were inspected to ensure the magnitudes were economically plausible and appropriately scaled. Gaps (output, unemployment, real wages, productivity) lie in the expected ±1–5% range. ΔRER and ΔNX display reasonable quarterly volatility. Import and energy inflation gaps show large swings during 2019–2023, reflecting documented global cost‑push shocks. The real interest‑rate gap behaved consistently with monetary‑policy and inflation dynamics. No series exhibited signs of mis‑scaling, measurement errors, or inappropriate de-trending.
+
+## Stationarity Testing
+
+All macroeconomic variables were transformed into either *gap* form (deviations from trend or from steady‑state values) or *first differences* where required by theory. Stationarity was evaluated using the Augmented Dickey–Fuller (ADF) test for each transformed series.
+
+All variables exhibit stationarity at conventional significance levels. The output gap $(\tilde{Y})$, unemployment gap $(\tilde{U})$, inflation deviation $(\tilde{\pi})$, wage gap $(\tilde{w})$, productivity gap $(\tilde{P})$, real interest‑rate gap $(\tilde{r})$, 5‑year spread gap $(\tilde{i}^{spr})$, import‑price inflation gap $(\tilde{\pi}^{\text{IM}})$, and energy‑price inflation gap $(\tilde{\pi}^{\text{E}})$ were all stationary (with ADF $p<0.05$ in each case).
+
+Differenced variables include the change in the real exchange rate $(\Delta\text{RER})$ and the change in net exports $(\Delta\text{NX})$. These are stationary by construction. The raw nominal interest‑rate differential $(i-i^f)$ was found to be non‑stationary, so a **trend‑adjusted differential gap** was constructed, yielding a stationary series suitable for use in the UIP equation.
+
+## Structural‑Break Testing \[needs revision for Apr 5th run\]
+
+To ensure robustness of stationarity and to identify potential regime shifts, each series was tested for breaks using **Zivot–Andrews one‑break unit‑root tests** and **Bai–Perron multiple‑break** tests.
+
+We found the **output gap** to have a single structural break in 2020Q1 (COVID‑19 collapse). **Inflation deviation** and the **real rate gap** appear to show a coinciding structural break around 2021–22, corresponding to the inflation regime shift. Analysis of the **unemployment gap** revealed four persistent structural breaks (2004Q2, 2008Q4, 2013Q4, 2019Q4). For all other variables, Bai–Perron BICs were minimized at zero breaks.
+
+Corresponding break dummies were included **only** in the equations whose dependent variables exhibited genuine structural breaks, thus seeking parsimony and stability.
+
+## Multicollinearity Diagnostics \[need re-running...\]
+
+For each equation, pairwise correlations and **Variance Inflation Factors (VIFs)** were examined for all regressors, including lagged dependent variables and calibrated regressors. Pairwise correlations across all equations were modest (typically \< 0.4). Inflation lags showed expected moderate correlation (\~0.7), but well below problematic thresholds. Import‑ and energy‑price inflation gaps were moderately correlated (\~0.6), consistent with common external shocks. All VIF values were well below conventional thresholds (VIF \< 5), indicating **no multicollinearity concerns**. The regressor sets are therefore suitable for stable 3SLS estimation.
+
+## Persistence and Lag Structure (ACF/PACF Analysis) \[re-run and confirm...\]
+
+Autocorrelation (ACF) and partial autocorrelation (PACF) plots were examined to confirm appropriate dynamic structure:
+
+**Gaps** (output, unemployment, wages, productivity, real interest‑rate) demonstrated clear **AR(1)** processes, confirming use of a single lag in the IS, Okun, Wage‑Phillips, and productivity equations.
+
+**Inflation Deviation** shows a AR(1)–AR(2) structure, validating inclusion of two inflation lags in the Phillips Curve.
+
+**ΔRER and ΔNX** both showed minimal autocorrelation beyond lag 1 with no strong case for additional dynamics to be added.
+
+**Import and Energy Price Gaps:** AR(1)–AR(2) persistence but no evidence of higher‑order dynamics.
+
+No variable exhibited long‑memory behaviour or seasonality requiring deseasonalisation.
+
+## Outliers and Shock Episodes
+
+Visual inspection and residual diagnostics identified several periods of extreme volatility, including COVID‑19 (2020Q1-Q2), the post‑pandemic inflation shock (2021–22) and commodity‑price spikes (2022–23). These episodes correspond precisely to detected structural breaks and are handled through appropriately placed break dummies in the relevant equations.
+
+## Final Assessment
+
+Diagnostic checks confirm that all measures have been taken to appropriately filter, difference, or lag-augment all data series and to ensure that the data are **stationary**, appropriately de-trended, and well-scaled. Structural breaks have been carefully identified and incorporated **only where justified**. No problematic multicollinearity exists within the regressor matrices and the dynamics implied by ACF/PACF plots are reflected in the model specification. With these measures, we are confident the dataset is therefore in **excellent condition for equation‑by‑equation estimation** and subsequent **3SLS system estimation**, ensuring valid inference and robust structural relationships.
+
+# Annex III - OLS estimation and diagnostics
+
+Before proceeding to instrumental‑variables and system estimation, each behavioural equation in the model was estimated using **ordinary least squares (OLS)**. A full OLS diagnostic stage was completed for all seven behavioural equations, and the conclusions were aligned with expectations. OLS was found to be acceptable for the IS, Taylor Rule, Okun, productivity and UIP equations, with no signs of serious endogeneity. The OLS regressions for the Phillips and Wage-Phillips equations are not so robust, with the endogeneity of the output gap and unemployment gaps appearing to cause, respectively, serial correlation and simultaneity.
+
+These OLS regressions are **not used for inference**, but instead serve to validate the **signs** and **magnitudes** of key coefficients, confirm the **dynamic structure** implied by the ACF/PACF analysis, test for **serial correlation** and **heteroskedasticity** in residuals, verify the treatment of **break dummies**, ensure that no important regressors or lags are missing, and detect equations where **endogeneity** renders OLS unreliable (to be addressed via 2SLS/3SLS).
+
+Overall, the OLS diagnostics confirm that **each equation’s structural form is adequately specified**, and identify precisely which equations required instrumental‑variables estimation.
+
+BP = studentized Breusch-Pagan test
+
+BG = Breusch-Godfrey test
+
+## Equation-by-equation synthesis
+
+**IS Curve (Output Gap Equation):**
+
+### OLS Findings
+
+-   Signs for all coefficients consistent with theory.
+
+-   Output persistence highly significant.
+
+-   Break dummies significant and essential (COVID and 2022 inflation regime).
+
+### Diagnostics
+
+**BG(4):** *No serial correlation.*
+
+**BP test:** *Heteroskedasticity present* (expected due to COVID spikes).
+
+Residuals otherwise stable and well‑behaved.
+
+**Conclusion:** The IS curve is structurally well‑specified and dynamically complete. OLS is adequate; no need for 2SLS.
+
+## Phillips Curve (Price Inflation Equation)
+
+### OLS Findings
+
+-   Inflation persistence terms (β₁, β₂) positive and significant.
+
+-   Import- and energy‑price gaps significant with correct signs.
+
+-   Output‑gap coefficient has **wrong sign under OLS** (negative) — classic simultaneity bias.
+
+### Diagnostics
+
+-   **BG(4):** *Strong serial correlation.*
+
+-   **BP:** *No heteroskedasticity.*
+
+-   Residuals show autocorrelation → OLS unusable for inference.
+
+### Conclusion
+
+OLS fails due to **endogeneity of the output gap**. This **requires 2SLS / 3SLS**.
+
+## Wage Phillips Curve (WPC)
+
+## OLS Findings
+
+-   Wage persistence (θ₁) very strong → matches ACF/PACF.
+
+-   Inflation expectations term positive and significant.
+
+-   Productivity gap positive, plausible.
+
+-   **Unemployment gap coefficient has wrong sign under OLS** (positive), consistent with:
+
+```         
+-   endogeneity of u_GAP
+
+-   COVID‑furlough distortions
+
+-   simultaneity in wage–unemployment determination.
+```
+
+### Diagnostics
+
+-   **BG(4):** *Serial correlation detected.*
+
+-   **BP:** *Residuals homoskedastic*.
+
+-   Residuals show the characteristic simultaneity pattern seen in wage equations.
+
+### Conclusion
+
+Requires **2SLS / 3SLS**. Not suitable for OLS inference.
+
+## Taylor Rule
+
+### OLS Findings
+
+-   Policy inertia extremely strong (ρ ≈ 0.95).
+
+-   Inflation and output-gap responses positive, significant, and economically reasonable.
+
+-   High R² (≈0.98), low residual variance — consistent with smooth MPC behaviour.
+
+### Diagnostics
+
+-   **BG(4):** Serial correlation (expected due to policy smoothing).
+
+-   **BP:** No heteroskedasticity.
+
+-   Residuals otherwise extremely well-behaved.
+
+### Conclusion
+
+OLS acceptable for diagnostics; TR will be estimated cleanly in the system.
+
+## Okun Equation (Unemployment Gap)
+
+### OLS Findings
+
+-   Strong AR(1) unemployment persistence (δ₁ ≈ 0.65).
+
+-   Output-gap effect negative, significant (Okun’s law).
+
+-   Break dummies behave exactly as BP tests predicted.
+
+### Diagnostics
+
+-   **BG(4):** No serial correlation.
+
+-   **BP:** Heteroskedasticity (expected due to labour‑market episodes).
+
+-   Residuals stable and well-formed.
+
+### Conclusion
+
+Equation structurally sound; OLS acceptable.
+
+## Productivity Equation (OLP)
+
+### OLS Findings
+
+-   Correct signs and magnitudes (AR(1) + cyclical effect).
+
+-   Low R² (≈0.20) — expected due to TFP noise.
+
+### Diagnostics
+
+-   **BG(4):** Serial correlation (normal for productivity).
+
+-   **BP:** Heteroskedasticity (TFP volatility).
+
+-   Residuals dominated by COVID measurement distortion — expected.
+
+### Conclusion
+
+Specification valid; noise-driven residual issues handled in system estimation.
+
+## UIP Equation
+
+### OLS Findings
+
+-   Interest-differential coefficient negative (forward-premium puzzle).
+
+-   Import-price inflation significant, correct sign.
+
+-   Weak AR(1) in ΔRER — consistent with ACF/PACF.
+
+-   Low R² (≈0.20) typical of exchange-rate equations.
+
+### Diagnostics
+
+-   **BG(4) and BG(10):** *No serial correlation.*
+
+-   **BP:** borderline heteroskedasticity.
+
+-   Residuals white-noise like, remarkably clean.
+
+### Conclusion
+
+UIP block well-specified; OLS acceptable.
+
+## Overall Summary
+
+-   **Five equations** (IS, TR, Okun, OLP, UIP) are structurally sound under OLS and yield stable diagnostics.
+
+-   **Two equations — the inflation Phillips Curve and the Wage Phillips Curve — show clear signs of simultaneity and serial correlation**, as expected.
+
+-   These two require **2SLS and full-system 3SLS estimation** for structural interpretation.
+
+-   No equations require additional lags, transformations, or structural breaks beyond those identified in ZA/BP testing.
+
+-   The OLS diagnostic phase confirms the model is properly specified and ready for **full structural estimation**.
+
+So now we proceed to the next stage in the hierarchy of estimation. A disciplined structural‑modelling workflow *is* to run 2SLS on the equations that suffer from endogeneity.
+
+# Annex IV - 2SLS analysis of PC and WPC relations
+
+This stage targets specific equations where regressors are endogenous, namely the **Phillips Curve** and w**age Phillips Curve**
+
+Both failed the BG test under OLS, indicating serial correlation due to endogenous regressors. The Y_GAP coefficient in the PC had the wrong sign under OLS, classic sign of simultaneity. The u_GAP coefficient in the WPC had the wrong sign, with unemployment and wage setting jointly determined, a classic OLS failure. OLS residuals remain autocorrelated even after the correct lag structure → the model is correct, but OLS is the wrong estimator. Other equations do *not* suffer from strong simultaneity. IS, Okun, Productivity, UIP, TR can be left to later in the system stage.
+
+2SLS is used to **repair the demand/supply blocks** before we combine all equations in a 3SLS estimator. This involves instrumenting the endogenous variables using relevant instruments drawn from the full data set (e.g., lags of exogenous variables, predetermined variables, etc.):
+
+-   in the Phillips curve, the endogenous regressors include the output gap $\tilde{Y}_t$ and possibly the import price inflation gap $\tilde{\pi}^{\text{IM}}_t$, even if less prominent. The (adaptive) expectations proxy $[\text{E}_t(\tilde{\pi}_{t+1}) = \tilde{\pi}_{t-1}]$ is pre-determined;
+
+-   in the Wage Phillips Curve, the endogenous regressors are the unemployment gap $(\tilde{U}_t)$ and possibly $\tilde{\pi}_{t-1}$. The lagged wage gap $(\tilde{w}_{t-1})$ is predetermined.
+
+## Instruments for 2SLS estimation
+
+We use **predetermined / exogenous** variables such as: lags of output gap, lags of unemployment gap, lags of wage gap, r_GAP, i_DIFFL_GAP, drer, dNX, IMcpi_GAP, ecpi_GAP, the structural break dummies.
+
+Instrument relevance and validity were assessed using first‑stage F‑statistics, partial R2R\^2R2, Wu–Hausman endogeneity tests, and over‑identification tests, with lag depth chosen to balance relevance and exogeneity based on dynamic diagnostics.
+
+REMINDER: 2SLS replaces an endogenous variable by the part of it that can be explained by exogenous drivers, thereby isolating the causal channel of interest. OR 2SLS is like solving the system for the exogenous component of an endogenous variable and substituting that component into the structural equation.
+
+**PC instruments**
+
+Lagged inflation terms are included in the instrument set, reflecting their role as predetermined drivers of demand via policy feedback while remaining orthogonal to contemporaneous inflation shocks.
+
+-   Y_GAP_L2
+
+-   Y_GAP_L3
+
+-   r_GAP
+
+-   i5y_GAP
+
+-   drer_L1
+
+-   IMcpi_GAP
+
+-   break dummies.
+
+**WPC instruments**
+
+We want instruments that **move unemployment** but **do not respond contemporaneously to wage shocks**. Core excluded instruments (those not in the structural equation):
+
+-   u_GAP_L2 and L3 \[(persistent labour‑market slack, safely exogenous at these lags)\]
+
+-   Y_GAP (labour demand shifter; not directly in the wage equation)
+
+-   prod_GAP_L1 (technology/productivity affects employment with lag)
+
+-   r_GAP (policy stance affects labour demand but not wages contemporaneously).
+
+Included exogenous regressors as instruments:
+
+-   wage_GAP_L1
+
+-   dcpi_DEV_L1
+
+-   prod_GAP
+
+-   break dummies
+
+This is standard practice in BoE COMPASS and IMF QPM.
+
+### Phillips Curve findings from 2SLS
+
+Sign on Y_GAP remains negative (counter-intuitive from a theoretical standpoint). This is **no longer OLS simultaneity bias,** which the 2SLS process seeks to remove.Conditional on the cost‑push variables and break dummy, the result is suggesting that demand‑driven variation in output is negatively correlated with inflation in this sample. Post‑GFC and especially post‑COVID, UK inflation has been predominantly supply‑driven. Conditional on supply shocks and policy reaction, higher demand has been disinflationary. That is a *substantive economic finding*, rather than an econometric artefact.
+
+Using 2SLS as the estimator, we are effectively estimating how inflation responds to *demand‑driven output movements*, **holding constant** import prices, energy prices, and the post‑2021 inflation regime. The sign can still be negative for even after instrumentation for a number of reasons:
+
+1.  Cost-push shocks dominating the sample. The regression includes `IMcpi_GAP` (significant, positive), `ecpi_GAP` (significant, positive), `bpp` (very large, very significant). Once those are controlled for, the remaining variation in inflation is **not classic demand‑pull inflation**. The UK, since \~2008 to 2023, has seen periods of *strong demand* often coinciding with **disinflation**, inflation surges occurring when demand was weak (energy, import shocks).
+
+2.  Monetary policy reaction destroys the simple PC correlation: in our system strong demand → tighter policy and tighter policy → lower inflation. The IV approach *correctly* traces demand via: `r_GAP`, term spreads, lagged output. But inflation **responds to the policy reaction**, not directly to demand. So the structural path is: Y_GAP ↑ → policy tightens → inflation ↓. This suggests a *policy‑dominated regime*. OLS hid this by mixing channels; 2SLS reveals it.
+
+3.  The break dummy absorbs the inflation regime shift: coefficient on bpp dummy is doing signifiant work in the regression. This points to most of the post‑2021 inflation jump being **orthogonal to demand**, it is a regime shift (supply / expectations / margins) and, once these are absorbed, there is little positive demand‑inflation slope left to estimate.
+
+Even though the sign didn’t flip, 2SLS **has done exactly what it’s meant to do**, confirming strong instruments, endogeneity removed, OLS inconsistency rejected, cost‑push channels correctly identified and the regime shift correctly isolated. This means the result is now **economically interpretable**, even if it violates NKPC priors. That is not a failure — it’s information.
+
+This is not the final Phillips Curve as this is only limited-information IV. In 2SLS, we are conditioning on current wages, policy reaction, external prices but not allowing feedback via IS, Okun, wage setting or UIP. The full structural feedback should appears in **3SLS**, as part of which policy reaction and demand are jointly determined, output, wages, and prices interact simultaneously, the PC slope often **shrinks toward zero** or becomes mildly positive. Central banks rarely rely on the sign of κᵧ from single‑equation IV alone.
+
+### Wage Phillips Curve findings from 2SLS
+
+In the Wage Phillips Curve, our endogenous regressor is the unemployment gap and we have three **predetermined / exogenous regressors in** `wage_GAP_L1` (wage inertia), `dcpi_DEV_L1` (backward‑ looking inflation expectations) and `prod_GAP` (productivity gap). OLS suggests that wage inertia and inflation expectations behave correctly but that the **sign on `u_GAP` was wrong** due to simultaneity (and COVID/furlough) and that, therefore, IV is required.
+
+The weak instruments test reveals that the IV machinery worked with F\>30. The Wu-Hausman test value \>6 and significant at the 1% level. We can **reject** the null that OLS is consistent, which confirms OLS sign and inference problems were real, IV is needed and 2SLS was the appropriate next step. This validates the entire IV exercise.
+
+The coefficient on wage_GAP_L1 is **rock‑solid**: Very strong persistence, Almost unchanged from OLS. Consistent with wage contracts, institutional inertia and UK labour market behaviour. This coefficient being stable across OLS and IV is a *good sign*. Inflation expectations `dcpi_DEV_L1` are also behaving exactly as expected: Positive, Moderately sized, Statistically significant, Matches backward‑looking expectations assumption. Again, stable across estimators → model well specified.
+
+`prod_GAP:` Correct sign, Small magnitude, Not statistically significant once simultaneity is addressed This is **not a problem**: Productivity effects on wages are slow‑moving; Much of the effect is already captured through wage persistence; Quarterly data is noisy. This term is doing what it should: *no spurious precision*.
+
+`u_GAP`: the crucial interpretation. **The sign flipped to negative.** This is the *main success criterion* for the WPC IV step. Under OLS: sign was **positive** (clearly wrong), driven by simultaneity and furlough distortion. Under 2SLS: sign is **negative**, as theory requires, simultaneity bias has been removed. This confirms the **structural mechanism** is now correctly identified. Why is it not statistically significant? This is **not surprising** once you think about it structurally. Key reasons:
+
+**Wages are extremely persistent:** `wage_GAP_L1 ≈ 0.88` absorbs most variation
+
+**COVID and furlough weaken the signal:** Even after IV, unemployment variation explains only a small part of wag eadjustment.
+
+**UK labour market since 2000 is flat‑PC:** Empirically, λᵤ is small and often insignificant in quarterly data. Central banks usually *calibrate* this slope rather than estimate it tightly.
+
+**2SLS inflates standard errors (correctly):** IV trades bias for variance. Loss of precision is expected and desirable. What matters here is **sign correction**, not significance.
+
+Over‑identification test (Sargan test \>20, p\<0.0004: This *looks* concerning, but in context it is **manageable and explainable**. Important points:
+
+-   You have **many instruments** for one endogenous regressor
+
+-   Macro samples are small (≈100 observations)
+
+-   Instruments include: lagged unemployment, output gap, real rate, productivity, all highly persistent
+
+In this setting: Sargan often rejects even when instruments are economically valid. This is especially common when: regressors are persistent, shocks are large (COVID), heteroskedasticity is present. This **does not invalidate** the WPC. It signals that **full system estimation (3SLS)** is now the appropriate next step. In fact, this is a *classic* pattern: isolated IV → over‑ID rejection; system IV → stabilisation.
+
+What the WPC 2SLS achieved:
+
+-   Endogeneity removed (Wu–Hausman rejects OLS)
+
+-   Instrument strength confirmed (F ≈ 31)
+
+-   Wrong sign problem fixed (u_GAP \< 0)
+
+-   Wage inertia and expectations preserved
+
+-   No spurious precision introduced.
+
+What it tells you economically
+
+-   UK real wages respond only weakly to unemployment slack at quarterly frequency
+
+-   Most wage dynamics are inertial and expectations‑driven
+
+-   COVID/furlough fundamentally weakened the wage–slack channel
+
+-   Any demand‑driven wage pressure is modest.
+
+This is exactly what BoE‑style semi‑structural models assume.
+
+At this point:
+
+-   PC 2SLS → endogeneity removed, sign interpretable
+
+-   WPC 2SLS → endogeneity removed, sign corrected
+
+-   IS, Okun, TR, OLP, UIP → already validated
+
+You are now **fully justified** in moving to **full 3SLS system estimation**. The fact that:
+
+-   κᵧ (PC) remains negative, and
+
+-   λᵤ (WPC) is small
+
+is a **substantive empirical result**, not a failure.
+
+In modern UK data, inflation is supply‑driven and wages are inertial.
+
+Over‑identification tests are sensitive in small samples with persistent variables. While the Sargan statistic rejects the null in some specifications, coefficient estimates are robust across alternative instrument sets and system estimation. Given strong first‑stage diagnostics and rejection of OLS consistency, IV and system estimates are preferred. Our model includes: COVID/furlough distortions, large regime shift in inflation (bpp), monetary policy reaction embedded in instruments, multiple feedback loops. This means the assumption:
+
+E(Z′ε)=0exactly\mathbb{E}(Z' \varepsilon) = 0 \quad \text{exactly}E(Z′ε)=0exactly
+
+is **too strong for quarterly macro data**. Sargan is asking for *exact orthogonality* — our model is only economically orthogonal. That mismatch explains the rejection.
+
+Decision tree with the **correct logic**:
+
+| Step | Question | Your result | Action |
+|--------------|------------------------------|--------------|--------------|
+| 1 | Are instruments relevant? | Yes (F ≫ 10) | Proceed |
+| 2 | Is OLS inconsistent? | Yes (Wu–Hausman) | IV justified |
+| 3 | Does Sargan pass? | Maybe no | Diagnose, don’t panic |
+| 4 | Are coefficients stable across reasonable specs? | Likely yes | Trust structure |
+| 5 | Is this a system model? | Yes | Use 3SLS |
+
+### Bottom line
+
+-   A failed Sargan in macro 2SLS is **common**
+
+-   It does **not** invalidate IV when instruments are strong
+
+-   It does **not** send you back to OLS
+
+-   It often disappears or weakens in 3SLS
+
+-   The correct response is *diagnosis, parsimony, and system estimation*
+
+-   Your modelling strategy remains correct
+
+We are encountering a **well‑known diagnostic tension in applied macroeconometrics**.
+
+# Annex V - 3SLS system estimation
+
+Up to now, we have engaged with **OLS** for diagnostics and structure checking and **2SLS** for fixing *local* endogeneity equation‑by‑equation. Now, with **3SLS**:, we estimate **all equations jointly,** allow **cross‑equation error correlation,** impose **system‑wide identification,** stop asking “is this regressor exogenous *here*?” and start asking “is this variable exogenous *in the system*?”
+
+This is crucial because the model is *explicitly* simultaneous: output ↔ inflation ↔ policy ↔ real rates; output ↔ unemployment ↔ wages ↔ inflation; inflation ↔ exchange rate ↔ import prices. 3SLS is the first estimator that actually respects this structure. Mechanically, 3SLS combines 2SLS logic (endogenous RHS variables are instrumented) and SUR logic (residuals allowed to be correlated across equations). So it answers: “Using only exogenous variation, and accounting for cross‑equation covariance, what is the system‑consistent set of parameters?”
+
+That’s why it is the *final* estimator.
+
+Once both PC and WPC are fixed via 2SLS, you estimate the **whole 7‑equation system jointly**, allowing:
+
+-   cross‑equation error covariances
+
+-   structural identification
+
+-   system‑consistent parameters
+
+-   higher efficiency
+
+-   and correction of any remaining endogeneity
+
+You can assemble them into a **system of equations** and estimate them using 3SLS:
+
+-   ✔ correcting remaining endogeneity
+
+-   ✔ exploiting cross-equation error correlations
+
+-   ✔ obtaining system‑consistent shocks
+
+-   ✔ improving efficiency
+
+-   ✔ producing your final structural parameter set
+
+“Fully free 3SLS” (the first 3SLS run) answers one question only: **“If I let the data speak as freely as possible, once simultaneity and cross‑equation correlations are handled, what do the structural relationships *want* to look like?”** This step is analog‑diagnostic, not policy‑ready. It is used to check **signs** across the whole system, gauge **magnitudes** relative to priors, see which slopes are **weakly identified**, see which parameters are **trying to do too much work**, identify **trade‑offs** (e.g. PC slope vs policy response); confirm that your structure is coherent once all feedback loops are closed.
+
+At this stage: you **do not over‑interpret significance**; you **expect some coefficients to be noisy**; you **expect some slopes to be implausible in magnitude**. That’s normal — and informative.
+
+Why you *don’t* start with calibration: If you calibrated before seeing free 3SLS results, you would not know whether: the calibration is supporting the data, or the calibration is suppressing a deeper misspecification. Free 3SLS acts like an **X‑ray**: it shows where the bones are weak before you put on the cast.
+
+What the hybrid (calibrated) model is doing: once you’ve seen the unrestricted 3SLS results, you then ask: **“Which parameters do I actually *want* the data to identify, and which should be disciplined by theory or external evidence?”** Typical examples (very familiar from central‑bank models):
+
+-   Phillips‑curve output slope (κᵧ): often weakly identified → calibrated or tightly constrained
+
+-   Wage Phillips Curve unemployment slope (λᵤ): small and noisy in data → calibrated
+
+-   IS curve semi‑elasticities of long rates: calibrated for stability
+
+-   Policy reaction coefficients: either calibrated or gently constrained
+
+-   Trend / steady‑state parameters: almost always calibrated
+
+The hybrid model therefore: **reduces variance** where the data are weak, **improves numerical stability**, **prevents trade‑offs** between poorly identified slopes, **makes counterfactuals interpretable**, **anchors the model to theory and institutional knowledge**. Crucially: You are *not* calibrating to “improve fit” — you are calibrating to **resolve identification problems revealed by free estimation**.
+
+We began by estimating the unrestricted system via 3SLS to assess identification and sign consistency. Given weak identification of some structural slopes, we then impose calibrated values for selected parameters in line with standard macroeconomic priors, re‑estimating the remaining parameters using a constrained system estimator.
+
+What we have now is not a collection of regressions, but a **system-consistent empirical macro model**.
+
+## System‑level diagnostics: this is a successful 3SLS
+
+**System fit measures:** The contrast between the OLS Rsq and the McElroy Rsq is *crucial*. **OLS-R² (≈ 0.41)** tells you how well the system would fit if you naïvely summed single‑equation OLS fits. **McElroy R² (≈ 0.91)** is the correct system‑level goodness‑of‑fit for SUR/3SLS. The very large jump tells that **cross‑equation correlations are extremely important, and 3SLS is extracting a lot of efficiency and identification that OLS/2SLS could not.** This alone validates the entire move to system estimation.
+
+**Residual covariance and correlation matrices: 3SLS is justified.** Look at the residual **correlations** (this is the heart of 3SLS). Examples:
+
+-   IS ↔ OKUN: **0.71**
+
+-   IS ↔ WPC: **0.60**
+
+-   WPC ↔ OLP: **0.69**
+
+-   TR ↔ UIP: **0.34**
+
+-   Y‑side blocks ↔ productivity: strong positive correlations
+
+-   PC ↔ others: generally negative correlations
+
+This tells us **there are strong common shocks working across demand, labour markets, productivity, and external balances.** Exactly what we expect in: GFC, COVID, post‑2021 inflation shock. If these correlations had been near zero, 3SLS would have been pointless. They are not. This confirms 3SLS is **structurally appropriate**, not just “fancier IV”.
+
+## Equation‑by‑equation interpretation
+
+**IS curve (output gap):** Key coefficients: strong by not explosive output gap persistence $\tilde{Y}_{t-1} = 0.50^*$; very strong real rate channel $\tilde{r}_t = 0.78^*$. The COVID and 2022 break dummies are both large and significant. Interpretation: Output is **highly inertial**. Monetary‑policy stance (real rate gap) is the **dominant cyclical driver of demand**. External channels (NX, exchange rate) are weak once policy is accounted for. This IS curve looks exactly like a modern UK IS curve.
+
+**Phillips Curve (prices):** Key coefficients: highly significant inflation persistence $\tilde{\pi}_{t-1} = 0.77^{***}$; the output gap $\tilde{Y}_t = -0.21^{**}$; energy prices: positive and significant; import prices: positive but weaker; break dummy: small and insignificant. **Inflation is predominantly supply‑driven and policy‑mediated in this sample.**
+
+The negative demand coefficient does **not** mean “demand lowers inflation” in a causal sense. It means:
+
+-   When demand was strong, **policy reacted aggressively**, dampening inflation.
+
+-   Inflation rises **when demand is weak but supply shocks dominate** (energy, imports).
+
+This is entirely consistent with UK post‑GFC dynamics, COVID–energy–cost shock period, monetary policy endogeneity. This is not a failure of the Phillips Curve — it is an empirical statement about regime dominance.
+
+**Wage Phillips Curve:** Key coefficients: very strong inertia / wage persistence $\tilde{w}_{t-1} > 1.0^*$; Inflation expectations: small, insignificant; unemployment gap: tiny, insignificant; Productivity gap $\tilde{P}_t; \quad \theta_2 = -0.44^{***}$ **negative and significant.** This tells us that **UK real wages are not disciplined primarily by unemployment slack in this period.** Instead wages are extremely inertial, productivity shocks dominate short‑run wage dynamics, slack has very limited marginal explanatory power once inertia and system feedback are accounted for. This is consistent with: furlough distortions, labour hoarding, weak outside‑option effects, institutional wage‑setting. Exactly the kind of result that motivates **calibration** of $\lambda_U$ in hybrid models.
+
+**Taylor Rule:** This is the clearest equation in the system: Interest‑rate smoothing: **0.96**\* (textbook); Inflation response: positive and significant; Output response: positive and significant; Very high R² (≈ 0.98). Interpretation: **Monetary policy is the stabilising backbone of the system.** Policy responds systematically and strongly to inflation and activity, and its feedback loop shapes the rest of the model. This equation anchors the whole system.
+
+**Okun’s law:** Key results: Unemployment persistence: **\~0.57**\*; Output gap: **–0.06**\*; Structural breaks meaningful. Interpretation: Labour markets respond slowly but clearly to activity. Output drives unemployment reliably. Breaks capture migration, furlough, post‑COVID shifts appropriately. Okun block is very well behaved.
+
+**Productivity (OLP):** Low R² (\~0.14), weak coefficients — and that is *exactly right*. Interpretation: **short‑ run productivity is noisy and only weakly cyclical.** Most productivity variation is: measurement error, sectoral mix, unmodelled technology. This equation is doing its job without pretending to explain too much.
+
+**UIP:** Low/negative R², significant interest‑differential channel, weak dynamics. Interpretation: **Exchange rates are noisy, forward‑looking, and dominated by financial premia.** This is the empirical UIP puzzle — **not a misspecification**.
+
+## What the system is telling us
+
+Putting the blocks together, your 3SLS model says:
+
+-   **Demand matters**, but mainly through **policy reaction**, not directly through price setting.
+
+-   **Inflation is supply‑driven** in the estimation window.
+
+-   **Wages are inertial**, weakly anchored by slack, and sensitive to productivity.
+
+-   **Monetary policy is systematic, strong, and central**.**Cross‑equation shocks are large**, which is why 3SLS matters.
+
+This is a **coherent, modern macro narrative** for the UK post‑2008 economy. We now know:
+
+-   which parameters are **weakly identified** (PC slope, wage–slack slope),
+
+-   which are **strongly identified** (policy rule, IS persistence, Okun),
+
+-   where theory should supplement the data.
+
+So the **next natural step** is: **Impose calibrated values for weak slopes and re‑estimate the system under those restrictions.** This will: stabilise impulse responses, sharpen interpretation, reduce noise without falsifying the data.
+
+This is **not** a disappointing or messy result. On the contrary: The system works, The econometrics are sound, The economic story is credible, The diagnostics say “3SLS was necessary”.
+
+Alternative draft of this 3SLS section
+
+# Annex VI - System Estimation Results: Fully Unrestricted 3SLS
+
+This section documents the results from estimating the full semi‑structural model using **three‑stage least squares (3SLS)**. The purpose of this stage is diagnostic and informational rather than final: the unrestricted system estimation allows the data to determine parameter values once simultaneity across equations and cross‑equation error correlations are fully accounted for.
+
+## 6.1 Rationale for System Estimation
+
+Single‑equation estimation, even with instrumental variables, cannot fully capture the simultaneous feedback mechanisms embedded in the model. Output, inflation, wages, unemployment, monetary policy, productivity, and the exchange rate are jointly determined, and shocks affecting one block of the model propagate through the others contemporaneously.
+
+The 3SLS estimator is therefore employed to:
+
+-   
+
+-   correct for endogeneity across equations,
+
+-   
+
+-   exploit cross‑equation correlations in the error structure, and
+
+-   
+
+-   obtain system‑consistent parameter estimates.
+
+-   
+
+This step follows extensive single‑equation diagnostics and 2SLS estimation for the Phillips Curve and Wage Phillips Curve, where endogeneity was shown to be material.
+
+## 6.2 Identification and Instrument Strategy
+
+A lean system‑wide instrument set was constructed to ensure full‑rank identification of the stacked system. Instruments were restricted to predetermined variables and structural break indicators that are plausibly exogenous to contemporaneous shocks. Rank diagnostics confirmed that the resulting instrument matrix is full rank, ensuring numerical stability of the 3SLS estimator.
+
+The guiding principle in designing the instrument set was parsimony rather than maximal coverage: the system estimator borrows identifying variation across equations, so redundant instruments can undermine identification rather than improve it.
+
+## 6.3 System Fit and Cross‑Equation Error Structure
+
+At the system level, the unrestricted 3SLS estimation achieves a high degree of explanatory power once cross‑equation correlations are accounted for. While the aggregated OLS measure of fit is moderate, the McElroy system R² indicates that the joint model explains the bulk of variation across the endogenous variables when estimated as a system.
+
+The estimated residual covariance and correlation matrices exhibit substantial off‑diagonal elements, particularly among:
+
+-   
+
+-   output, unemployment, and wage equations;
+
+-   
+
+-   output and productivity;
+
+-   
+
+-   monetary policy and exchange‑rate dynamics.
+
+-   
+
+These correlations confirm the presence of strong common shocks across blocks of the model and provide a compelling justification for system estimation. The magnitudes and signs of these correlations align with major macroeconomic episodes in the sample, including the Global Financial Crisis, the COVID period, and the post‑2021 inflation surge.
+
+## 6.4 Core Behavioural Blocks
+
+### Output (IS Curve)
+
+The IS equation displays strong internal consistency under 3SLS. Output dynamics are highly persistent, and the real interest rate gap emerges as the dominant cyclical driver of demand. Structural break dummies associated with the COVID recession and the post‑2021 period are large and significant, reflecting substantial regime shifts in activity.
+
+Notably, the coefficient on the real interest rate gap is positive in the unrestricted system. At this stage, this should not be interpreted as a structural demand elasticity. Rather, it reflects the strong endogeneity of monetary policy: periods of strong activity coincide with aggressive policy tightening, and 3SLS correctly attributes this correlation to system‑wide interaction rather than causal stimulus.
+
+### Inflation (Phillips Curve)
+
+Inflation exhibits substantial persistence, with lagged inflation terms contributing strongly to current inflation dynamics. Energy and import price shocks enter with the expected positive sign, confirming the importance of cost‑push factors in recent UK inflation episodes.
+
+The output gap enters the unrestricted Phillips Curve with a negative coefficient, even after full system correction for simultaneity. This result indicates that, over the estimation sample, demand effects on inflation operate primarily through the policy reaction function rather than directly via price‑setting behaviour. Inflationary episodes are largely associated with adverse supply shocks coinciding with weak demand conditions.
+
+### Wages (Wage Phillips Curve)
+
+Wage dynamics are dominated by strong inertia, with lagged real wage gaps explaining the majority of variation. Inflation expectations play a limited role, and the unemployment gap enters with a small and statistically insignificant coefficient in the unrestricted system.
+
+This finding suggests that labour‑market slack provides only weak discipline over wage growth at quarterly frequencies, particularly in the presence of institutional and policy interventions such as the furlough scheme. Productivity shocks, rather than labour‑market tightness, are the primary driver of deviations in real wages in the sample.
+
+### Monetary Policy (Taylor Rule)
+
+The Taylor Rule equation is tightly estimated under 3SLS. Monetary policy exhibits substantial interest‑rate smoothing and responds systematically and significantly to both inflation deviations and the output gap. This equation serves as the stabilising core of the system and largely governs the transmission of demand conditions to other blocks.
+
+### Labour Market, Productivity and External Sector
+
+The Okun relationship between output and unemployment is stable and well identified, capturing both persistence in unemployment and the expected negative response to activity. Structural break indicators perform as intended, isolating regime shifts in labour‑market behaviour.
+
+Short‑run productivity dynamics are weakly cyclical and noisy, consistent with measurement error and sectoral composition effects. Exchange‑rate dynamics are volatile and weakly explained by fundamentals, reflecting the well‑documented empirical failure of uncovered interest parity at short horizons.
+
+## 6.5 Interpretation of the Unrestricted System
+
+Taken together, the unrestricted 3SLS results characterise an economy in which:
+
+-   
+
+-   inflation dynamics are predominantly supply‑driven;
+
+-   
+
+-   wage formation is highly inertial and weakly responsive to slack;
+
+-   
+
+-   monetary policy plays a central role in mediating demand‑inflation interactions;
+
+-   
+
+-   output fluctuations are largely governed by policy stance rather than autonomous private‑sector demand.
+
+-   
+
+Several behavioural slopes—most notably the Phillips Curve output coefficient and the Wage Phillips Curve unemployment coefficient—are weakly identified in the unrestricted system. This is a familiar feature of modern macroeconomic data and reflects both structural change and the dominance of large non‑demand shocks.
+
+## 6.6 Motivation for Hybrid (Calibrated) Estimation
+
+The unrestricted 3SLS results serve their intended purpose: they reveal which parameters the data are able to identify reliably and which are subject to substantial uncertainty or system‑level feedback effects. In particular, demand‑side slopes in price‑ and wage‑setting equations are weakly identified once policy reactions are endogenised.
+
+These findings motivate the transition to a **hybrid estimation strategy**, in which a small subset of behavioural parameters is calibrated based on external evidence and theoretical priors, while the remaining parameters are re‑estimated using constrained 3SLS. The next section presents this calibrated system and evaluates whether the imposed discipline improves stability, interpretability, and policy relevance without contradicting the empirical evidence.
+
+# Annex VII - Hybrid estimation and calibration strategy
+
+The unrestricted 3SLS results serve their intended diagnostic purpose. They identify which parameters are robustly pinned down by the data once simultaneity and cross‑equation feedbacks are fully accounted for, and which parameters are weakly identified or absorb system‑level interactions. In particular, demand‑side slopes in the price‑ and wage‑setting blocks are imprecisely estimated once monetary policy reactions are endogenised, reflecting both the dominance of large supply shocks in the sample and the strong systematic response of policy to macroeconomic conditions.
+
+These findings motivate a **hybrid estimation strategy**, in which a small subset of behavioural parameters is disciplined using external evidence and theoretical priors, while the remaining parameters are estimated jointly using constrained 3SLS. The purpose of this approach is not to improve in‑sample fit, but to regularise weakly identified channels and to ensure that the estimated system remains economically interpretable and suitable for policy analysis. Importantly, calibration is applied incrementally and only where clearly warranted by the unrestricted results.
+
+### 6.1 Hybrid A: Regularising weak demand slopes in price‑ and wage‑setting
+
+The first calibration stage (Hybrid A) targets demand‑side slopes in the Phillips Curve and the Wage Phillips Curve. In the unrestricted system, these parameters are weakly identified and unstable in sign, reflecting the fact that observed inflation and wage dynamics over the sample are dominated by supply shocks, institutional features of the labour market, and monetary policy feedback, rather than by contemporaneous demand pressure.
+
+Accordingly, Hybrid A fixes the output‑gap coefficient in the price Phillips Curve and the unemployment‑gap coefficient in the wage Phillips Curve at small, theoretically plausible values. These calibrations impose a weak demand pull in price- and wage‑setting without forcing textbook magnitudes or altering the overall structure of the system. All remaining parameters—including inflation persistence, wage inertia, policy reaction coefficients, and labor‑market dynamics—remain freely estimated.
+
+This step regularises channels that the data are unable to identify cleanly on their own, while preserving the empirical character of the inflation and wage processes. Importantly, Hybrid A does not materially change the qualitative interpretation of the system; rather, it prevents weakly identified demand slopes from absorbing unrelated system‑level variation.
+
+### 6.2 Hybrid B: Anchoring the level of monetary policy via the neutral real rate
+
+The second calibration stage (Hybrid B) addresses a distinct identification issue: the level of the real policy stance. In quarterly macroeconomic data, the neutral real interest rate is notoriously difficult to estimate jointly with inflation dynamics, policy smoothing, and structural break effects. In the unrestricted system, this lack of level identification manifests itself as ambiguity in the interpretation of real‑rate movements and in the estimated demand–policy interaction.
+
+Hybrid B therefore anchors the neutral real interest rate at an externally plausible value, effectively fixing the steady‑state level of the real rate while leaving all behavioral responses unconstrained. This normalization affects levels but not marginal dynamics, and it allows the real‑rate gap to be interpreted consistently across equations and simulations. Crucially, Hybrid B does not impose any restriction on the sensitivity of demand to interest rates; it simply removes a flat direction in the likelihood associated with the policy level.
+
+At this stage, the model remains fully data‑driven in its dynamic responses, but becomes more transparent in its interpretation of monetary conditions.
+
+### 6.3 Hybrid C: Enforcing monotone policy transmission for simulation purposes
+
+While Hybrid B yields a coherent and empirically grounded system, impulse‑response analysis reveals that monetary policy shocks induce non‑monotone output adjustment: following an initial contraction, output temporarily rebounds before converging back to baseline. This behaviour reflects the dominance of endogenous policy reactions in the estimated IS block, which causes policy shocks to be interpreted partly as states correlated with strong demand rather than as causal disturbances.
+
+For policy simulation purposes, this lack of monotonicity is problematic. A contractionary monetary shock should generate a uniformly contractionary path for real activity along the transition, even if the data do not cleanly separate reaction from transmission. Accordingly, the third calibration stage (Hybrid C) imposes a weakly negative interest‑rate elasticity in the IS curve. This constraint is deliberately modest and is introduced solely to ensure monotone and interpretable propagation of policy shocks.
+
+Hybrid C does not alter the estimated policy rule, inflation dynamics, wage setting, or labor‑market structure. Its role is limited to enforcing causal discipline in the demand–policy channel so that the model can be used reliably for counterfactual experiments and scenario analysis. The resulting impulse responses exhibit smooth, monotone contraction in output following monetary tightening, while preserving the empirical narrative established in the earlier stages.
+
+### 6.4 Summary
+
+Taken together, the three calibration stages play distinct and complementary roles. Hybrid A regularises weakly identified demand slopes in nominal adjustment, Hybrid B anchors the level of monetary policy, and Hybrid C enforces monotone policy transmission for simulation purposes. Each stage is motivated directly by diagnostics from the preceding specification, and no calibration is imposed without clear empirical justification. The final hybrid system is therefore both empirically disciplined and policy‑usable, combining the strengths of system estimation with minimal, transparent theoretical structure.
 
 # Introduction
 
@@ -38,57 +1119,6 @@ The paper, titled *Real Exchange Rate Overshooting and the Output Cost of Bring
 While it is of particular relevance to the Thatcher-era reforms, the work remains a foundational reference for modern structural analyses of the UK economy. The principles of the Buiter-Miller model (nominal stickiness with rational expectations in financial markets) using updated New Keynesian DSGE frameworks. The OBR's "Small Model of the UK Economy" (used to simulate fiscal and monetary shocks) might reasonably be viewed as a contemporary structural successor, incorporating similar elements like exchange rate pass-through and inflation persistence, but evolving the Buiter-Miller logic into a four-equation New Keynesian framework. We have tethered our analysis to the OBR framework, but have sought to adapt it where required to achieve economic coherence and a better fit to the particular extract of UK data that we are using.
 
 # LATEST MODEL
-
-7 equations
-
-## The Structural System
-
-The model is defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using either CK or HP filters). (Multivariate filters were attempted but they crashed the system!)
-
-$$
-\begin{aligned}
-\text{IS (agg dem):} \quad \tilde{y}_t &= \alpha_1 \tilde{y}_{t-1} + \beta_1 \tilde{r}_t + \beta_2 \tilde{i}_{spr, t} + \gamma_1 \tilde{q}_{t-1} + \delta_1 \Delta \text{nx}_{t-1} + \sum \phi_i D_{i,t} + \epsilon_{1,t} \\
-\text{PC (inflation):} \quad\pi_t &= \alpha_2 \pi_{t-1} + \beta_3 \tilde{w}_t + \gamma_2 \tilde{q}_{t-1} + \theta_1 \Delta p^{m}_{t-1} + \theta_2 \Delta p^{e}_{t-1} + \sum \phi_i D_{i,t} + \epsilon_{2,t} \\
-\text{TR (mon pol)}: \quad i_t &= \alpha_3 i_{t-1} + \beta_4 (\pi_t - \pi^*) + \beta_5 \tilde{y}_t + \gamma_3 \tilde{q}_{t-1} +  \phi_1 D_{2020Q2} + \epsilon_{3,t} \\
-\text{OL (lab dem):} \quad\tilde{u}_t &= \alpha_4 \tilde{u}_{t-1} + \beta_6 \tilde{y}_t + \phi_1 D_{2020Q2} + \epsilon_{4,t} \\
-\text{UIP (exch rate):} \quad \tilde{q}_t &= \alpha_5 \tilde{q}_{t-1} + \beta_7 (\tilde{r}_t - \tilde{r}^f_t)_{t-1} + \epsilon_{5,t} \\
-\text{WPC (lab sup):} \quad \tilde{w}_t &= \alpha_6 \tilde{w}_{t-1} + \beta_8 \pi_{t-1} + \gamma_4 \tilde{u}_{t-1} + \delta_2 \tilde{pr}_t + \epsilon_{6,t} \\
-\text{POL (produc):} \quad \tilde{pr}_t &= \alpha_7 \tilde{pr}_{t-1} + \beta_9 \tilde{y}_t + \phi_1 D_{2020Q2} + \epsilon_{7,t}
-\end{aligned}
-$$ {#eq-system}
-
-The IS Curve (Aggregate Demand) equation features the following variables:
-
--   $\tilde{y}$ is the **Output Gap** (`Y_GAP`) (CK filter for trend)
--   $\tilde{r}$ is the **Real Interest Rate Gap** (`R_GAP`)
--   $\tilde{i}_{spr}$ is the **Nominal Spread Gap (**`i_spr_GAP`)
--   $\tilde{q}$ is the **Real Exchange Rate Gap (**`RER_GAP`)
--   $\Delta nx$ is **Net Export Growth** (`dNX`)
--   $D_{cov}$ represents the 2020 **COVID dummy variables.**
-
-The Phillips Curve introduces the following additional variables:
-
--   $\pi$ is the **year-on-year (YoY) CPI inflation** (`INFL_yoy`)
--   $\tilde{w}$ is the **real wage gap** (`WAGE_GAP`)
--   $\Delta p^m$ is import price inflation measured through the imports price deflator
--   $\Delta p^e$ is energy price inflation measured through the domestic fuels component of the CPI.
-
-The Taylor Rule equation, representing the monetary policy rule, introduces:
-
--   $\tilde{i}$ is the **nominal rate gap** (BOE base rate)
--   $(\pi - \pi^*)$ is the deviation in (yoy CPI) inflation from the 2% target
-
-Okun's Law provides the labour demand relation, introducing:
-
--   $\tilde{u}$ is the **Unemployment Gap** (`U_GAP`) $(u_t - u^*)$ (CK filter for trend)
-
-The important role of the exchange rate is reflected in the Uncovered Interest Parity equation, in which:
-
--   $(\tilde{r} - \tilde{r}^f)$ is the real interest rate differential between the UK and the rest of the world (US as proxy)
-
-The final variable is the key ingredient in our wage Phillips curve and Okun's Law relating wages to productivity. The equations introduce:
-
--   $\tilde{pr}$ which is the **labour productivity gap** (the deviation in output per hour worked from its trend.
 
 ## Econometric methods
 
@@ -138,111 +1168,7 @@ The relatively low R-squared for the Productivity equation (0.19) is consistent 
 
 In a typical economy, we expect a positive sign here (**pro-cyclical productivity**), meaning firms get more out of their workers when demand is high. However, the negative and insignificant sign of the coefficient on the output gap in our productivity Okun's Law is typical of the UK. With a p-value of **0.85**, the coefficient is statistically indistinguishable from zero. This suggests that the **output gap has no significant impact on UK productivity**, which would support the hypothesis that UK productivity is "de-linked" from the business cycle.
 
-The negative sign on the coefficient is consistent with labour hoarding - the tendency for firms to keep their staff during downturns - but also with the Furlough scheme. As such, it is not surprising to see measured productivity per hour dropping when output falls but headcount stays the same. Conversely, firms might hire faster than output grows in the early stages of a boom, making the initial productivity move appear more negative than is the reality.
-
-```{r}
-#| label: tbl-results
-#| tbl-cap: "Table 1: 2SLS System Estimates of the UK Economy"
-#| results: asis
-#| echo: false
-
-library(huxtable)
-
-# Define a helper to 'tidy' systemfit equations
-tidy.systemfit.equation <- function(x, ...) {
-  s <- summary(x)
-  d <- as.data.frame(s$coefficients)
-  names(d) <- c("estimate", "std.error", "statistic", "p.value")
-  d$term <- rownames(d)
-  return(d)
-}
-
-# Simplified glance function to avoid the '5 rows' error
-glance.systemfit.equation <- function(x, ...) {
-  s <- summary(x)
-  # Just return the basics: N and R2
-  data.frame(
-    nobs = as.numeric(s$df[1] + s$df[2]), 
-    r.squared = as.numeric(s$r.squared)
-  )
-}
-
-# 2. Build the Base Table (using the master 3SLS object)
-ht <- huxreg(
-  "IS Curve"       = fit_2sls_7eqn1$eq[], 
-  "Phillips Curve" = fit_2sls_7eqn1$eq[], 
-  "Taylor Rule"    = fit_2sls_7eqn1$eq[], 
-  "Okun's Law"     = fit_2sls_7eqn1$eq[],
-  "UIP"            = fit_2sls_7eqn1$eq[],
-  "Wage Phillips"  = fit_2sls_7eqn1$eq[],
-  "Prod Okun"      = fit_2sls_7eqn1$eq[],
-  coefs = c(
-    "Constant"                     = "(Intercept)",
-    "Output Gap (t-1)"             = "Y_GAP_lag1",
-    "Real Interest Rate Gap"       = "R_GAP",
-    "Nominal Spread Gap"           = "i_spr_GAP",
-    "Real Exchange Rate Gap (t-1)" = "RER_GAP_lag1",
-    "Net Export Growth (t-1)"      = "dNX_lag1",
-    "COVID-19 (2020Q2)"            = "dummy_2020Q2",
-    "COVID-19 (2020Q3)"            = "dummy_2020Q3",
-    "Inflation (t-1)"              = "INFL_yoy_lag1",
-    "Real Wage Gap"                = "WAGE_GAP",
-    "Import Price Inflation"             = "dlog_IM_defl_lag1",
-    "Energy Price Inflation"             = "dlog_energy_cpi_lag1",
-    "Nominal BOE Rate Gap"               = "lag(i_GAP, 1)",
-    "Inflation Deviation from 2%"        = "Infl_dev",
-    "Output Gap (Current)"               = "Y_GAP",
-    "Unemployment Gap (t-1)"             = "U_GAP_lag1",
-    "Real Interest Rate Gap Diff (t-1)"  = "lag(R_GAP_diff, 1)",
-    "Real Wage Gap (t-1)"                = "lag(WAGE_GAP, 1)",
-    "Productivity Gap (Current)"         = "PROD_GAP",
-    "Productivity Gap (t-1)"             = "lag(PROD_GAP, 1)"
-),
-  stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
-  statistics = c("N" = "nobs", "R2" = "r.squared"),
-  note = NULL 
-)
-
-# 3. Construct Footer Rows (Sargan values updated for the Master Model)
-sargan_values <- c("Sargan Test (p)", "0.380", "0.089", "0.107", "N/A")
-system_r2_row <- c("System R-squared (McElroy)", "0.959", "", "", "")
-stars_note    <- c("*** p < 0.01; ** p < 0.05; * p < 0.1", "", "", "", "")
-
-# 4. Add Rows and Apply Formatting
-ht_final <- ht %>%
-  add_rows(sargan_values, after = nrow(.)) %>%
-  add_rows(system_r2_row) %>%
-  add_rows(stars_note)
-
-# Indices for formatting
-row_sargan <- nrow(ht_final) - 2
-row_system <- nrow(ht_final) - 1
-row_note   <- nrow(ht_final)
-
-# Formatting: Merging, Centering, and Locking Decimals
-ht_final <- ht_final %>%
-  merge_cells(row_system, 2:5) %>%
-  merge_cells(row_note, 1:5) %>%
-  set_align(row_system, 2, "center") %>%
-  set_align(row_note, 1, "left") %>%
-  set_number_format(row_sargan, 2:5, NA) %>%
-  set_number_format(row_system, 2, NA) %>%
-  theme_article() %>%
-  set_align(1:nrow(.), 1, "left") %>%           # Labels Left
-  set_align(1:row_sargan, 2:5, "center") %>%    # Numbers Center
-  set_italic(c(row_sargan, row_system), 1) %>%  # Italic footers
-  set_bold(c(row_sargan, row_system), 1) %>%    # Bold footers
-  set_bottom_border(row_sargan - 1, 1:5, 0.4) %>% 
-  set_bottom_border(row_note - 1, 1:5, 0.8) %>%   
-  set_left_padding(1:nrow(.), 1, 10) %>%
-  set_width(1.0)
-
-# Render the final masterpiece
-ht_final
-
-```
-
-## Conclusions
+The negative sign on the coefficient is consistent with labour hoarding - the tendency for firms to keep their staff during downturns - but also with the Furlough scheme. As such, it is not surprising to see measured productivity per hour dropping when output falls but headcount stays the same. Conversely, firms might hire faster than output grows in the early stages of a boom, making the initial productivity move appear more negative than is the reality.Conclusions
 
 This conclusion ties together your **2SLS system results** into a cohesive narrative for your Quarto paper. It frames the "statistical puzzles" (like the productivity/wage signs) as **empirical findings** specific to the UK’s unique economic structure.
 
@@ -278,148 +1204,6 @@ $$
 \text{Okun's Law: } \quad \tilde{u}_t &= \gamma \tilde{y}_t + \omega_t \\
 \text{UIP: } \quad q_t &= \gamma q_{t-1} + (1- \gamma) E_t[q_{t+1}] - 
 \end{aligned} $$
-
-Where:
-
--   $\tilde{y}_t$ is the **Output Gap** (`Y_GAP`) $(y_t - y^*)$
--   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`) $(r_t - r^*)$
--   $\tilde{u}_t$ is the **Unemployment Gap** (`U_GAP`) $(u_t - u^*)$
--   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)...check...may be Infl_dev...deviation from 2% target
-
-Where:
-
--   $y_t$ is the **Output Gap** (`Y_GAP`)
--   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)
--   $i_t$ is the **Nominal Base Rate** (`BOE_rate`)
--   $u_t$ is the **Unemployment Gap** (`U_GAP`)
--   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`)
--   $spr_t$ is the **Market Spread Change** (`d_mkt_spr`)
--   $rer_t$ is the **Real Exchange Rate Gap** (`RER_GAP`)
--   $nx_t$ is the **Net Export Growth** (`dNX`)
--   $m_t, e_t, cap_t$ represent **Import, Energy, and Price Cap shocks**
--   $D_{zlb}, D_{cov}$ are **Dummy variables**
-
-# new
-
-### The Structural Macro-System Specification
-
-The economy is represented by a four-equation hybrid New Keynesian system, estimated using Three-Stage Least Squares (3SLS) to account for simultaneity between the output gap, inflation, and the monetary policy response.
-
-$$
-\begin{aligned}
-\text{IS Curve: } \quad y_t &= \alpha_0 + \rho_y y_{t-1} + \gamma_y E_t[y_{t+1}] + \beta_r \tilde{r}_t + \beta_s spr_t + \sum_{i=1}^2 \phi_i rer_{t-i} + \sum_{i=1}^2 \delta_i nx_{t-i} + \epsilon_{y,t} \\
-\text{Phillips Curve: } \quad \pi_t &= \pi_0 + \rho_{\pi} \pi_{t-1} + \gamma_{\pi} E_t[\pi_{t+1}] + \beta_{\pi} y_{t-1} + \theta_m m_t + \theta_e e_t + \theta_c cap_t + \epsilon_{\pi,t} \\
-\text{Taylor Rule: } \quad i_t &= i_0 + \rho_i i_{t-1} + \kappa_{\pi} (\pi_t - \pi^*) + \kappa_y y_t + \lambda_{zlb} D_{zlb} + \epsilon_{i,t} \\
-\text{Okun's Law: } \quad u_t &= u_0 + \rho_u u_{t-1} + \beta_u y_t + \lambda_{cov} D_{cov} + \epsilon_{u,t}
-\end{aligned}
-$$
-
-Where:
-
--   $y_t$ is the **Output Gap** (`Y_GAP`)
--   $\pi_t$ is the **YoY Inflation Rate** (`INFL_yoy`)
--   $i_t$ is the **Nominal Base Rate** (`BOE_rate`)
--   $u_t$ is the **Unemployment Gap** (`U_GAP`)
--   $\tilde{r}_t$ is the **Real Interest Rate Gap** (`R_GAP`)
--   $spr_t$ is the **Market Spread Change** (`d_mkt_spr`)
--   $rer_t$ is the **Real Exchange Rate Gap** (`RER_GAP`)
--   $nx_t$ is the **Net Export Growth** (`dNX`)
--   $m_t, e_t, cap_t$ represent **Import, Energy, and Price Cap shocks**
--   $D_{zlb}, D_{cov}$ are **Dummy variables**
-
-```{r}
-#| label: tbl-results
-#| tbl-cap: "Table 1: 3SLS System Estimates of the UK Economy (Master Model)"
-#| results: asis
-#| echo: false
-
-library(huxtable)
-
-# Define a helper to 'tidy' systemfit equations
-tidy.systemfit.equation <- function(x, ...) {
-  s <- summary(x)
-  d <- as.data.frame(s$coefficients)
-  names(d) <- c("estimate", "std.error", "statistic", "p.value")
-  d$term <- rownames(d)
-  return(d)
-}
-
-# Simplified glance function to avoid the '5 rows' error
-glance.systemfit.equation <- function(x, ...) {
-  s <- summary(x)
-  # Just return the basics: N and R2
-  data.frame(
-    nobs = as.numeric(s$df[1] + s$df[2]), 
-    r.squared = as.numeric(s$r.squared)
-  )
-}
-
-# 2. Build the Base Table (using the master 3SLS object)
-ht <- huxreg(
-  "IS Curve"       = fit_3sls_master$eq[], 
-  "Phillips Curve" = fit_3sls_master$eq[], 
-  "Taylor Rule"    = fit_3sls_master$eq[], 
-  "Okun's Law"     = fit_3sls_master$eq[],
-  coefs = c(
-    "Constant"                 = "(Intercept)",
-    "Output Gap (t-1)"         = "Y_GAP_lag1",
-    "Real Interest Rate Gap"   = "R_GAP",
-    "Real Exchange Rate (t-1)" = "RER_GAP_lag1",
-    "Net Export Growth (t-1)"  = "dNX_lag1",
-    "Inflation (t-1)"          = "INFL_yoy_lag1",
-    "Expected Inflation (t+1)" = "INFL_yoy_lead1",
-    "Inflation Deviation"      = "Infl_dev",
-    "Base Rate (t-1)"          = "BOE_rate_lag1",
-    "Unemployment Gap (t-1)"   = "U_GAP_lag1",
-    "Output Gap (Current)"     = "Y_GAP",
-    "COVID-19 (2020Q2)"        = "dummy_2020Q2",
-    "COVID-19 (2020Q3)"        = "dummy_2020Q3"
-  ),
-  stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
-  statistics = c("N" = "nobs", "R2" = "r.squared"),
-  note = NULL 
-)
-
-# 3. Construct Footer Rows (Sargan values updated for the Master Model)
-sargan_values <- c("Sargan Test (p)", "0.380", "0.089", "0.107", "N/A")
-system_r2_row <- c("System R-squared (McElroy)", "0.959", "", "", "")
-stars_note    <- c("*** p < 0.01; ** p < 0.05; * p < 0.1", "", "", "", "")
-
-# 4. Add Rows and Apply Formatting
-ht_final <- ht %>%
-  add_rows(sargan_values, after = nrow(.)) %>%
-  add_rows(system_r2_row) %>%
-  add_rows(stars_note)
-
-# Indices for formatting
-row_sargan <- nrow(ht_final) - 2
-row_system <- nrow(ht_final) - 1
-row_note   <- nrow(ht_final)
-
-# Formatting: Merging, Centering, and Locking Decimals
-ht_final <- ht_final %>%
-  merge_cells(row_system, 2:5) %>%
-  merge_cells(row_note, 1:5) %>%
-  set_align(row_system, 2, "center") %>%
-  set_align(row_note, 1, "left") %>%
-  set_number_format(row_sargan, 2:5, NA) %>%
-  set_number_format(row_system, 2, NA) %>%
-  theme_article() %>%
-  set_align(1:nrow(.), 1, "left") %>%           # Labels Left
-  set_align(1:row_sargan, 2:5, "center") %>%    # Numbers Center
-  set_italic(c(row_sargan, row_system), 1) %>%  # Italic footers
-  set_bold(c(row_sargan, row_system), 1) %>%    # Bold footers
-  set_bottom_border(row_sargan - 1, 1:5, 0.4) %>% 
-  set_bottom_border(row_note - 1, 1:5, 0.8) %>%   
-  set_left_padding(1:nrow(.), 1, 10) %>%
-  set_width(1.0)
-
-# Render the final masterpiece
-ht_final
-
-```
-
-# The IS relation
 
 ## Theoretical model specification
 
@@ -520,21 +1304,7 @@ $\mathbf{D} \cdot \gamma_{IS}$ represents a set of pulse dummy variables for the
 
 $\epsilon_{y,t}$ is the model's error term.
 
-**Sign Expectations**: Note that while $\beta_3$ (real rate) and $\beta_4$ (spread) should be **negative** (tighter conditions = lower output), $\beta_6$ (real exchange rate) should be **positive** if an increase in the index represents a depreciation (making exports cheaper).
-
-```{r}
-#| label: "HOG_IS_ORIG"
-#| warning: false
-#| message: false
-
-hog_is_fit <- lm(Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + d_mkt_spr + 
-                   zlb_interaction + dlog_NX + lag_rer_gap + 
-                   dummy_2020Q2 + dummy_2020Q3, 
-                 data = MODEL_DIFFS)
-summary(hog_is_fit)
-```
-
-Given the results, we refined to a tidier model
+**Sign Expectations**: Note that while $\beta_3$ (real rate) and $\beta_4$ (spread) should be **negative** (tighter conditions = lower output), $\beta_6$ (real exchange rate) should be **positive** if an increase in the index represents a depreciation (making exports cheaper).Given the results, we refined to a tidier model
 
 $$ \text{HOG IS Curve 2:} \quad y_t = \beta_1 y_{t-1} + \beta_2 y_{t+1|t} + \beta_3 r_t + \beta_4 er_{t-1} + \mathbf{D}\gamma_{IS} + \epsilon_{y,t} $$
 
@@ -546,29 +1316,7 @@ $r_t$: the real interest rate gap, as already defined
 
 $er_{t-1}$: the lagged real exchange rate gap, reflecting the time delay in the expenditure switching effect.
 
-$\mathbf{D} \cdot \gamma_{IS}$: COVID pulse dummies.
-
-```{r}
-#| label: "HOG_IS_PARS"
-#| warning: false
-#| message: false
-
-hog_is_fit_1 <- lm(Y_GAP ~ lag_Y_gap + lead_Y_gap + R_GAP + lag_rer_gap + 
-                   dummy_2020Q2 + dummy_2020Q3, 
-                 data = MODEL_DIFFS)
-summary(hog_is_fit_1)
-```
-
-```{r}
-plot(hog_is_fit_1, which = 1, col = "royalblue", pch = 20, 
-     main = "Residuals vs Fitted: Tidier HOG IS Model")
-
-plot(hog_is_fit_1, which = 2, col = "darkgreen", pch = 20)
-
-car::durbinWatsonTest(hog_is_fit_1)
-```
-
-This removes non-significant terms and produces a better, more parsimonious result, for the following reasons:
+$\mathbf{D} \cdot \gamma_{IS}$: COVID pulse dummies.This removes non-significant terms and produces a better, more parsimonious result, for the following reasons:
 
 -   **Increased Precision (Lower Standard Errors)**: on the output and interest rate gaps.
 

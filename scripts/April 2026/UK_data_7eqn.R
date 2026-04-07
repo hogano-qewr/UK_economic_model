@@ -14,6 +14,7 @@ library(mFilter)
 library(stringr)
 library(systemfit)
 library(tsibble)
+library(stats)
 select <- dplyr::select
 
 
@@ -69,8 +70,8 @@ MODEL_DF <- list(GDP_clean, AGG_DEM_clean) %>%
 #   into a yearqtr object within a filter() function. While the strings "1997 Q1" and "2024 Q4" look
 #   like dates, R cannot naturally "rank" them as strings (e.g., "2000 Q1" would come after "1997 Q4" 
 #   alphabetically, but this logic can fail with different naming conventions). By using the zoo 
-#   package's as.yearqtr class, you can treat them as numeric values where 1996.0 is earlier than 2024.75.
-#  filter down to our period
+#   package's as.yearqtr class, you can treat them as numeric values
+
 
 MODEL_DF <- MODEL_DF |> 
   filter(
@@ -84,9 +85,9 @@ MODEL_DF <- MODEL_DF |>
          I_tot = as.numeric(I_tot),
   )
 # Handle Inventory separately 
-# (I_inven has negative numbers, so you CANNOT log it. Use it as a % of GDP instead)
+# (I_inven has negative numbers, so you CANNOT log it. Use it as a % of GDP instead) (*100 to state as %)
 MODEL_DF <- MODEL_DF %>%
-  mutate(invtry_RAT = I_inven / GDP_mp) 
+  mutate(invtry_RAT = (I_inven / GDP_mp) * 100)  
 
 
 
@@ -107,7 +108,6 @@ unemp <- UK_unempl  |>
 
 MODEL_DF <- left_join(MODEL_DF, unemp, by = "Date")
 
-view(MODEL_DF)
 
 #### PRODUCTIVITY: OUTPUT PER HOUR WORKED  #####################################
 
@@ -296,7 +296,7 @@ IM_defl <- import_price_deflator  |>
 MODEL_DF <- left_join(MODEL_DF, IM_defl, by = "Date")
 
 
-view(MODEL_DF)
+
 
 
 ##################################################################################################
@@ -482,7 +482,7 @@ MODEL_DF <- left_join(MODEL_DF, GBP_EER_final, by = c("date" = "Date"))
 MODEL_DF <- MODEL_DF %>%
   mutate(date = as.Date(as.yearqtr(date, format = "%Y Q%q")))
 
-
+view(MODEL_DF)
 
 
 #### convert the data we need (logs) ###############################
@@ -527,6 +527,8 @@ MODEL_READY <- MODEL_READY %>%
 # 3. Quick check: Is the 2024 Q4 gap reasonable?
 tail(MODEL_READY %>% select(date, GVA_bp, Y_star, Y_GAP), 5)
 
+
+
 ### REPEAT FOR UNEMPLOYMENT GAP ################
 
 hp_U <- hpfilter(MODEL_READY$u_RATE, freq = 1600)
@@ -548,36 +550,14 @@ MODEL_READY %>%
   tail(5)
 
 
-#### SO, ABOVE WE HAVE NEW OUTPUT AND UNEMPLOYMENT GAPS
-################################################################################################################
-
-########## NEW INTEREST RATE GAP  #########################################
-# Wald test showed the expectations weights don't sum to 1. This usually means lead_pi (expectations) 
-#   is "stealing" the explanatory power of the other variables because it is so highly correlated with them.
-# The Fix: Try a "Target-Consistent" Phillips Curve. Instead of using lead_pi (which is just a lead of your 
-#   own data), use the deviation from the 2% target.
-
 MODEL_READY <- MODEL_READY %>%
   mutate(
-    # INFLATION, INFLATION "GAP" (deviation from BOE target), REAL INTEREST RATE, GILT SPREAD (5-YR) 
-    # INFL_yoy: (log(now) - log(4 quarters ago)) gives a decimal growth rate
-    # NEED TO BASE THIS ON IMF VERSION OF UK CPI FOR MODEL CONSISTENCY AND RESOLVE AUTOCORREL.
-    cpi_INFL_imf = (cpi_IDX_imf - lag(cpi_IDX_imf, 4)) * 100,
-    dcpi_INFL = (dcpi_IDX - lag(dcpi_IDX, 4)) * 100,
-    # 1. Inflation Deviation from Target (2.25% is value for GDP defl that is equiv to CPI 2% target)
-    dcpi_DEV = dcpi_INFL - 2.25,
-    
-    r_UK = i_UK - dcpi_DEV,
-    
-    i5y_SPR = i_g5y - i_UK)
-
-# IMPORTS / ENERGY PRICE INFLATION 
-
-MODEL_READY <- MODEL_READY |> 
-  mutate(
-    IMcpi_INFL  = (IMcpi_IDX - lag(IMcpi_IDX, 4)) * 100,
-    IMcpi_INFL_adj = IMcpi_IDX / er_IDX,
-    ecpi_INFL = (ecpi_IDX - lag(ecpi_IDX, 4)) * 100
+    Y_GAP_L1    = lag(Y_GAP, 1),
+    Y_GAP_L2    = lag(Y_GAP, 2),
+    Y_GAP_L3    = lag(Y_GAP, 3),
+    u_GAP_L1    = lag(u_GAP, 1),
+    u_GAP_L2    = lag(u_GAP, 2),
+    u_GAP_L3    = lag(u_GAP, 3)
   )
 
 #################### NET EXPORT GROWTH ########################################
@@ -597,51 +577,7 @@ MODEL_READY <- MODEL_READY %>%
     dNX_lag1 = lag(dNX, 1)
   )
 
-
-# Remove the first 4 rows and the last 4 rows
-MODEL_READY <- MODEL_READY %>%
-  slice(5:(n() - 4))
-
-
-
-
-
-
-## NOMINAL RATE GAP
-hp_i_UK <- hpfilter(MODEL_READY$i_UK, freq = 1600)
-
-# 3. Map back to the subset
-MODEL_READY <- MODEL_READY %>%
-  mutate(
-    i_STAR = as.numeric(hp_i_UK$trend),
-    i_GAP = as.numeric(hp_i_UK$cycle)
-  )
-
-## REAL RATE GAP
-#### real interest rate GAP = nominal interest rate gap less the inflation deviation ##########
-MODEL_READY <- MODEL_READY %>%
-  mutate(
-    r_GAP = i_GAP - dcpi_DEV)
-
-## INT'L RATE DIFFERENTIAL
-MODEL_READY <- MODEL_READY %>%
-  mutate(
-    i_DIFFL = (i_UK - i_FOR)
-  )
-
-MODEL_READY <- MODEL_READY |> 
-  mutate(
-    di_DIFFL = i_DIFFL - lag(i_DIFFL, 1)
-  )
-
-################################################################################
-
-
-
-
-####################################################################################################
-
-### CONVERT NOMINAL EXCHANGE RATE TO REAL EXCHANGE RATE###########
+### CONVERT NOMINAL EXCHANGE RATE INDEX TO REAL EXCHANGE RATE INDEX and ESTABLISH FIRST DIFFERENCES ###########
 
 MODEL_READY <- MODEL_READY %>%
   mutate(rer = er_IDX + cpi_IDX_imf - fcpi_WIDX)
@@ -651,6 +587,10 @@ MODEL_READY <- MODEL_READY |>
     drer = (rer - lag(rer, 1)) * 100
   )
 
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    drer_L1     = lag(drer, 1)
+  )
 #  NOTE ON RER ####
 
 # RER rising indicates a Real Appreciation of the Pound—either because the nominal exchange rate 
@@ -661,14 +601,23 @@ MODEL_READY <- MODEL_READY |>
 
 
 
-### QUICK NOTE ON APPROACH TO PRODUCTIVITY AND WAGES #########
-# For a consistent New Keynesian / Structural model: 
-#   Productivity: Use the Gap. It represents "Supply-side slack." If productivity is below trend 
-#     (negative gap), it puts upward pressure on unit labor costs and inflation.
-#   Real Wages: Use Real Wage Growth. In the UK, wages are often "sticky." Modeling the growth of 
-#     wages relative to the gap in productivity is a classic way to show how "Wage-Push Inflation" 
-#     works.
-# N.B. FOUND THAT REAL WAGE GROWTH FAILS STATIONARITY TESTS
+##### REAL WAGE GAP and LAG ##############################################################
+
+hp_wage <- hpfilter(MODEL_READY$wage_IDX, freq = 1600)
+
+# 3. Extract the 'cycle' as your PROD_GAP
+MODEL_READY$wage_GAP <- hp_wage$cycle * 100
+#####################################################################################
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    wage_GAP_L1 = lag(wage_GAP, 1)
+  )
+##########################################################################################
+
+# SLICE OUT LAST 4 ROWS FOR MISSING DATA #################################################
+library(dplyr)
+MODEL_READY <- MODEL_READY %>% slice_head(n = -4)
 
 
 ##### define PRODUCTIVITY GAP so it represents supply-side slack ###################################
@@ -680,9 +629,16 @@ hp_prod <- hpfilter(MODEL_READY$prod_IDX, freq = 1600)
 # 3. Extract the 'cycle' as your PROD_GAP
 MODEL_READY$prod_GAP <- hp_prod$cycle * 100
 
+
+# CHECK ###
 MODEL_READY %>% 
   select(date, prod_IDX, prod_GAP) |>  
   tail(5)
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    prod_GAP_L1 = lag(prod_GAP, 1)
+  )
 
 # Direct Elasticity: In your 3SLS, if you regressed Inflation on this PROD_GAP, a coefficient of 
 #   -0.2 would mean: "A 1 percentage point drop in the productivity gap (productivity falling 
@@ -690,18 +646,6 @@ MODEL_READY %>%
 # Middle East Crisis Link: In a supply shock scenario (like the Middle East crisis), energy costs
 #   spike, which often causes real productivity to drop relative to its trend. Your model can now 
 #   capture this "negative productivity shock" on the same 1:1 scale as your interest rate hikes.
-
-
-##### REAL WAGE GAP ##############################################################
-
-hp_wage <- hpfilter(MODEL_READY$wage_IDX, freq = 1600)
-
-# 3. Extract the 'cycle' as your PROD_GAP
-MODEL_READY$wage_GAP <- hp_wage$cycle * 100
-#####################################################################################
-
-
-
 
 # Handling Supply Shocks: The Middle East crisis is a classic supply shock. When energy prices spike,
 #   it creates a "wedge" between productivity and wages. By using Real Wage Growth, you can observe 
@@ -711,11 +655,95 @@ MODEL_READY$wage_GAP <- hp_wage$cycle * 100
 #   by approximately 2% even as output per worker fell. Modeling this as growth allows you to see 
 #   how much "catch-up" pressure exists from previous high-inflation periods. 
 
+### QUICK NOTE ON APPROACH TO PRODUCTIVITY AND WAGES #########
+# For a consistent New Keynesian / Structural model: 
+#   Productivity: Use the Gap. It represents "Supply-side slack." If productivity is below trend 
+#     (negative gap), it puts upward pressure on unit labor costs and inflation.
+#   Real Wages: Use Real Wage Growth. In the UK, wages are often "sticky." Modeling the growth of 
+#     wages relative to the gap in productivity is a classic way to show how "Wage-Push Inflation" 
+#     works.
+# N.B. FOUND THAT REAL WAGE GROWTH FAILS STATIONARITY TESTS
 
-str(MODEL_READY)
+
+
+
+########## INFLATION AND INTEREST RATES (PREP FOR RATE GAPS) #########################################
+# Wald test showed the expectations weights don't sum to 1. This usually means lead_pi (expectations) 
+#   is "stealing" the explanatory power of the other variables because it is so highly correlated with them.
+# The Fix: Try a "Target-Consistent" Phillips Curve. Instead of using lead_pi (which is just a lead of your 
+#   own data), use the deviation from the 2% target.
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    # INFLATION, INFLATION "DEV" (deviation from BOE target), REAL INTEREST RATE, GILT SPREAD (5-YR) 
+    # INFL_yoy: (log(now) - log(4 quarters ago)) gives a decimal growth rate
+    # NEED TO BASE THIS ON IMF VERSION OF UK CPI FOR MODEL CONSISTENCY AND RESOLVE AUTOCORREL.
+    cpi_INFL_imf = (cpi_IDX_imf - lag(cpi_IDX_imf, 4)) * 100,
+    dcpi_INFL = (dcpi_IDX - lag(dcpi_IDX, 4)) * 100,
+    # 1. Inflation Deviation from Target (2.25% is value for GDP defl that is equiv to CPI 2% target)
+    dcpi_DEV = dcpi_INFL - 2.25,
+    
+    r_UK = i_UK - dcpi_INFL,
+    
+    i5y_SPR = i_g5y - i_UK)
+
+# IMPORTS / ENERGY PRICE INFLATION 
+
+MODEL_READY <- MODEL_READY |> 
+  mutate(
+    IMcpi_INFL  = (IMcpi_IDX - lag(IMcpi_IDX, 4)) * 100,
+    ecpi_INFL = (ecpi_IDX - lag(ecpi_IDX, 4)) * 100
+  )
+
+## INT'L RATE DIFFERENTIAL
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    i_DIFFL = (i_UK - i_FOR)
+  )
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    dcpi_DEV_L1 = lag(dcpi_DEV, 1),
+    dcpi_DEV_L2 = lag(dcpi_DEV,2),
+    i_UK_L1     = lag(i_UK, 1),
+    )
+
+# REMOVE FIRST 4 ROWS (now NA due to df loss)
+MODEL_READY <- MODEL_READY %>%
+  slice(-(1:4))
+
+
+
+## REAL RATE GAP
+#### real interest rate GAP 
+hp_r_UK <- hpfilter(MODEL_READY$r_UK, freq = 1600)
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    r_STAR = as.numeric(hp_r_UK$trend),
+    r_GAP = as.numeric(hp_r_UK$cycle)
+  )
+
+MODEL_READY <- MODEL_READY |> 
+  mutate(
+    r_STAR_cal = 0.5,
+    r_GAP_cal  = r_UK - r_STAR_cal
+  )
+
+MODEL_READY %>% 
+  select(date, i_UK, dcpi_INFL, r_UK, r_STAR_cal, r_GAP_cal) %>% 
+  tail(5)
+
+
+hp_i_DIFFL <- hpfilter(MODEL_READY$i_DIFFL, freq = 1600)
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    i_DIFFL_STAR = as.numeric(hp_i_DIFFL$trend),
+    i_DIFFL_GAP = as.numeric(hp_i_DIFFL$cycle)
+  )
+
 ################################################################################
-
-
 
 
 hp_IMcpi_INFL<- hpfilter(MODEL_READY$IMcpi_INFL, freq = 1600)
@@ -740,20 +768,19 @@ MODEL_READY$i5y_GAP <- hp_i5y_SPR$cycle
 MODEL_READY$zlb <- if_else(MODEL_READY$i_UK <= 0.25, 1, 0)
 
 
-str(MODEL_READY)
-view(MODEL_READY)
 
-
+# REMOVE FIRST 2 ROWS (now NA due to df losses on dcpi_DEV lags)
 MODEL_READY <- MODEL_READY %>%
-  slice(-1)
+  slice(-(1:2))
+
+####################################################################################################
 
 
 
-####################################################
-### FOR QUARTO REPORT
-library(readr)
-write_csv(MODEL_READY, "reports/MODEL_READY.csv")
-####################################################
+str(MODEL_READY)
+################################################################################
+
+
 
 
 
@@ -763,7 +790,7 @@ write_csv(MODEL_READY, "reports/MODEL_READY.csv")
 
 
 vars_to_test <- c("Y_GAP", "u_GAP", "dcpi_DEV", "r_GAP", "drer", "prod_GAP", "wage_GAP", 
-                  "i5y_GAP", "di_DIFFL","IMcpi_GAP", "ecpi_GAP", "dNX")
+                  "i5y_GAP", "i_DIFFL_GAP","IMcpi_GAP", "ecpi_GAP", "dNX")
 # Loop through and print p-values
 for (v in vars_to_test) {
   # Remove NAs to avoid errors
@@ -780,19 +807,33 @@ for (v in vars_to_test) {
 # Y_GAP ADF p-value: 0.01 
 # u_GAP ADF p-value: 0.0275 
 # dcpi_DEV ADF p-value: 0.0437 
-# r_GAP ADF p-value: 0.0709 
+# r_GAP ADF p-value: 0.01 
 # drer ADF p-value: 0.01 
 # prod_GAP ADF p-value: 0.01 
 # wage_GAP ADF p-value: 0.0118 
 # i5y_GAP ADF p-value: 0.01 
-# di_DIFFL ADF p-value: 0.0128 
+# i_DIFFL_GAP ADF p-value: 0.0347 
 # IMcpi_GAP ADF p-value: 0.0486 
+# ecpi_GAP ADF p-value: 0.01 
+# dNX ADF p-value: 0.01 
+ 
+### re-ren post re-organ of data script to lose fewer degrees of freedom APRIL 5TH 2026
+# Y_GAP ADF p-value: 0.01 
+# u_GAP ADF p-value: 0.0293 
+# dcpi_DEV ADF p-value: 0.0453 
+# r_GAP ADF p-value: 0.01 
+# drer ADF p-value: 0.01 
+# prod_GAP ADF p-value: 0.01 
+# wage_GAP ADF p-value: 0.0225 
+# i5y_GAP ADF p-value: 0.01 
+# i_DIFFL_GAP ADF p-value: 0.0406 
+# IMcpi_GAP ADF p-value: 0.0522 
 # ecpi_GAP ADF p-value: 0.01 
 # dNX ADF p-value: 0.01 
 
 MODEL_READY %>% 
   select(date, Y_GAP, u_GAP, dcpi_DEV, r_GAP, drer, prod_GAP, wage_GAP, 
-        i5y_GAP, di_DIFFL, IMcpi_GAP, ecpi_GAP, dNX) |>  
+        i5y_GAP, i_DIFFL_GAP, IMcpi_GAP, ecpi_GAP, dNX) |>  
   tail(25)
 
 # ZIVOT-ANDREWS TEST FOR STATIONARITY WITH STRUCTURAL BREAKS
@@ -800,7 +841,8 @@ MODEL_READY %>%
 library(urca)
 
 # ENDOGENOUS VARIABLES
-
+# With the ZA and BP (struc breaks) tests, we are asking the question "Is there evidence that the mean 
+#   (or trend) of the output gap changed permanently in a way that requires modelling a regime break?"
 # for both intercept and trend ('both')
 za_Y_GAP <- ur.za(MODEL_READY$Y_GAP, model = "both", lag = NULL)
 summary(za_Y_GAP)
@@ -808,120 +850,168 @@ summary(za_Y_GAP)
 struc <- breakpoints(MODEL_READY$Y_GAP ~ 1)
 summary(struc)
 # case not strong for break...BIC minimised at m = 0 ; is it worth it for RSS reduction?
+# Unit‑root tests with endogenous breaks strongly reject non‑stationarity in the output gap when
+#  allowing for a COVID‑period disruption. However, multiple‑break tests with information‑criterion
+#  selection show no evidence of a persistent regime shift in the mean of the output gap. Accordingly, 
+#  the output gap is treated as stationary without an explicit structural break in the baseline 
+#  specification.
+# Although the COVID period generates large residuals in the output‑gap equation, multiple‑break tests 
+#  do not support a persistent regime shift in the mean of the gap. The episode is therefore treated 
+#  as an extreme transitory shock rather than as a structural break in the equilibrium relationship.
+# At the data‑generating‑process level, the correct conclusion is: Y_GAP is I(0) with large transitory 
+#   shocks, not a broken equilibrium process.
+
 
 
 za_u_GAP <- ur.za(MODEL_READY$u_GAP, model = "both", lag = NULL)
 summary(za_u_GAP)
-# Zivot-Andrews only allows for one structural break, but there are several in U_GAP
+# ZA says: Unemployment gap is highly persistent; A single break at the GFC is not enough to restore stationarity
 
 # Bai–Perron multiple breakpoints test
 struc <- breakpoints(MODEL_READY$u_GAP ~ 1)
 summary(struc)
-# U_GAP has for major structural breaks (@ 30: 2004 Q2; @48: 2008 Q4; @68: 2013 Q4; @92: 2019 Q4)
-MODEL_READY$date[c(25, 43, 63, 87, 88)]
-# Here’s the key insight:
-# 👉 Standard unit‑root tests (ADF, PP, ZA) assume 0 or 1 break.
-# 👉 U_GAP clearly has 4 breaks.
-# 👉 So these tests incorrectly classify U_GAP as non‑stationary.
-# This is not a real non‑stationarity problem.
-# It’s simply a multiple‑break problem, which is normal in macro labour market data.
-# 💡 4. The correct conclusion: U_GAP is stationary Because:  
-# It has a stable mean-reverting structure within regimes.
-# Labour gaps are constructed to be I(0).
-# Bai–Perron shows clear discrete regime shifts.
-# ZA fails because it only handles 1 break.
-# ADF fails because it assumes no breaks at all.
-#So the correct interpretation is:
-#  ✔️ U_GAP is I(0) with multiple structural breaks
-#❗ It is not I(1).
-#❗ No differencing is needed.
-#❗ This is fully normal in real macro models.
+# Bai–Perron says: Multiple mean shifts significantly improve fit. Penalised fit strongly prefers several regimes.
+# Together, they imply: u_GAP is best thought of as a stationary‑around‑shifting‑means process, not a single
+#   regime gap.
+# U_GAP has foUr major structural breaks
+MODEL_READY$date[c(24, 42, 62, 86)] # = ["2004-04-01" "2008-10-01" "2013-10-01" "2019-10-01"]
+
+# APRIL 5TH: CREATE TWO STRUCTURAL BREAK DUMMIES for GFC and 2013 Q4 - GFC definite; 2013 Q4 to test
+# This is a change from previous run in which we created 4 break dummies for U_GAP, as we now seek optimal
+# model design.
+
+# Why 2008Q4 is unquestionably the primary break. It is: the ZA break, the dominant Bai–Perron breakpoint,
+#  the largest labour‑market shock in the sample, and a clearly interpretable regime change.
+# Economically, it marks: the collapse of financial intermediation, employment destruction, a change in 
+#  job‑finding and matching dynamics, hysteresis effects widely documented for the UK.
+# 2008Q4 is a structural regime break in unemployment dynamics, not just a large shock and, as such, should be 
+#  hard‑coded into the baseline.
+
+# Economic meaning of 2013Q4: corresponds to: the end of GFC/post‑crisis adjustment, labour‑market repair 
+#   and re‑matching, immigration and participation changes, welfare and labour‑market institutional reforms,
+#   the return of employment growth without wage pressure. This is widely seen as a new labour‑market regime, 
+#   not a temporary disturbance.
+# Statistical role: Appears as a stable Bai–Perron breakpoint; Far enough from both GFC and COVID to matter 
+#   independently. Not driven by extreme outliers.
+# Modeling implications: Captures a persistent shift in unemployment dynamics; Does not contaminate short‑
+#   sample inference; Does not force you to treat COVID as a permanent regime
+
+# TENTATIVE CONCLUSION: “While multiple breakpoints are detectable in unemployment‑gap data, the baseline 
+#   specification includes only a GFC‑era regime shift. A secondary post‑crisis breakpoint is examined in 
+#   robustness checks. Pandemic‑era movements are treated as transitory disturbances rather than structural 
+#   changes in labour‑market equilibrium.”
+
+# FOUNDATIONAL REMINDERS
+# Standard unit‑root tests (ADF, ZA) assume 0 or 1 break. U_GAP has 4 breaks in our sample. So these tests 
+#     incorrectly classify U_GAP as non‑stationary but it's not a real non‑stationarity problem.
+# It’s simply a multiple‑break problem, which is normal in macro labour market data. # The correct interpretation 
+#     is rather that U_GAP is stationary because: 
+#         It has a stable mean-reverting structure within regimes.
+#         Labour gaps are constructed to be I(0).
+#         Bai–Perron shows clear discrete regime shifts.
+#         ZA fails because it only handles 1 break.
+#         ADF fails because it assumes no breaks at all.
+#         U_GAP is I(0) with multiple structural breaks, not I(1).
+
+
 
 
 # for both intercept and trend ('both')
 za_dcpi_DEV <- ur.za(MODEL_READY$dcpi_DEV, model = "both", lag = NULL)
 summary(za_dcpi_DEV)
-# DEFL_dev is stationary with a break at position 96 (2022 Q1)
+# DEFL_dev is stationary with a break at position 95 (2022 Q1)
 struc <- breakpoints(MODEL_READY$dcpi_DEV ~ 1)
 summary(struc)
-# Inflation deviation exhibits a single structural break @ 88 2020Q1
-# 2022Q1 (ZA) or 2020 Q1 (BP), 
-# corresponding to the onset of the global inflation shock. Multiple-break models were rejected 
-# by BIC, confirming that only one break is needed to stabilise the inflation equation.
-# The UK inflation process did not structurally break in 2019. Inflation was still very subdued in 2019.
-# The actual break is the global inflation shock of 2021. Supply chains, energy markets, markups, 
-# import prices, and expectations all changed. ZA is more aligned with inflation‑process breaks
-# ZA is designed to detect shifts in the trend and drift, not just mean shifts. Your structural model 
-# needs the big break, not the early drift Using the early‑drift BP break would: overcorrect the Phillips 
-# Curve, reduce parsimony, distort the inflation slope, introduce unnecessary dummy structure.
+# Inflation deviation exhibits a dominant structural break @ 87 2020Q1 for all m>=1
+# 2022Q1 (ZA) or 2020 Q1 (BP). ESTABLISH BREAK AT 87 [AND TEST 2021Q1 FOR ROBUSTNESS]
+# TENTATIVE CONCLUSION: “Unit‑root tests with endogenous breaks strongly reject non‑stationarity in 
+#   inflation deviations, identifying a sharp change in persistence associated with the post‑pandemic 
+#   inflation episode. Multiple‑break tests with information‑criterion selection indicate a single 
+#   dominant structural shift marking the end of the low‑inflation regime. Accordingly, the baseline 
+#   specification includes a post‑2020 inflation‑regime dummy, while treating the 2022 inflation surge 
+#   itself as a large realisation of that regime rather than as a separate structural break.”
+
 
 
 za_r_GAP <- ur.za(MODEL_READY$r_GAP, model = "both", lag = NULL)
 summary(za_r_GAP)
-# r_GAP is stationary with a break at position 96 (2022 Q1) [same as DEFL_dev]
+# r_GAP is stationary with a break at position 95 (2022 Q1) [same as DEFL_dev]
 # Bai–Perron multiple breakpoints test
 struc <- breakpoints(MODEL_READY$r_GAP ~ 1)
 summary(struc)
-# again, suggests break @ 88
+# BIC minimised with no break [Treat post‑pandemic tightening as an endogenous response, not a regime shift]
+
+
+
 
 za_drer <- ur.za(MODEL_READY$drer, model = "both", lag = NULL)
 summary(za_drer)
-# D_RER is stationary with a potential break at position 48 (2008 Q4)
+# D_RER is stationary with a potential break at position 43 (2009 Q1)
 # Bai–Perron multiple breakpoints test
 struc <- breakpoints(MODEL_READY$drer ~ 1)
 summary(struc)
-# suggests that no breakpoint is required. but, if needed for robustness, include at 48 (what ZA suggests)
-# Interpretation: The ZA statistic is strongly significant → D_RER is stationary (I(0)) even with a break.
-# ZA’s estimated break date is position 48, which corresponds to 2008 Q4. This makes perfect economic sense: 
-# 2008Q4 was the height of the global financial crisis, exchange rates worldwide experienced huge swings and 
-# volatility regime‑shifts. So ZA is telling you: If D_RER has a break, it is only the 2008Q4 financial crisis.
-# Reconciling the Two Tests (ZA vs BP): A (unit-root + break test): Designed to detect a single break in a 
-#   trending / near-unit-root variable. Finds break at 48 = 2008Q4. Tells you: “D_RER is stationary, but the 
-#   best single-break specification is 2008Q4.” BP (multiple-structural-break segmentation): Designed to detect 
-#   regime shifts in the mean. Prefers zero breaks for D_RER. Adding breaks reduces RSS but worsens BIC 
-#   (overfits noise). Thus the two tests are telling you: D_RER is stationary — good for your UIP equation. 
-#   No break is required for stability. The only plausible break is 2008Q4 (if you want a robustness dummy)
+# suggests that no breakpoint is required. 
+# “Despite large crisis‑era movements, changes in the real exchange rate are strongly stationary, 
+#   and information‑criterion‑based breakpoint tests provide no evidence of persistent regime shifts. 
+#   Accordingly, exchange‑rate dynamics are modelled without structural break dummies.”
 
 
 # note that WAGE_GAP passed the ADF test
 za_wage_GAP <- ur.za(MODEL_READY$wage_GAP, model = "both", lag = NULL)
 summary(za_wage_GAP)
-# fails to reject null hypothesis that WAGE_GAP has a unit root and suggests break at position 101 (2022 Q1)
-# ...very late in sample and doesn't make much sense 
+# fails to reject null hypothesis that WAGE_GAP has a unit root and suggests break at position 95 (2022 Q1)
 # Bai–Perron multiple breakpoints test
 struc <- breakpoints(MODEL_READY$wage_GAP ~ 1)
 summary(struc)
+#### APRIL 5TH RUN .... NOW BIC SUGGESTING THREE STRUCTURAL BREAKD REQUIRED (24, 51, 66) [2004Q2, 2011Q1, 2014Q4]
+# TENTATIVE NEW CONCLUSION: Although multiple structural breaks are detectable in the wage gap, these largely 
+#   reflect endogenous responses to changes in labour‑market slack, productivity, and inflation regimes. 
+#   Accordingly, the baseline specification does not impose wage‑specific regime dummies, allowing wage dynamics 
+#   to adjust through the system’s structural channels.”
+## PREVIOUS RUN CONCLUSION:
 # Statistically, no breaks required. BIC lowest with no breaks, despite dip at m=2 and m=3. 
 # Why wage gap can be stationary without clear breakpoints. Wage behaviour in the UK changed over time due to:
 #   post‑GFC low productivity; Brexit labour‑supply shifts; post‑Covid tight labour market; 2022–23 wage–price 
-#   dynamics.
-# BUT these changes were gradual, not sudden: firms adjust wages with delays; contracts are staggered; 
-#   expectations adapt slowly; bargaining power shifts smoothly.
-# Thus: ADF sees stable mean reversion → stationary. ZA cannot detect one dominant crash or spike → no strong 
-#   break. BP detects lots of small, unimportant changes → no break optimal. 
-# This is consistent with how wage gaps tend to behave in real semi‑structural models.
+#   dynamics. BUT these changes were gradual, not sudden: firms adjust wages with delays; contracts are staggered; 
+#   expectations adapt slowly; bargaining power shifts smoothly. # Thus: ADF sees stable mean reversion → stationary. ZA cannot detect one dominant crash or spike → no strong 
+#   break. BP detects lots of small, unimportant changes → no break optimal. This is consistent with how wage gaps 
+#   tend to behave in real semi‑structural models.
 
 
 za_prod_GAP <- ur.za(MODEL_READY$prod_GAP, model = "both", lag = NULL)
 summary(za_prod_GAP)
 struc <- breakpoints(MODEL_READY$prod_GAP ~ 1)
 summary(struc)
-# “ADF confirms that the productivity gap is stationary. Zivot–Andrews suggests one break in late 2020/early 
-#   2021, consistent with COVID distortions. Bai–Perron BIC clearly rejects the inclusion of breaks, making 
+# ADF confirms that the productivity gap is stationary. Zivot–Andrews suggests one break in 2020Q2, consistent
+# with COVID distortions. Bai–Perron BIC clearly rejects the inclusion of breaks, making 
 #   a zero‑break specification optimal. Therefore, no break dummies are required in the productivity‑gap 
-#   equation.”
+#   equation, with pandemic‑era volatility treated as a transitory disturbance rather than a structural shift.
+# NO CHANGE IN CONCLUSION BASED ON APRIL 5TH RUN....;
+# Measured productivity fluctuated violently during COVID, but its deviation from trend did not permanently 
+#   re‑anchor at a different level.
 
 
 # EXOGENOUS VARIABLES
 za_i5y_GAP <- ur.za(MODEL_READY$i5y_GAP, model = "both", lag = NULL)
 summary(za_i5y_GAP)
+# TEST-STAT FAIL...POTENTIAL BREAK AT 41 (2008Q3)
 struc <- breakpoints(MODEL_READY$i5y_GAP ~ 1)
 summary(struc)
+# STILL POINTING TO NO STRUCTURAL BREAKS BEING REQUIRED
 
-za_di_DIFFL <- ur.za(MODEL_READY$di_DIFFL, model = "both", lag = NULL)
-summary(za_di_DIFFL)
-struc <- breakpoints(MODEL_READY$di_DIFFL ~ 1)
+za_i_DIFFL_GAP <- ur.za(MODEL_READY$i_DIFFL_GAP, model = "both", lag = NULL)
+summary(za_i_DIFFL_GAP)
+# test-stat only passes at 10% level [...potential break at 42, 2008Q4] 
+struc <- breakpoints(MODEL_READY$i_DIFFL_GAP ~ 1)
 summary(struc)
+# april 5 run...now suggesting 3 structural breaks 19,42,57 [2003Q1, 2008Q4, 2012Q3]
+
+# Although multiple breakpoints are detectable in short‑term interest‑rate differentials, these 
+#   primarily reflect periods of international monetary policy coordination rather than persistent 
+#   regime shifts. Accordingly, interest‑rate spread gaps are modelled without structural break dummies, 
+#   with regime effects captured through inflation and policy‑reaction dynamics. Bai–Perron is detecting:
+#       periods when UK and ROW policy were moving together, periods when they diverged, periods when 
+#       they re‑converged.
 
 za_IMcpi_GAP <- ur.za(MODEL_READY$IMcpi_GAP, model = "both", lag = NULL)
 summary(za_IMcpi_GAP)
@@ -941,40 +1031,221 @@ summary(struc)
 
 
 
-###  STATIONARITY OF ALL ENDOGENDOUS AND EXOGENOUS VARIABLES CONFIRMED  ########
+########## BREAK DUMMIES ######################################
+# SEPARATE STRUCTURAL BREAK DUMMIES FOR THE DIFFERENT EQUATIONS
+# APRIL 5 REVSED POSITION -> BETTER DATA -> MODEL DESIGN motivate MINIMAL BREAKS & MINIMAL application in EQNS
 
-########## BREAK DUMMIES #####################################
-# THESE ARE WHERE THE STRUCTURAL BREAKDS OCCUR IN U_GAP ######
+# new Y_GAP @ 87 (2020Q1)  # cancelled for Apr 5th run
+#     u_GAP @ 86 (2019Q4)  # cancelled for Apr 5th run
+#           @ 62 (2013Q4)      # RETAINED
+#           @ 42 (2008Q4)      # RETAINED
+#           @ 24 (2004Q2)  # cancelled for Apr 5th run
+# dcpi_DEV  @ 87 (2020Q1)      # RETAINED BUT CHANGED FROM 2022Q1 (THE PEAK)
+#           @ 91 (2021Q1)      # NEW but only as an alternative to 87 for robustness testing
 
-bp <- c(25, 43, 63, 87, 88, 96)
-# new Y_GAP @ 88 (2020Q1) 
-#     u_GAP @ 87 (2019Q4) 
-#           @ 63 (2013Q4) 
-#           @ 43 (2008Q4) 
-#           @ 25 (2004Q2)
-# dcpi_DEV  @ 96 (2022Q1)
-#     r_GAP @ 96 also
 
-# Unemployment gap breaks (Okun equation only)
-MODEL_READY$bpu1 <- seq_len(nrow(MODEL_READY)) >= bp[1]
-MODEL_READY$bpu2 <- seq_len(nrow(MODEL_READY)) >= bp[2]
-MODEL_READY$bpu3 <- seq_len(nrow(MODEL_READY)) >= bp[3]
-MODEL_READY$bpu4 <- seq_len(nrow(MODEL_READY)) >= bp[4]
+bpu <- c(42, 62)
+# Unemployment gap breaks (Okun equation only OR OKUN and WAGE-UNEMP BLOCK?)
+# Keep the dummy narrowly targeted unless evidence tells you otherwise.
+MODEL_READY$bpu1_GFC  <- seq_len(nrow(MODEL_READY)) >= bpu[1]  
+MODEL_READY$bpu2_POST <- seq_len(nrow(MODEL_READY)) >= bpu[2]  # robustness test for inclusion / exclusion...
 
-# Output gap break (IS curve only)
-MODEL_READY$bpy  <- seq_len(nrow(MODEL_READY)) >= bp[5]
-
+bpp <- c(87, 91) # inflation regime start alternatives
 # Inflation deviation break (Phillips curve only)
-MODEL_READY$bpp  <- seq_len(nrow(MODEL_READY)) >= bp[6]
+MODEL_READY$bpp_BEG  <- seq_len(nrow(MODEL_READY)) >= bpp[1]
+MODEL_READY$bpp_LAT  <- seq_len(nrow(MODEL_READY)) >= bpp[2]  # for robustness testing as alternative
 
-# Real interest-rate gap break (IS curve only)
-MODEL_READY$bpr  <- seq_len(nrow(MODEL_READY)) >= bp[6]
-# THERE ARE ALSO SINGLE STRUCTURAL BREAKS IN Y_GAP (@93) AND DEFL_dev (@97)
-# continue with ZA and BP tests on the other variables that have passed ADF
-# THINK ABOUT WHETHER SEPARATE STRUCTURAL BREAK DUMMIES ARE REQUIRED FOR THE DIFFERENT EQUATIONS. 
-# because CO-PILOT recommends including the four above (30, 48, 68, 92) in the: Okun equation, 
-#     Wage Phillips Curve, Phillips Curve, IS curve, Taylor rule (optional)
+
+# NOTE: Only one regime dummy per block is included in the baseline.
+# Secondary dummies are used exclusively for sensitivity analysis.
 
 
 
 
+####################################################
+### FOR QUARTO REPORT
+library(readr)
+write_csv(MODEL_READY, "reports/MODEL_READY.csv")
+####################################################
+
+
+## MULTICOLLINEARITY TESTS
+# N.B library(car) / vif(lm(Y_GAP ~ ...)) once OLS run on individ equations
+
+# IS relation
+cor(MODEL_READY[, c("Y_GAP_L1", "r_GAP", "r_GAP_cal", "i5y_GAP","drer","dNX")], use = "pairwise.complete.obs")
+# PC relation
+cor(MODEL_READY[, c("dcpi_DEV_L1", "dcpi_DEV_L2", "Y_GAP", "IMcpi_GAP", "ecpi_GAP")], 
+    use = "pairwise.complete.obs")
+# TR relation
+cor(MODEL_READY[, c("i_UK_L1", "dcpi_DEV", "Y_GAP")], use = "pairwise.complete.obs")
+# OLU 
+cor(MODEL_READY[, c("u_GAP_L1", "Y_GAP")], use = "pairwise.complete.obs")
+# WPC
+cor(MODEL_READY[, c("wage_GAP_L1", "dcpi_DEV_L1", "u_GAP", "prod_GAP")], use = "pairwise.complete.obs")
+# OLP
+cor(MODEL_READY[, c("prod_GAP_L1", "Y_GAP")], use = "pairwise.complete.obs")
+# UIP
+cor(MODEL_READY[, c("drer_L1", "i_DIFFL_GAP", "dNX", "IMcpi_GAP")], use = "pairwise.complete.obs")
+
+
+## ACF, PACF etc. ### lag structures
+
+# Y_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$Y_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$Y_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+# u_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$u_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$u_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+# dcpi_DEV ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$dcpi_DEV, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$dcpi_DEV, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+# r_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$r_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$r_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+# drer ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$drer, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$drer, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# wage_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$wage_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$wage_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# prod_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$prod_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$prod_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# i_DIFFL_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$i_DIFFL_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$i_DIFFL_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# dNX ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$dNX, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$dNX, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# IMcpi_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$IMcpi_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$IMcpi_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+
+
+
+# ecpi_GAP ##############################
+# 1. Set up the plotting area (1 row, 2 columns)
+par(mfrow = c(1, 2))
+
+# 2. Plot Autocorrelation Function
+acf(MODEL_READY$ecpi_GAP, main = "ACF Plot", na.action = na.pass)
+
+# 3. Plot Partial Autocorrelation Function
+pacf(MODEL_READY$ecpi_GAP, main = "PACF Plot")
+
+# Reset plotting area
+par(mfrow = c(1, 1))

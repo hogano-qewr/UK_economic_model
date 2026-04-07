@@ -1,0 +1,87 @@
+---
+title: "testing_notes"
+format: html
+editor: visual
+---
+
+Notes arising in the process of choosing whether / where to apply structural breaks.
+
+## Why deciding now is actually important
+
+There’s a subtle but crucial reason not to delay this decision. If you keep `Y_GAP`’s break status “open” while analysing later variables, you risk:
+
+-   inconsistent break logic across equations,
+
+-   retrofitting earlier decisions to later diagnostics,
+
+-   implicitly letting the estimator dictate the structural story.
+
+By contrast, what you are doing now is:
+
+>  **separating structural decisions from estimation hygiene**
+
+That is exactly the discipline reviewers and institutions expect.
+
+## A clean way to formalise the decision
+
+At this point, you can safely write in your working notes (or even a comment in the data script):
+
+> **Decision (April 2026 vintage):**\
+> `Y_GAP` is treated as stationary without an explicit structural break dummy.\
+> COVID‑era dynamics are interpreted as large transitory shocks rather than as a regime shift in the equilibrium output gap.
+
+Once that decision is written down, you should **not revisit it unless something genuinely new appears**, such as:
+
+-   evidence of post‑2020 permanent mean reversion failure (unlikely),
+
+-   or contradictory results across multiple break methodologies (you don’t have that).
+
+## When the estimator diagnostics *do* matter for `Y_GAP`
+
+To be clear, BG/ARCH/recursive tests still matter — just **later** and for a different reason.
+
+They help you decide things like:
+
+-    whether to use HAC standard errors,
+
+-    whether to downweight or temporarily dummy a couple of quarters,
+
+-    whether to comment on COVID‑driven uncertainty explicitly.
+
+They do **not** reopen the structural break question. Think of them as answering:
+
+>  *“Can I estimate the no‑break model honestly?”*
+
+not:
+
+> *“Is the no‑break model conceptually correct?”*
+
+You’ve already answered the second question.
+
+### BG/ARCH/recursive tests are a *different layer*
+
+These diagnostics (BG, ARCH, recursive estimates) answer a **different question**:
+
+>  *Given the maintained structural specification, does the chosen estimator behave well?*
+>
+> That is:
+
+-   an **estimation adequacy** question,
+
+-   not a **structural regime** question.
+
+Concretely:
+
+-   BG tests diagnose *remaining serial correlation*
+
+-   ARCH tests diagnose *variance instability*
+
+-   recursive estimates diagnose *parameter drift*
+
+-   None of these tests tell you whether a **structural break should exist**. They tell you whether your **estimation strategy is robust to extreme episodes**.
+
+That’s why it is perfectly correct to:
+
+1.   decide on break inclusion **first**, and
+
+2.   use estimator diagnostics **afterwards** as a safeguard.
