@@ -7,11 +7,11 @@ c(rank = qr(mm)$rank, ncol = ncol(mm))
 
 # IS curve
 eq_IS <- Y_GAP + 0.05 * r_GAP_cal ~
-  Y_GAP_L1 + i5y_GAP + dNX + drer_L1 + bpy + bpr
+  Y_GAP_L1 + i5y_GAP + dNX + drer_L1
 
 # Phillips Curve
 eq_PC <- dcpi_DEV - 0.05 * Y_GAP ~ 
-  dcpi_DEV_L1 + dcpi_DEV_L2 + IMcpi_GAP + ecpi_GAP + bpp
+  dcpi_DEV_L1 + dcpi_DEV_L2 + IMcpi_GAP + ecpi_GAP + bpp_BEG
 
 # Wage Phillips Curve
 eq_WPC <- wage_GAP + 0.05 * u_GAP ~ 
@@ -23,7 +23,7 @@ eq_TR <- i_UK ~
 
 # Okun equation
 eq_OKUN <- u_GAP ~ 
-  u_GAP_L1 + Y_GAP + bpu1 + bpu2 + bpu3 + bpu4
+  u_GAP_L1 + Y_GAP + bpu1_GFC + bpu2_POST
 
 # Productivity
 eq_OLP <- prod_GAP ~ 
@@ -49,8 +49,8 @@ inst_3sls_HC <- ~
   prod_GAP_L1 +
   r_GAP_cal + i5y_GAP +
   drer_L1 +
-  bpp + bpy +
-  bpu1 + bpu2 + bpu3 + bpu4
+  bpp_BEG + 
+  bpu1_GFC + bpu2_POST
 
 fit_3sls_HC <- systemfit(
   system_eqs_HC,
@@ -61,7 +61,7 @@ fit_3sls_HC <- systemfit(
 
 summary(fit_3sls_HC)
 
-# EXAMINE SOME IRFs TO SEE IF HYBRID C ACTUALLY REQUIRED #######################
+# EXAMINE SOME IRFs #######################
 coef_sys <- coef(fit_3sls_HC)
 print(coef_sys)
 
@@ -215,8 +215,15 @@ plot_irf <- function(irf, vars, title = "") {
 plot_irf(irf_mp,
          vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
          title = "Monetary Policy Shock – Hybrid C")
+plot_irf(irf_demand,
+         vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
+         title = "Demand Shock – Hybrid C")
+plot_irf(irf_supply,
+         vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
+         title = "Supply Shock – Hybrid C")
 
-
+#################################################################################
+#################################################################################
 
 irf_to_tidy <- function(irf_mat, shock_name) {
   

@@ -43,6 +43,158 @@ Heteroskedasticity‑robust inference sharpens interpretation without altering s
 
 Overall, the revised data construction reduces the reliance on ad‑hoc structural adjustments, improves interpretability of break tests, and yields cleaner reduced‑form behaviour across equations. The final specification is parsimonious, economically transparent, and diagnostically stable, providing a sound basis for system estimation and policy analysis.
 
+## April 5th: Fully-free 3SLS vs. 2SLS/OLS
+
+### Interpretation of Price and Wage Phillips Curves
+
+*(Institutional / policy‑model style)*
+
+#### Price Phillips Curve
+
+In the fully simultaneous 3SLS estimation, the coefficient on the output gap in the price Phillips curve is negative and statistically significant. With the output gap defined as the deviation of output from potential, this implies that—conditional on the rest of the system—periods of above‑potential activity are associated with lower contemporaneous deviations of inflation from trend.
+
+This result should be interpreted with care. In a system in which monetary policy responds endogenously to both inflation and activity, the reduced‑form Phillips‑curve coefficient captures not only the underlying price‑setting behaviour of firms, but also the stabilising response of policy and associated financial‑conditions effects. In particular, positive output gaps are typically associated with a tightening of monetary conditions, which acts to curb subsequent inflationary pressure. When these feedbacks are estimated simultaneously, the partial correlation between inflation deviations and the output gap within the Phillips‑curve equation reflects net system interactions rather than a standalone behavioural elasticity.
+
+Comparing across estimation methods illustrates this point. Ordinary least squares produce a negative and relatively muted output‑gap coefficient, consistent with simultaneity bias arising from the joint determination of output, inflation, and monetary policy. Two‑stage least squares, which instruments the output gap using lagged real and financial variables, increases the magnitude of the coefficient but leaves the sign unchanged, reflecting the fact that demand disturbances in the data are systematically followed by policy stabilisation. Fully‑free 3SLS further reallocates the effect of demand pressure across the IS curve, the Taylor rule, and the Phillips curve, leaving the Phillips‑curve coefficient to reflect a residual reduced‑form relationship once policy feedback is internalised.
+
+For these reasons, the output‑gap coefficient estimated in the fully‑free system should not be interpreted as a direct measure of the structural inflation–activity trade‑off. In Hybrid‑A, the slope of the Phillips curve is therefore calibrated to impose the economically conventional mechanism—whereby excess demand generates upward pressure on inflation—rather than to match the reduced‑form coefficient that emerges from a fully endogenous policy system. The 3SLS results provide an ex post justification for this approach, showing that unconstrained estimation conflates price‑setting behaviour with the systematic response of monetary policy.
+
+#### Wage Phillips Curve
+
+Fully‑free 3SLS estimation of the wage Phillips curve indicates a high degree of persistence in real wage deviations from trend, with the coefficient on the lagged wage gap close to unity. In contrast, contemporaneous effects of labour‑market slack and inflation on wages are weak and statistically insignificant, once endogeneity across the system is taken into account. Short‑run productivity deviations enter with a sizeable coefficient, reflecting cyclical utilisation and compositional effects.
+
+Given the definition of the wage gap as the deviation of real wages from their HP‑filtered trend, these results imply that wage adjustment in the UK occurs primarily through gradual correction of past deviations rather than through rapid responses to contemporaneous labour‑market conditions. Episodes of labour‑market slack are associated with prolonged periods of subdued real wage growth, rather than sharp wage cuts, consistent with the presence of nominal and institutional rigidities in wage‑setting.
+
+Comparison across estimation approaches reinforces this interpretation. OLS and 2SLS estimates suggest at most weak contemporaneous effects of unemployment on wages, and these effects are not robust once the full system of interactions is taken into account. In the 3SLS system, labour‑market slack primarily influences wages indirectly—through persistence and through regime shifts captured in the unemployment and output blocks—rather than as a strong within‑quarter compression mechanism.
+
+This motivates the treatment adopted in Hybrid‑A, where the coefficient on labour‑market slack in the wage Phillips curve is calibrated rather than freely estimated. The calibration ensures a stable and monotonic relationship between slack and wage pressure in long‑run dynamics, while avoiding over‑interpretation of short‑run correlations that are weakly identified in the data. The fully‑free 3SLS results support this approach, indicating that wage dynamics are dominated by inertia and adjustment lags, and that contemporaneous slack effects are structurally secondary.
+
+#### Implications for model use
+
+Taken together, the results from the fully‑free 3SLS system suggest that both price and wage Phillips curves are heavily influenced by endogenous feedbacks, particularly through monetary policy and broader system dynamics. Reduced‑form slope coefficients should therefore be interpreted as reflecting net interactions rather than isolated behavioural relationships. Hybrid‑A calibration choices can be viewed as structural discipline devices that preserve economically meaningful transmission mechanisms while ensuring stability and interpretability of the model for scenario analysis and policy applications.
+
+## APRIL 5: HYBRID A : Results from the Hybrid‑A 3SLS Specification
+
+### Overview
+
+This section summarises the results from the Hybrid‑A variant of the semi‑structural model estimated by three‑stage least squares (3SLS). Hybrid‑A imposes limited structural discipline by calibrating selected Phillips‑curve slopes, while allowing all other equations to be estimated freely within the system. The purpose of this specification is to deliver a stable, interpretable framework suitable for scenario analysis and policy simulations, while retaining empirical coherence across blocks.
+
+Overall system performance under Hybrid‑A remains strong. System‑wide fit, residual correlations, and coefficient stability are comparable to the fully‑free 3SLS specification, indicating that the imposed restrictions are consistent with the joint data‑generating process and do not distort behaviour elsewhere in the model.
+
+### Output and Demand Dynamics (IS Curve)
+
+The IS equation under Hybrid‑A displays broadly unchanged behaviour relative to the unconstrained system. Output growth exhibits moderate persistence, with lagged output remaining strongly significant. The real interest rate continues to enter with a positive coefficient, reflecting the endogenous response of monetary policy to economic conditions rather than a causal stimulus effect. Longer‑term interest rates, trade flows, and exchange‑rate terms remain statistically weak.
+
+The stability of the IS equation indicates that Hybrid‑A restrictions applied to the nominal block do not interfere with real‑side demand dynamics. Output fluctuations continue to be driven primarily by internal propagation and policy‑conditioned financial channels.
+
+### Price Phillips Curve
+
+Under Hybrid‑A, the price Phillips curve is estimated with the contemporaneous output‑gap effect imposed rather than freely estimated. This restores a structurally interpretable price‑setting relationship in which excess demand generates inflationary pressure by construction.
+
+Within this disciplined framework, inflation dynamics are dominated by inertia. The coefficient on lagged inflation is large and precisely estimated, consistent with persistent inflation processes. Cost‑push channels retain explanatory power, particularly energy prices, while import‑price effects are weaker and episodic. The inflation‑regime dummy plays a limited role once persistence and cost dynamics are accounted for.
+
+Importantly, the Hybrid‑A specification removes the need to interpret the reduced‑form association between inflation and activity emerging from full system feedback. Instead, inflation responds structurally to demand pressure as imposed, while policy reactions and financial conditions absorb stabilisation dynamics elsewhere in the system.
+
+### Wage Phillips Curve
+
+The wage Phillips curve under Hybrid‑A continues to exhibit very high persistence in real wage deviations from trend, with the lagged wage gap close to unity. This confirms that wage adjustment is slow and highly inertial, consistent with institutional features such as bargaining arrangements, contract rigidities, and asymmetric adjustment in downturns.
+
+By calibrating the contemporaneous unemployment effect, Hybrid‑A ensures that labour‑market slack exerts a stabilising influence on wage pressure over time, without relying on weakly identified short‑run correlations. Inflation pass‑through to wages remains limited, while productivity deviations exert a significant influence, reflecting cyclical utilisation and compositional effects.
+
+Overall, the wage block supports an interpretation in which real wages adjust gradually and indirectly to economic conditions, with regime effects expressed through labour‑market dynamics rather than through abrupt wage movements.
+
+### Monetary Policy (Taylor Rule)
+
+The monetary policy rule remains virtually unchanged under Hybrid‑A. Interest‑rate smoothing is very strong, and policy responds positively to both inflation deviations and the output gap. The stability of the Taylor rule across specifications indicates that the imposed nominal‑side restrictions do not contaminate policy behaviour.
+
+The Taylor rule continues to function as the primary stabilising mechanism in the model, absorbing demand pressures and shaping the transmission of shocks across the system.
+
+### Labour Market (Okun’s Law)
+
+The unemployment equation remains one of the strongest blocks in the model. Unemployment exhibits high persistence, responds strongly and negatively to the output gap, and displays clear regime shifts associated with the Global Financial Crisis and the subsequent labour‑market recovery period.
+
+These regime effects remain highly statistically significant under Hybrid‑A, reinforcing the conclusion that labour‑market dynamics are structurally segmented and that such segmentation is best captured in the unemployment equation rather than in wage or price equations.
+
+### Productivity and External Sector
+
+Productivity dynamics are largely unchanged under Hybrid‑A. Productivity responds positively but modestly to the output gap and exhibits limited persistence, consistent with cyclical utilisation effects and measurement noise. Explanatory power remains modest, as expected.
+
+In the external sector, the exchange‑rate equation continues to be driven primarily by interest‑rate differentials, with limited roles for trade and import‑price variables. Explanatory power remains low, reflecting the inherently noisy nature of exchange‑rate movements. Hybrid‑A does not materially alter the behaviour of this block.
+
+### Residual Correlations and System Coherence
+
+Residual correlations across equations remain economically interpretable under Hybrid‑A. Output, unemployment, wages, and productivity continue to share common shocks, while inflation innovations are negatively correlated with real‑side disturbances, consistent with stabilising policy responses. Monetary‑policy shocks remain correlated with exchange‑rate movements.
+
+The structure of residual correlations confirms that Hybrid‑A restrictions do not force the data into an artificial decomposition. Instead, they enhance coherence by clarifying the channels through which shocks propagate.
+
+### Summary Assessment
+
+The Hybrid‑A 3SLS specification delivers a stable, interpretable semi‑structural system. By imposing limited structural discipline in the Phillips‑curve blocks, the model avoids over‑interpreting reduced‑form correlations generated by endogenous policy feedback, while preserving empirical flexibility elsewhere. Key behavioural relationships remain intact, strongly identified equations are unaffected, and system‑wide fit remains high.
+
+This specification is therefore well suited for scenario analysis, conditional forecasting, and policy simulation, providing a transparent articulation of structural transmission mechanisms alongside empirically grounded dynamics.
+
+## APRIL 5 - HYBRID B : Conditional Forecasting and Scenario Specification
+
+### Overview
+
+Hybrid B represents the conditional forecasting and scenario‑analysis configuration of the model. In this specification, the neutral real interest rate is fixed exogenously and the real policy stance is defined relative to this neutral benchmark. This removes trend‑estimation noise and policy‑reaction endogeneity from the interest‑rate channel, allowing the model to be used to trace the effects of an assumed monetary‑policy stance on output, inflation, wages, and the labour market.
+
+Hybrid B builds directly on the structural discipline established in Hybrid A. The Phillips‑curve relationships retain their calibrated slopes, while the remainder of the system is estimated freely using three‑stage least squares (3SLS). The resulting model is explicitly designed for scenario conditioning and policy simulations rather than for structural parameter identification.
+
+### Conditioning on the Neutral Real Rate
+
+In Hybrid B, the neutral real rate of interest is fixed at a constant value and the real policy gap is defined as the deviation of the observed short‑term real interest rate from this neutral benchmark. This treatment abstracts from time‑variation in the neutral rate and re‑interprets the interest‑rate channel as a measure of **policy stance** rather than of policy behaviour.
+
+This approach mirrors standard institutional practice when conditioning forecasts on market expectations or internally specified policy paths. By construction, monetary‑policy feedback to contemporaneous developments in output and inflation is removed from the transmission channel linking real interest rates to demand.
+
+### Output and Demand Dynamics (IS Curve)
+
+Under Hybrid B, the IS curve exhibits a smaller but statistically significant response to the real interest‑rate gap. Output persistence remains strong, while the explanatory power of the IS equation declines relative to Hybrid A.
+
+This reduction in fit is expected and desirable in a conditional framework. When policy is treated as exogenous, the model no longer exploits contemporaneous feedback from activity into policy to explain short‑run fluctuations in output. Instead, the IS curve captures the causal impact of a given policy stance on demand. The resulting coefficient can therefore be interpreted more directly as a policy‑transmission elasticity rather than as a reduced‑form correlation.
+
+Other financial and external demand channels remain weak, consistent with earlier results and with the view that short‑run demand dynamics are primarily governed by internal propagation and policy stance.
+
+### Price Phillips Curve
+
+In the price Phillips curve, the contemporaneous output‑gap effect remains imposed as a calibrated structural relationship. Under Hybrid B, inflation dynamics continue to be dominated by persistence, with lagged inflation carrying the bulk of explanatory power. Cost‑push variables, including energy and import prices, play a secondary role, while the inflation‑regime dummy remains non‑binding in the presence of strong inertia.
+
+Importantly, fixing the policy stance prevents the Phillips curve from absorbing policy‑reaction effects. Inflation outcomes now reflect the combined influence of inherited persistence and exogenous demand pressure, rather than the endogenous stabilisation present in the fully‑free system. This makes the inflation block well suited for conditional forecasts and counterfactual demand scenarios.
+
+### Wage Phillips Curve
+
+The wage Phillips curve under Hybrid B continues to display very high persistence in real wage deviations from trend, reinforcing the conclusion that wage adjustment is slow and institutionally constrained. The calibrated contemporaneous effect of labour‑market slack ensures that adverse labour conditions exert a stabilising influence on wage pressure over time, without relying on weakly identified short‑run correlations.
+
+As in Hybrid A, productivity deviations play a significant role in explaining wage movements, reflecting cyclical utilisation and compositional effects. Inflation pass‑through to wages remains limited. Overall, wage dynamics under Hybrid B are stable and economically plausible, supporting their use in medium‑term labour‑market projections.
+
+### Monetary Policy Block
+
+Although the Taylor‑rule equation remains estimated in the Hybrid B system, its role is conceptually diminished. With the real policy gap defined exogenously, the Taylor rule no longer governs the evolution of demand and inflation within the model. Instead, it becomes an inert block whose dynamics are superseded by the imposed policy stance when the model is used operationally.
+
+The persistence and responsiveness of the estimated Taylor rule remain stable, indicating that the imposed conditioning does not distort the underlying policy reaction function. In practical applications, the Taylor rule can be replaced or overridden by an external policy path without affecting the internal consistency of the model.
+
+### Labour Market and Productivity
+
+Labour‑market dynamics under Hybrid B remain robust. Okun’s law continues to display strong persistence and a sizeable response of unemployment to the output gap. Structural regime shifts associated with the post‑financial‑crisis period and the subsequent recovery remain clearly identified and statistically significant.
+
+Productivity dynamics weaken modestly relative to Hybrid A, with output exerting a smaller and less precisely estimated influence. This is again consistent with the conditional nature of Hybrid B: once policy stance is fixed, less cyclical variation is attributed to endogenous utilisation adjustments.
+
+### External Sector
+
+The exchange‑rate equation continues to be driven primarily by interest‑rate differentials, with limited roles for trade volumes and import prices. Explanatory power remains low, reflecting the inherent volatility of exchange rates and the stylised nature of uncovered interest parity relationships. Hybrid B does not materially alter the behaviour of the external sector.
+
+### Residual Correlations and System Coherence
+
+Residual correlations under Hybrid B remain economically interpretable and broadly similar to those observed under Hybrid A. Output, unemployment, wages, and productivity share common disturbances, while inflation innovations are negatively correlated with real‑side shocks, consistent with stabilising policy effects being imposed rather than estimated.
+
+The determinant of the residual covariance matrix falls further relative to Hybrid A, indicating tighter system coherence once policy stance is conditioned. No evidence emerges of instability or misspecification induced by fixing the neutral real rate.
+
+### Summary Assessment
+
+Hybrid B delivers a stable and internally coherent conditional forecasting system. By fixing the neutral real interest rate and treating the policy stance as exogenous, the model shifts cleanly from structural identification to policy‑transmission analysis. The IS curve becomes interpretable as a causal demand channel, while inflation and wage dynamics are governed by persistence and calibrated structural relationships.
+
+Crucially, the transition from Hybrid A to Hybrid B does not disrupt strongly identified behavioural relationships elsewhere in the system. Instead, it clarifies the roles of policy stance, demand, and nominal inertia, making Hybrid B well suited for scenario analysis, forecast conditioning, and counterfactual policy exercises.
+
 # A structural macro-econometric model of the UK economy
 
 The model is a hybrid New Keynesian system, defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using HP filters). A seven‑equation semi‑structural system with hybrid calibration–estimation:

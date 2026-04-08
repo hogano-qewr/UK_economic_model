@@ -1,3 +1,16 @@
+# What fixing r∗r^*r∗ does in Hybrid B (recap): doing three very deliberate and coherent things:
+# Separating policy stance from policy behaviour: r_STAR_cal = 0.5 pins down a structural neutral real rate.
+#   Variation in r_GAP_cal now reflects policy stance, not movements in estimated trends.
+# Removing an identification problem: In fully‑free systems, time‑varying or implicitly estimated r* can 
+#   contaminate: IS slope estimates, Phillips‑curve dynamics, interpretation of monetary shocks. Fixing r* 
+#   eliminates that ambiguity.
+# Putting the model firmly into “conditional forecasting / scenario mode”: the essence of Hybrid B: policy
+#   is conditioned, not estimated, the rest of the system responds structurally.
+# This is exactly how OBR/BoE models are typically used when running: market‑consistent forecast conditioning,
+#   policy‑path scenarios, or counterfactual monetary experiments.
+# 
+
+
 
 ########## HYBRID B: second-STAGE CALIBRATION #################################
 mm <- model.matrix(inst_3sls_HB, data = MODEL_READY)
@@ -7,11 +20,11 @@ c(rank = qr(mm)$rank, ncol = ncol(mm))
 
 # IS curve
 eq_IS <- Y_GAP ~ 
-  Y_GAP_L1 + r_GAP_cal + i5y_GAP + dNX + drer_L1 + bpy + bpr
+  Y_GAP_L1 + r_GAP_cal + i5y_GAP + dNX + drer_L1
 
 # Phillips Curve
 eq_PC <- dcpi_DEV - 0.05 * Y_GAP ~ 
-  dcpi_DEV_L1 + dcpi_DEV_L2 + IMcpi_GAP + ecpi_GAP + bpp
+  dcpi_DEV_L1 + dcpi_DEV_L2 + IMcpi_GAP + ecpi_GAP + bpp_BEG
 
 # Wage Phillips Curve
 eq_WPC <- wage_GAP + 0.05 * u_GAP ~ 
@@ -23,7 +36,7 @@ eq_TR <- i_UK ~
 
 # Okun equation
 eq_OKUN <- u_GAP ~ 
-  u_GAP_L1 + Y_GAP + bpu1 + bpu2 + bpu3 + bpu4
+  u_GAP_L1 + Y_GAP + bpu1_GFC + bpu2_POST
 
 # Productivity
 eq_OLP <- prod_GAP ~ 
@@ -49,8 +62,9 @@ inst_3sls_HB <- ~
   prod_GAP_L1 +
   r_GAP_cal + i5y_GAP +
   drer_L1 +
-  bpp + bpy +
-  bpu1 + bpu2 + bpu3 + bpu4
+  bpp_BEG + 
+  bpu1_GFC + bpu2_POST
+
 
 fit_3sls_HB <- systemfit(
   system_eqs_HB,
@@ -198,7 +212,7 @@ plot_irf <- function(irf, vars, title = "") {
     "topright",
     legend = vars,
     col = seq_along(vars),
-    lwd = 2,
+    lwd = 1,
     bty = "n"
   )
 }
@@ -206,3 +220,9 @@ plot_irf <- function(irf, vars, title = "") {
 plot_irf(irf_mp,
          vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
          title = "Monetary Policy Shock – Hybrid B")
+plot_irf(irf_demand,
+         vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
+         title = "Demand Shock – Hybrid B")
+plot_irf(irf_supply,
+         vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
+         title = "Supply Shock – Hybrid B")
