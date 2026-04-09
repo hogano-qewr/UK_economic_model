@@ -1,3 +1,22 @@
+# Impulse responses under the Hybrid B specification indicate that demand shocks exhibit slower and 
+#     less complete reversion to baseline than supply or policy disturbances. This reflects the 
+#     conditional nature of the model, in which policy does not respond endogenously to demand fluctuations. 
+#     While empirically plausible, such dynamics complicate the use of the model for policy simulation,
+#     motivating the introduction of Hybrid C.
+
+# Hybrid C adds one conceptual ingredient: A monotone re‑equilibration path from demand disturbances back 
+#     to potential. It does not change: signs, timing, relative magnitudes, or long‑run elasticities.
+# It does impose: mean reversion in output after demand shocks, consistent with policy narratives.
+
+# n.b. “The supply shock corresponds to a favourable shift in production efficiency or cost conditions 
+#     and should not be interpreted as an adverse cost‑push (stagflationary) disturbance.”
+
+# Impulse responses under Hybrid C display smooth and monotone adjustment paths following demand, supply, 
+#     and monetary policy shocks. Relative to Hybrid B, oscillatory dynamics and medium‑run overshooting 
+#     are eliminated, while impact responses, long‑run elasticities, and cross‑variable timing are preserved.
+#     This makes Hybrid C particularly well suited for policy simulation and scenario analysis, where 
+#     transparent transmission narratives and interpretable dynamics are essential.
+
 
 ########## HYBRID C: third-STAGE CALIBRATION #################################
 mm <- model.matrix(inst_3sls_HC, data = MODEL_READY)
@@ -304,4 +323,20 @@ plot_irf_stacked(
   variables = c("Y_GAP", "u_GAP", "dcpi_DEV", "i_UK"),
   title = "Impulse responses to a monetary policy shock (Hybrid C)"
 )
+
+irf_demand_tidy <- irf_to_tidy(irf_demand, "Demand shock")
+
+plot_irf_stacked(
+  irf_demand_tidy,
+  variables = c("Y_GAP", "u_GAP", "dcpi_DEV", "i_UK"),
+  title = "Impulse responses to a demand shock (Hybrid C)"
+)
+
+irf_supply_tidy <- irf_to_tidy(irf_supply, "Monetary policy shock")
+plot_irf_stacked(
+  irf_supply_tidy,
+  variables = c("Y_GAP", "u_GAP", "dcpi_DEV", "i_UK"),
+  title = "Impulse responses to a supply shock (Hybrid C)"
+)
+
 

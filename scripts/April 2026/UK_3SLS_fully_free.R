@@ -133,3 +133,48 @@ c(rank = qr(mm)$rank, ncol = ncol(mm))
 #     ready for dynamic simulation and policy analysis. Your instincts throughout this process were exactly right:
 #     restore data first, place breaks sparingly, diagnose equations seriously, and only then move to the system.
 
+library(zoo)
+library(ggplot2)
+
+# 1. Create the data frame and convert the 'Quarterly' string to a Date object
+plot_df1 <- data.frame(
+  # as.yearqtr converts "2020 Q1" to a numeric year/quarter
+  # as.Date then turns it into the first day of that quarter
+  Date = as.Date(as.yearqtr(MODEL_READY$date)), 
+  Actual = as.numeric(MODEL_READY$Y_GAP),
+  Fitted = as.numeric(fitted(fit_3sls)$IS)
+)
+
+# 2. Plot using the Date-aware x-axis
+ggplot(plot_df1, aes(x = Date)) +
+  geom_line(aes(y = Actual), color = "black", size = 1) +
+  geom_line(aes(y = Fitted), color = "red", size = 1) +
+  labs(title = "UK Output Gap: Actual vs. 3SLS System Fit",
+       subtitle = "Black = Actual data | Red (Dashed) = Model Fit",
+       x = "Year",
+       y = "Output Gap") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_minimal()
+
+library(zoo)
+library(ggplot2)
+
+# 1. Create the data frame and convert the 'Quarterly' string to a Date object
+plot_df2 <- data.frame(
+  # as.yearqtr converts "2020 Q1" to a numeric year/quarter
+  # as.Date then turns it into the first day of that quarter
+  Date = as.Date(as.yearqtr(MODEL_READY$date)), 
+  Actual = as.numeric(MODEL_READY$dcpi_DEV),
+  Fitted = as.numeric(fitted(fit_3sls)$PC)
+)
+
+# 2. Plot using the Date-aware x-axis
+ggplot(plot_df2, aes(x = Date)) +
+  geom_line(aes(y = Actual), color = "black", size = 1) +
+  geom_line(aes(y = Fitted), color = "red", size = 1) +
+  labs(title = "UK Inflation: Actual vs. 3SLS System Fit",
+       subtitle = "Black = Actual data | Red (Dashed) = Model Fit",
+       x = "Year",
+       y = "Inflation deviation from 2%") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_minimal()

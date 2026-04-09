@@ -1,4 +1,4 @@
-# What fixing r∗r^*r∗ does in Hybrid B (recap): doing three very deliberate and coherent things:
+# What fixing r* does in Hybrid B (recap): doing three very deliberate and coherent things:
 # Separating policy stance from policy behaviour: r_STAR_cal = 0.5 pins down a structural neutral real rate.
 #   Variation in r_GAP_cal now reflects policy stance, not movements in estimated trends.
 # Removing an identification problem: In fully‑free systems, time‑varying or implicitly estimated r* can 
@@ -9,8 +9,40 @@
 # This is exactly how OBR/BoE models are typically used when running: market‑consistent forecast conditioning,
 #   policy‑path scenarios, or counterfactual monetary experiments.
 # 
+# Hybrid B's purpose/ interpretation is "...this is what the economy does if policy stays on its assumed path."
+#   Policy is conditioned (through the fixing of r*). 
+# Central banks and fiscal institutions deliberately use models that behave less well than policy‑simulation 
+#   models, because they want to see where the economy can drift if nothing corrects it. (i.e., if policy doesn't
+#   react any differently to how it currently reacts).
+# Hybrid B is retained for baseline and scenario analysis, where persistence and incomplete mean reversion 
+#   are informative features of the data (in the case of a demand shock). Hybrid C is introduced for policy simulation, where monotone 
+#   adjustment paths and clear transmission narratives are required. The distinction reflects differences 
+#   in intended use rather than deficiencies in either specification.
 
+# If Hybrid B forced demand shocks to mean‑revert smoothly, it would be building policy behaviour into the 
+#   forecast engine, which is something institutions are usually careful to avoid. So despite the demand shock
+#   IRFs looking “ugly”: Hybrid B is honest, is risk‑revealing, and is appropriate for baseline/scenario work.
+# Hybrid B demand shock does not converge cleanly to zero, exhibits medium‑run drift, and behaves less “well” 
+#   than supply and policy shocks. But crucially:   This behaviour is not pathological—it is informational. It 
+#   is telling you something true about the economy under the Hybrid B assumptions:   Policy is conditioned, not 
+#   reacting; Output and unemployment are highly persistent; There is no automatic mean‑reversion mechanism for 
+#   demand. In other words, Hybrid B is saying:   “If demand rises and policy does not respond endogenously, 
+#   the economy does not necessarily self‑correct.” That is empirically plausible and analytically valuable, 
+#   especially for forecasting and scenario conditioning.
 
+# Hybrid B reveals that conditional demand shocks do not naturally converge under fixed policy. Hybrid C is 
+#   introduced to impose gradual re‑equilibration consistent with policy‑simulation requirements.
+
+# Why this happens only for demand shocks in Hybrid B. The key reason is structural: In Hybrid B:
+#   Monetary policy is conditioned (policy path fixed); Phillips‑curve slopes are disciplined; Demand 
+#   shocks are the only shocks that directly hit the level of activity. There is no equilibrium‑restoring 
+#   mechanism left that forces output back to zero
+# Put differently: In Hybrid B, demand shocks are level shocks, not purely transitory innovations. Supply 
+#   and policy shocks still have: cost‑side decay (PC, WPC), monetary stabilisation, or natural adjustment channels.
+# Demand shocks do not, because:  Output persistence is high; Policy does not react endogenously; No explicit 
+#   “return‑to‑potential” correction is imposed. So the model is honestly telling you:  “If demand is pushed up 
+#   and policy does nothing new, output does not automatically snap back.” That is empirically plausible, 
+#   but awkward for policy simulation.
 
 ########## HYBRID B: second-STAGE CALIBRATION #################################
 mm <- model.matrix(inst_3sls_HB, data = MODEL_READY)

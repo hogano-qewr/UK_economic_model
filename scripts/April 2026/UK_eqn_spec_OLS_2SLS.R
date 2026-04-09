@@ -93,7 +93,21 @@ coeftest(IS_ols, vcov. = vcovHC(IS_ols, type = "HC1"))
 
 checkresiduals(IS_ols)
 
-
+plot_df1_ols <- data.frame(
+  Date = as.Date(as.yearqtr(MODEL_READY$date)),
+  Actual = as.numeric(MODEL_READY$Y_GAP),
+  Fitted = as.numeric(fitted(IS_ols))
+)
+ggplot(plot_df1, aes(x = Date)) +
+  geom_line(aes(y = Actual), color = "black", size = 1) +
+  geom_line(aes(y = Fitted), color = "red", size = 1) +
+  labs(title = "UK Output Gap: Actual vs. OLS Fit",
+       subtitle = "Black = Actual data | Red (Dashed) = Model Fit",
+       x = "Year",
+       y = "Output Gap") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_minimal()
+# NOT MUCH VALE TO DOING THESE FOR OLS
 
 ############# PHILLIPS CURVE (INFLATION EQUATION) #############
 
