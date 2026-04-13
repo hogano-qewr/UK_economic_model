@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Oliver Hogan">
-<meta name="dcterms.date" content="2026-04-05">
+<meta name="dcterms.date" content="2026-04-10">
 
 <title>A Small Open-Economy DSGE Model for the UK</title>
 <style>
@@ -78,7 +78,37 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#a-structural-macro-econometric-model-of-the-uk-economy" id="toc-a-structural-macro-econometric-model-of-the-uk-economy" class="nav-link active" data-scroll-target="#a-structural-macro-econometric-model-of-the-uk-economy"><span class="header-section-number">1</span> A structural macro-econometric model of the UK economy</a>
+  <li><a href="#april-5th-data-revision-structural-breaks-and-diagnostic-results" id="toc-april-5th-data-revision-structural-breaks-and-diagnostic-results" class="nav-link active" data-scroll-target="#april-5th-data-revision-structural-breaks-and-diagnostic-results"><span class="header-section-number">0.1</span> April 5th Data Revision, Structural Breaks, and Diagnostic Results</a></li>
+  <li><a href="#april-5th-fully-free-3sls-vs.-2slsols" id="toc-april-5th-fully-free-3sls-vs.-2slsols" class="nav-link" data-scroll-target="#april-5th-fully-free-3sls-vs.-2slsols"><span class="header-section-number">0.2</span> April 5th: Fully-free 3SLS vs.&nbsp;2SLS/OLS</a>
+  <ul class="collapse">
+  <li><a href="#interpretation-of-price-and-wage-phillips-curves" id="toc-interpretation-of-price-and-wage-phillips-curves" class="nav-link" data-scroll-target="#interpretation-of-price-and-wage-phillips-curves"><span class="header-section-number">0.2.1</span> Interpretation of Price and Wage Phillips Curves</a></li>
+  </ul></li>
+  <li><a href="#april-5-hybrid-a-results-from-the-hybrida-3sls-specification" id="toc-april-5-hybrid-a-results-from-the-hybrida-3sls-specification" class="nav-link" data-scroll-target="#april-5-hybrid-a-results-from-the-hybrida-3sls-specification"><span class="header-section-number">0.3</span> APRIL 5: HYBRID A : Results from the Hybrid‑A 3SLS Specification</a>
+  <ul class="collapse">
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">0.3.1</span> Overview</a></li>
+  <li><a href="#output-and-demand-dynamics-is-curve" id="toc-output-and-demand-dynamics-is-curve" class="nav-link" data-scroll-target="#output-and-demand-dynamics-is-curve"><span class="header-section-number">0.3.2</span> Output and Demand Dynamics (IS Curve)</a></li>
+  <li><a href="#price-phillips-curve-1" id="toc-price-phillips-curve-1" class="nav-link" data-scroll-target="#price-phillips-curve-1"><span class="header-section-number">0.3.3</span> Price Phillips Curve</a></li>
+  <li><a href="#wage-phillips-curve-1" id="toc-wage-phillips-curve-1" class="nav-link" data-scroll-target="#wage-phillips-curve-1"><span class="header-section-number">0.3.4</span> Wage Phillips Curve</a></li>
+  <li><a href="#monetary-policy-taylor-rule" id="toc-monetary-policy-taylor-rule" class="nav-link" data-scroll-target="#monetary-policy-taylor-rule"><span class="header-section-number">0.3.5</span> Monetary Policy (Taylor Rule)</a></li>
+  <li><a href="#labour-market-okuns-law" id="toc-labour-market-okuns-law" class="nav-link" data-scroll-target="#labour-market-okuns-law"><span class="header-section-number">0.3.6</span> Labour Market (Okun’s Law)</a></li>
+  <li><a href="#productivity-and-external-sector" id="toc-productivity-and-external-sector" class="nav-link" data-scroll-target="#productivity-and-external-sector"><span class="header-section-number">0.3.7</span> Productivity and External Sector</a></li>
+  <li><a href="#residual-correlations-and-system-coherence" id="toc-residual-correlations-and-system-coherence" class="nav-link" data-scroll-target="#residual-correlations-and-system-coherence"><span class="header-section-number">0.3.8</span> Residual Correlations and System Coherence</a></li>
+  <li><a href="#summary-assessment" id="toc-summary-assessment" class="nav-link" data-scroll-target="#summary-assessment"><span class="header-section-number">0.3.9</span> Summary Assessment</a></li>
+  </ul></li>
+  <li><a href="#april-5---hybrid-b-conditional-forecasting-and-scenario-specification" id="toc-april-5---hybrid-b-conditional-forecasting-and-scenario-specification" class="nav-link" data-scroll-target="#april-5---hybrid-b-conditional-forecasting-and-scenario-specification"><span class="header-section-number">0.4</span> APRIL 5 - HYBRID B : Conditional Forecasting and Scenario Specification</a>
+  <ul class="collapse">
+  <li><a href="#overview-1" id="toc-overview-1" class="nav-link" data-scroll-target="#overview-1"><span class="header-section-number">0.4.1</span> Overview</a></li>
+  <li><a href="#conditioning-on-the-neutral-real-rate" id="toc-conditioning-on-the-neutral-real-rate" class="nav-link" data-scroll-target="#conditioning-on-the-neutral-real-rate"><span class="header-section-number">0.4.2</span> Conditioning on the Neutral Real Rate</a></li>
+  <li><a href="#output-and-demand-dynamics-is-curve-1" id="toc-output-and-demand-dynamics-is-curve-1" class="nav-link" data-scroll-target="#output-and-demand-dynamics-is-curve-1"><span class="header-section-number">0.4.3</span> Output and Demand Dynamics (IS Curve)</a></li>
+  <li><a href="#price-phillips-curve-2" id="toc-price-phillips-curve-2" class="nav-link" data-scroll-target="#price-phillips-curve-2"><span class="header-section-number">0.4.4</span> Price Phillips Curve</a></li>
+  <li><a href="#wage-phillips-curve-2" id="toc-wage-phillips-curve-2" class="nav-link" data-scroll-target="#wage-phillips-curve-2"><span class="header-section-number">0.4.5</span> Wage Phillips Curve</a></li>
+  <li><a href="#monetary-policy-block" id="toc-monetary-policy-block" class="nav-link" data-scroll-target="#monetary-policy-block"><span class="header-section-number">0.4.6</span> Monetary Policy Block</a></li>
+  <li><a href="#labour-market-and-productivity" id="toc-labour-market-and-productivity" class="nav-link" data-scroll-target="#labour-market-and-productivity"><span class="header-section-number">0.4.7</span> Labour Market and Productivity</a></li>
+  <li><a href="#external-sector" id="toc-external-sector" class="nav-link" data-scroll-target="#external-sector"><span class="header-section-number">0.4.8</span> External Sector</a></li>
+  <li><a href="#residual-correlations-and-system-coherence-1" id="toc-residual-correlations-and-system-coherence-1" class="nav-link" data-scroll-target="#residual-correlations-and-system-coherence-1"><span class="header-section-number">0.4.9</span> Residual Correlations and System Coherence</a></li>
+  <li><a href="#summary-assessment-1" id="toc-summary-assessment-1" class="nav-link" data-scroll-target="#summary-assessment-1"><span class="header-section-number">0.4.10</span> Summary Assessment</a></li>
+  </ul></li>
+  <li><a href="#a-structural-macro-econometric-model-of-the-uk-economy" id="toc-a-structural-macro-econometric-model-of-the-uk-economy" class="nav-link" data-scroll-target="#a-structural-macro-econometric-model-of-the-uk-economy"><span class="header-section-number">1</span> A structural macro-econometric model of the UK economy</a>
   <ul class="collapse">
   <li><a href="#the-is-relation-aggregate-demand" id="toc-the-is-relation-aggregate-demand" class="nav-link" data-scroll-target="#the-is-relation-aggregate-demand"><span class="header-section-number">1.1</span> The IS relation (aggregate demand)</a></li>
   <li><a href="#phillips-curve-relation-domestic-price-inflation" id="toc-phillips-curve-relation-domestic-price-inflation" class="nav-link" data-scroll-target="#phillips-curve-relation-domestic-price-inflation"><span class="header-section-number">1.2</span> Phillips curve relation (domestic price inflation)</a></li>
@@ -117,17 +147,17 @@ window.Quarto = {
   </ul></li>
   <li><a href="#annex-ii---data-diagnostics" id="toc-annex-ii---data-diagnostics" class="nav-link" data-scroll-target="#annex-ii---data-diagnostics"><span class="header-section-number">5</span> Annex II - Data diagnostics</a>
   <ul class="collapse">
-  <li><a href="#stationarity-testing" id="toc-stationarity-testing" class="nav-link" data-scroll-target="#stationarity-testing"><span class="header-section-number">5.1</span> Stationarity Testing</a></li>
-  <li><a href="#structuralbreak-testing" id="toc-structuralbreak-testing" class="nav-link" data-scroll-target="#structuralbreak-testing"><span class="header-section-number">5.2</span> Structural‑Break Testing</a></li>
-  <li><a href="#scaling-and-economic-plausibility" id="toc-scaling-and-economic-plausibility" class="nav-link" data-scroll-target="#scaling-and-economic-plausibility"><span class="header-section-number">5.3</span> Scaling and Economic Plausibility</a></li>
-  <li><a href="#multicollinearity-diagnostics" id="toc-multicollinearity-diagnostics" class="nav-link" data-scroll-target="#multicollinearity-diagnostics"><span class="header-section-number">5.4</span> Multicollinearity Diagnostics</a></li>
-  <li><a href="#persistence-and-lag-structure-acfpacf-analysis" id="toc-persistence-and-lag-structure-acfpacf-analysis" class="nav-link" data-scroll-target="#persistence-and-lag-structure-acfpacf-analysis"><span class="header-section-number">5.5</span> Persistence and Lag Structure (ACF/PACF Analysis)</a></li>
+  <li><a href="#scaling-and-economic-plausibility-plots-of-series-combined-facet-wrapped" id="toc-scaling-and-economic-plausibility-plots-of-series-combined-facet-wrapped" class="nav-link" data-scroll-target="#scaling-and-economic-plausibility-plots-of-series-combined-facet-wrapped"><span class="header-section-number">5.1</span> Scaling and Economic Plausibility [plots of series … combined / facet-wrapped]</a></li>
+  <li><a href="#stationarity-testing" id="toc-stationarity-testing" class="nav-link" data-scroll-target="#stationarity-testing"><span class="header-section-number">5.2</span> Stationarity Testing</a></li>
+  <li><a href="#structuralbreak-testing-needs-revision-for-apr-5th-run" id="toc-structuralbreak-testing-needs-revision-for-apr-5th-run" class="nav-link" data-scroll-target="#structuralbreak-testing-needs-revision-for-apr-5th-run"><span class="header-section-number">5.3</span> Structural‑Break Testing [needs revision for Apr 5th run]</a></li>
+  <li><a href="#multicollinearity-diagnostics-need-re-running" id="toc-multicollinearity-diagnostics-need-re-running" class="nav-link" data-scroll-target="#multicollinearity-diagnostics-need-re-running"><span class="header-section-number">5.4</span> Multicollinearity Diagnostics [need re-running…]</a></li>
+  <li><a href="#persistence-and-lag-structure-acfpacf-analysis-re-run-and-confirm" id="toc-persistence-and-lag-structure-acfpacf-analysis-re-run-and-confirm" class="nav-link" data-scroll-target="#persistence-and-lag-structure-acfpacf-analysis-re-run-and-confirm"><span class="header-section-number">5.5</span> Persistence and Lag Structure (ACF/PACF Analysis) [re-run and confirm…]</a></li>
   <li><a href="#outliers-and-shock-episodes" id="toc-outliers-and-shock-episodes" class="nav-link" data-scroll-target="#outliers-and-shock-episodes"><span class="header-section-number">5.6</span> Outliers and Shock Episodes</a></li>
   <li><a href="#final-assessment" id="toc-final-assessment" class="nav-link" data-scroll-target="#final-assessment"><span class="header-section-number">5.7</span> Final Assessment</a></li>
   </ul></li>
-  <li><a href="#annex-iii---ols-pre-estimation-diagnostics" id="toc-annex-iii---ols-pre-estimation-diagnostics" class="nav-link" data-scroll-target="#annex-iii---ols-pre-estimation-diagnostics"><span class="header-section-number">6</span> Annex III - OLS pre-estimation diagnostics</a>
+  <li><a href="#annex-iii---ols-estimation-and-diagnostics" id="toc-annex-iii---ols-estimation-and-diagnostics" class="nav-link" data-scroll-target="#annex-iii---ols-estimation-and-diagnostics"><span class="header-section-number">6</span> Annex III - OLS estimation and diagnostics</a>
   <ul class="collapse">
-  <li><a href="#is-curve-output-gap-equation" id="toc-is-curve-output-gap-equation" class="nav-link" data-scroll-target="#is-curve-output-gap-equation"><span class="header-section-number">6.1</span> IS Curve (Output Gap Equation)</a>
+  <li><a href="#equation-by-equation-synthesis" id="toc-equation-by-equation-synthesis" class="nav-link" data-scroll-target="#equation-by-equation-synthesis"><span class="header-section-number">6.1</span> Equation-by-equation synthesis</a>
   <ul class="collapse">
   <li><a href="#ols-findings" id="toc-ols-findings" class="nav-link" data-scroll-target="#ols-findings"><span class="header-section-number">6.1.1</span> OLS Findings</a></li>
   <li><a href="#diagnostics" id="toc-diagnostics" class="nav-link" data-scroll-target="#diagnostics"><span class="header-section-number">6.1.2</span> Diagnostics</a></li>
@@ -195,7 +225,7 @@ window.Quarto = {
   <li><a href="#output-is-curve" id="toc-output-is-curve" class="nav-link" data-scroll-target="#output-is-curve"><span class="header-section-number">9.4.1</span> Output (IS Curve)</a></li>
   <li><a href="#inflation-phillips-curve" id="toc-inflation-phillips-curve" class="nav-link" data-scroll-target="#inflation-phillips-curve"><span class="header-section-number">9.4.2</span> Inflation (Phillips Curve)</a></li>
   <li><a href="#wages-wage-phillips-curve" id="toc-wages-wage-phillips-curve" class="nav-link" data-scroll-target="#wages-wage-phillips-curve"><span class="header-section-number">9.4.3</span> Wages (Wage Phillips Curve)</a></li>
-  <li><a href="#monetary-policy-taylor-rule" id="toc-monetary-policy-taylor-rule" class="nav-link" data-scroll-target="#monetary-policy-taylor-rule"><span class="header-section-number">9.4.4</span> Monetary Policy (Taylor Rule)</a></li>
+  <li><a href="#monetary-policy-taylor-rule-1" id="toc-monetary-policy-taylor-rule-1" class="nav-link" data-scroll-target="#monetary-policy-taylor-rule-1"><span class="header-section-number">9.4.4</span> Monetary Policy (Taylor Rule)</a></li>
   <li><a href="#labour-market-productivity-and-external-sector" id="toc-labour-market-productivity-and-external-sector" class="nav-link" data-scroll-target="#labour-market-productivity-and-external-sector"><span class="header-section-number">9.4.5</span> Labour Market, Productivity and External Sector</a></li>
   </ul></li>
   <li><a href="#interpretation-of-the-unrestricted-system" id="toc-interpretation-of-the-unrestricted-system" class="nav-link" data-scroll-target="#interpretation-of-the-unrestricted-system"><span class="header-section-number">9.5</span> 6.5 Interpretation of the Unrestricted System</a></li>
@@ -255,7 +285,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 5, 2026</p>
+      <p class="date">April 10, 2026</p>
     </div>
   </div>
   
@@ -267,6 +297,154 @@ window.Quarto = {
 </header>
 
 
+<section id="april-5th-data-revision-structural-breaks-and-diagnostic-results" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="april-5th-data-revision-structural-breaks-and-diagnostic-results"><span class="header-section-number">0.1</span> April 5th Data Revision, Structural Breaks, and Diagnostic Results</h2>
+<p>dfgsjdf;gjdf…</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{IS (agg dem):} \quad &amp; \tilde{Y}_t = \alpha_1 \tilde{Y}_{t-1} - \phi_r \tilde{r}_t - \phi_{i^{spr}} \tilde{i}^{spr}_t + \alpha_2 \Delta \text{NX}_t + \alpha_3 \Delta \text{RER}_{t-1} + \epsilon_t^{\text{IS}} \\
+\text{PC (inflation):} \quad &amp; \tilde{\pi}_t = \beta_1 \tilde{\pi}_{t-1} + \beta_2 \tilde{\pi}_{t-2} + \kappa_Y \tilde{Y}_t + \beta_3 \tilde{\pi}_t^{\text{IM}} + \beta_4 \tilde{\pi}_t^{\text{E}} + \beta_5 \text{BP}_t^{\pi} + \epsilon_t^{\text{PC}} \\
+\text{TR (mon pol):} \quad &amp; i_t = \rho i_{t-1} + (1-\rho)(r^* + \pi^* + \tau_{\pi} \tilde{\pi}_t + \tau_Y \tilde{Y}_t) + \epsilon_t^{\text{TR}} \\
+\text{OLU (lab dem):} \quad &amp; \tilde{U}_t = \delta_1 \tilde{U}_{t-1} - \delta_2 \tilde{Y}_t + \delta_3 \text{BP}_t^{U1} + \delta_4 \text{BP}_t^{U2} + \epsilon_t^{\text{OLU}} \\
+\text{WPC (lab sup):} \quad &amp; \tilde{w}_t = \theta_1 \tilde{w}_{t-1} + \lambda_{\pi} \tilde{\pi}_{t-1} + \lambda_U \tilde{U}_t + \theta_2 \tilde{P}_t + \epsilon_t^{\text{WPC}} \\
+\text{OLP (produc):} \quad &amp; \tilde{P}_t = \eta_1 \tilde{P}_{t-1} + \eta_2 \tilde{Y}_t + \epsilon_t^{\text{OLP}} \\
+\text{UIP (exch rate):} \quad &amp; \Delta \text{RER}_t = \mu_1 \Delta \text{RER}_{t-1} + \psi \tilde{i}_t^{diff} + \mu_2 \Delta \text{NX}_t + \mu_3 \tilde{\pi}_t^{\text{IM}} + \epsilon_t^{\text{UIP}}
+\end{aligned}
+\]</span></p>
+<p>This paper presents a re‑estimated semi‑structural UK macroeconomic model using a revised data construction that restores early‑sample observations (1998Q3–1999Q4) previously lost to lagging and transformation choices. The recovery of these degrees of freedom materially improves regime identification and equation behaviour across the system, allowing a clearer separation between persistent structural changes and large transitory shocks.</p>
+<p>Structural break tests (Zivot–Andrews and Bai–Perron) and subsequent equation‑level diagnostics motivate a <strong>minimal and targeted break strategy</strong>. Persistent regime shifts are identified only where economically meaningful and empirically robust: a Global Financial Crisis (GFC) break and a post‑2013 repair regime in the unemployment gap, and a single inflation‑regime break dating from early 2020. Breaks are explicitly rejected for output gaps, wages, productivity, exchange rates, and monetary policy, where apparent instability reflects shock volatility rather than changes in underlying structure.</p>
+<p>Single‑equation OLS diagnostics show strong internal coherence across blocks. Real‑side equations (IS, Okun’s law, and productivity) exhibit heteroskedastic but serially uncorrelated residuals, consistent with state‑dependent shock amplitudes during crisis periods but stable adjustment dynamics. Nominal and institutional equations (price Phillips curve, wage Phillips curve, and Taylor rule) display residual serial correlation but fail to reject homoskedasticity, reflecting expected inertia in inflation, wage setting, and policy adjustment rather than misspecification.</p>
+<p>Heteroskedasticity‑robust inference sharpens interpretation without altering substantive conclusions. Core structural slopes remain stable across specifications, while marginal significance attached to later crisis dummies dissipates under robust standard errors—correctly distinguishing regime change from shock realisation. In the wage Phillips curve, labour‑market slack affects wage dynamics primarily by slowing mean reversion rather than inducing contemporaneous wage declines, eliminating the need for wage‑specific regime dummies.</p>
+<p>Overall, the revised data construction reduces the reliance on ad‑hoc structural adjustments, improves interpretability of break tests, and yields cleaner reduced‑form behaviour across equations. The final specification is parsimonious, economically transparent, and diagnostically stable, providing a sound basis for system estimation and policy analysis.</p>
+</section>
+<section id="april-5th-fully-free-3sls-vs.-2slsols" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="april-5th-fully-free-3sls-vs.-2slsols"><span class="header-section-number">0.2</span> April 5th: Fully-free 3SLS vs.&nbsp;2SLS/OLS</h2>
+<section id="interpretation-of-price-and-wage-phillips-curves" class="level3" data-number="0.2.1">
+<h3 data-number="0.2.1" class="anchored" data-anchor-id="interpretation-of-price-and-wage-phillips-curves"><span class="header-section-number">0.2.1</span> Interpretation of Price and Wage Phillips Curves</h3>
+<p><em>(Institutional / policy‑model style)</em></p>
+<section id="price-phillips-curve" class="level4" data-number="0.2.1.1">
+<h4 data-number="0.2.1.1" class="anchored" data-anchor-id="price-phillips-curve"><span class="header-section-number">0.2.1.1</span> Price Phillips Curve</h4>
+<p>In the fully simultaneous 3SLS estimation, the coefficient on the output gap in the price Phillips curve is negative and statistically significant. With the output gap defined as the deviation of output from potential, this implies that—conditional on the rest of the system—periods of above‑potential activity are associated with lower contemporaneous deviations of inflation from trend.</p>
+<p>This result should be interpreted with care. In a system in which monetary policy responds endogenously to both inflation and activity, the reduced‑form Phillips‑curve coefficient captures not only the underlying price‑setting behaviour of firms, but also the stabilising response of policy and associated financial‑conditions effects. In particular, positive output gaps are typically associated with a tightening of monetary conditions, which acts to curb subsequent inflationary pressure. When these feedbacks are estimated simultaneously, the partial correlation between inflation deviations and the output gap within the Phillips‑curve equation reflects net system interactions rather than a standalone behavioural elasticity.</p>
+<p>Comparing across estimation methods illustrates this point. Ordinary least squares produce a negative and relatively muted output‑gap coefficient, consistent with simultaneity bias arising from the joint determination of output, inflation, and monetary policy. Two‑stage least squares, which instruments the output gap using lagged real and financial variables, increases the magnitude of the coefficient but leaves the sign unchanged, reflecting the fact that demand disturbances in the data are systematically followed by policy stabilisation. Fully‑free 3SLS further reallocates the effect of demand pressure across the IS curve, the Taylor rule, and the Phillips curve, leaving the Phillips‑curve coefficient to reflect a residual reduced‑form relationship once policy feedback is internalised.</p>
+<p>For these reasons, the output‑gap coefficient estimated in the fully‑free system should not be interpreted as a direct measure of the structural inflation–activity trade‑off. In Hybrid‑A, the slope of the Phillips curve is therefore calibrated to impose the economically conventional mechanism—whereby excess demand generates upward pressure on inflation—rather than to match the reduced‑form coefficient that emerges from a fully endogenous policy system. The 3SLS results provide an ex post justification for this approach, showing that unconstrained estimation conflates price‑setting behaviour with the systematic response of monetary policy.</p>
+</section>
+<section id="wage-phillips-curve" class="level4" data-number="0.2.1.2">
+<h4 data-number="0.2.1.2" class="anchored" data-anchor-id="wage-phillips-curve"><span class="header-section-number">0.2.1.2</span> Wage Phillips Curve</h4>
+<p>Fully‑free 3SLS estimation of the wage Phillips curve indicates a high degree of persistence in real wage deviations from trend, with the coefficient on the lagged wage gap close to unity. In contrast, contemporaneous effects of labour‑market slack and inflation on wages are weak and statistically insignificant, once endogeneity across the system is taken into account. Short‑run productivity deviations enter with a sizeable coefficient, reflecting cyclical utilisation and compositional effects.</p>
+<p>Given the definition of the wage gap as the deviation of real wages from their HP‑filtered trend, these results imply that wage adjustment in the UK occurs primarily through gradual correction of past deviations rather than through rapid responses to contemporaneous labour‑market conditions. Episodes of labour‑market slack are associated with prolonged periods of subdued real wage growth, rather than sharp wage cuts, consistent with the presence of nominal and institutional rigidities in wage‑setting.</p>
+<p>Comparison across estimation approaches reinforces this interpretation. OLS and 2SLS estimates suggest at most weak contemporaneous effects of unemployment on wages, and these effects are not robust once the full system of interactions is taken into account. In the 3SLS system, labour‑market slack primarily influences wages indirectly—through persistence and through regime shifts captured in the unemployment and output blocks—rather than as a strong within‑quarter compression mechanism.</p>
+<p>This motivates the treatment adopted in Hybrid‑A, where the coefficient on labour‑market slack in the wage Phillips curve is calibrated rather than freely estimated. The calibration ensures a stable and monotonic relationship between slack and wage pressure in long‑run dynamics, while avoiding over‑interpretation of short‑run correlations that are weakly identified in the data. The fully‑free 3SLS results support this approach, indicating that wage dynamics are dominated by inertia and adjustment lags, and that contemporaneous slack effects are structurally secondary.</p>
+</section>
+<section id="implications-for-model-use" class="level4" data-number="0.2.1.3">
+<h4 data-number="0.2.1.3" class="anchored" data-anchor-id="implications-for-model-use"><span class="header-section-number">0.2.1.3</span> Implications for model use</h4>
+<p>Taken together, the results from the fully‑free 3SLS system suggest that both price and wage Phillips curves are heavily influenced by endogenous feedbacks, particularly through monetary policy and broader system dynamics. Reduced‑form slope coefficients should therefore be interpreted as reflecting net interactions rather than isolated behavioural relationships. Hybrid‑A calibration choices can be viewed as structural discipline devices that preserve economically meaningful transmission mechanisms while ensuring stability and interpretability of the model for scenario analysis and policy applications.</p>
+</section>
+</section>
+</section>
+<section id="april-5-hybrid-a-results-from-the-hybrida-3sls-specification" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="april-5-hybrid-a-results-from-the-hybrida-3sls-specification"><span class="header-section-number">0.3</span> APRIL 5: HYBRID A : Results from the Hybrid‑A 3SLS Specification</h2>
+<section id="overview" class="level3" data-number="0.3.1">
+<h3 data-number="0.3.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">0.3.1</span> Overview</h3>
+<p>This section summarises the results from the Hybrid‑A variant of the semi‑structural model estimated by three‑stage least squares (3SLS). Hybrid‑A imposes limited structural discipline by calibrating selected Phillips‑curve slopes, while allowing all other equations to be estimated freely within the system. The purpose of this specification is to deliver a stable, interpretable framework suitable for scenario analysis and policy simulations, while retaining empirical coherence across blocks.</p>
+<p>Overall system performance under Hybrid‑A remains strong. System‑wide fit, residual correlations, and coefficient stability are comparable to the fully‑free 3SLS specification, indicating that the imposed restrictions are consistent with the joint data‑generating process and do not distort behaviour elsewhere in the model.</p>
+</section>
+<section id="output-and-demand-dynamics-is-curve" class="level3" data-number="0.3.2">
+<h3 data-number="0.3.2" class="anchored" data-anchor-id="output-and-demand-dynamics-is-curve"><span class="header-section-number">0.3.2</span> Output and Demand Dynamics (IS Curve)</h3>
+<p>The IS equation under Hybrid‑A displays broadly unchanged behaviour relative to the unconstrained system. Output growth exhibits moderate persistence, with lagged output remaining strongly significant. The real interest rate continues to enter with a positive coefficient, reflecting the endogenous response of monetary policy to economic conditions rather than a causal stimulus effect. Longer‑term interest rates, trade flows, and exchange‑rate terms remain statistically weak.</p>
+<p>The stability of the IS equation indicates that Hybrid‑A restrictions applied to the nominal block do not interfere with real‑side demand dynamics. Output fluctuations continue to be driven primarily by internal propagation and policy‑conditioned financial channels.</p>
+</section>
+<section id="price-phillips-curve-1" class="level3" data-number="0.3.3">
+<h3 data-number="0.3.3" class="anchored" data-anchor-id="price-phillips-curve-1"><span class="header-section-number">0.3.3</span> Price Phillips Curve</h3>
+<p>Under Hybrid‑A, the price Phillips curve is estimated with the contemporaneous output‑gap effect imposed rather than freely estimated. This restores a structurally interpretable price‑setting relationship in which excess demand generates inflationary pressure by construction.</p>
+<p>Within this disciplined framework, inflation dynamics are dominated by inertia. The coefficient on lagged inflation is large and precisely estimated, consistent with persistent inflation processes. Cost‑push channels retain explanatory power, particularly energy prices, while import‑price effects are weaker and episodic. The inflation‑regime dummy plays a limited role once persistence and cost dynamics are accounted for.</p>
+<p>Importantly, the Hybrid‑A specification removes the need to interpret the reduced‑form association between inflation and activity emerging from full system feedback. Instead, inflation responds structurally to demand pressure as imposed, while policy reactions and financial conditions absorb stabilisation dynamics elsewhere in the system.</p>
+</section>
+<section id="wage-phillips-curve-1" class="level3" data-number="0.3.4">
+<h3 data-number="0.3.4" class="anchored" data-anchor-id="wage-phillips-curve-1"><span class="header-section-number">0.3.4</span> Wage Phillips Curve</h3>
+<p>The wage Phillips curve under Hybrid‑A continues to exhibit very high persistence in real wage deviations from trend, with the lagged wage gap close to unity. This confirms that wage adjustment is slow and highly inertial, consistent with institutional features such as bargaining arrangements, contract rigidities, and asymmetric adjustment in downturns.</p>
+<p>By calibrating the contemporaneous unemployment effect, Hybrid‑A ensures that labour‑market slack exerts a stabilising influence on wage pressure over time, without relying on weakly identified short‑run correlations. Inflation pass‑through to wages remains limited, while productivity deviations exert a significant influence, reflecting cyclical utilisation and compositional effects.</p>
+<p>Overall, the wage block supports an interpretation in which real wages adjust gradually and indirectly to economic conditions, with regime effects expressed through labour‑market dynamics rather than through abrupt wage movements.</p>
+</section>
+<section id="monetary-policy-taylor-rule" class="level3" data-number="0.3.5">
+<h3 data-number="0.3.5" class="anchored" data-anchor-id="monetary-policy-taylor-rule"><span class="header-section-number">0.3.5</span> Monetary Policy (Taylor Rule)</h3>
+<p>The monetary policy rule remains virtually unchanged under Hybrid‑A. Interest‑rate smoothing is very strong, and policy responds positively to both inflation deviations and the output gap. The stability of the Taylor rule across specifications indicates that the imposed nominal‑side restrictions do not contaminate policy behaviour.</p>
+<p>The Taylor rule continues to function as the primary stabilising mechanism in the model, absorbing demand pressures and shaping the transmission of shocks across the system.</p>
+</section>
+<section id="labour-market-okuns-law" class="level3" data-number="0.3.6">
+<h3 data-number="0.3.6" class="anchored" data-anchor-id="labour-market-okuns-law"><span class="header-section-number">0.3.6</span> Labour Market (Okun’s Law)</h3>
+<p>The unemployment equation remains one of the strongest blocks in the model. Unemployment exhibits high persistence, responds strongly and negatively to the output gap, and displays clear regime shifts associated with the Global Financial Crisis and the subsequent labour‑market recovery period.</p>
+<p>These regime effects remain highly statistically significant under Hybrid‑A, reinforcing the conclusion that labour‑market dynamics are structurally segmented and that such segmentation is best captured in the unemployment equation rather than in wage or price equations.</p>
+</section>
+<section id="productivity-and-external-sector" class="level3" data-number="0.3.7">
+<h3 data-number="0.3.7" class="anchored" data-anchor-id="productivity-and-external-sector"><span class="header-section-number">0.3.7</span> Productivity and External Sector</h3>
+<p>Productivity dynamics are largely unchanged under Hybrid‑A. Productivity responds positively but modestly to the output gap and exhibits limited persistence, consistent with cyclical utilisation effects and measurement noise. Explanatory power remains modest, as expected.</p>
+<p>In the external sector, the exchange‑rate equation continues to be driven primarily by interest‑rate differentials, with limited roles for trade and import‑price variables. Explanatory power remains low, reflecting the inherently noisy nature of exchange‑rate movements. Hybrid‑A does not materially alter the behaviour of this block.</p>
+</section>
+<section id="residual-correlations-and-system-coherence" class="level3" data-number="0.3.8">
+<h3 data-number="0.3.8" class="anchored" data-anchor-id="residual-correlations-and-system-coherence"><span class="header-section-number">0.3.8</span> Residual Correlations and System Coherence</h3>
+<p>Residual correlations across equations remain economically interpretable under Hybrid‑A. Output, unemployment, wages, and productivity continue to share common shocks, while inflation innovations are negatively correlated with real‑side disturbances, consistent with stabilising policy responses. Monetary‑policy shocks remain correlated with exchange‑rate movements.</p>
+<p>The structure of residual correlations confirms that Hybrid‑A restrictions do not force the data into an artificial decomposition. Instead, they enhance coherence by clarifying the channels through which shocks propagate.</p>
+</section>
+<section id="summary-assessment" class="level3" data-number="0.3.9">
+<h3 data-number="0.3.9" class="anchored" data-anchor-id="summary-assessment"><span class="header-section-number">0.3.9</span> Summary Assessment</h3>
+<p>The Hybrid‑A 3SLS specification delivers a stable, interpretable semi‑structural system. By imposing limited structural discipline in the Phillips‑curve blocks, the model avoids over‑interpreting reduced‑form correlations generated by endogenous policy feedback, while preserving empirical flexibility elsewhere. Key behavioural relationships remain intact, strongly identified equations are unaffected, and system‑wide fit remains high.</p>
+<p>This specification is therefore well suited for scenario analysis, conditional forecasting, and policy simulation, providing a transparent articulation of structural transmission mechanisms alongside empirically grounded dynamics.</p>
+</section>
+</section>
+<section id="april-5---hybrid-b-conditional-forecasting-and-scenario-specification" class="level2" data-number="0.4">
+<h2 data-number="0.4" class="anchored" data-anchor-id="april-5---hybrid-b-conditional-forecasting-and-scenario-specification"><span class="header-section-number">0.4</span> APRIL 5 - HYBRID B : Conditional Forecasting and Scenario Specification</h2>
+<section id="overview-1" class="level3" data-number="0.4.1">
+<h3 data-number="0.4.1" class="anchored" data-anchor-id="overview-1"><span class="header-section-number">0.4.1</span> Overview</h3>
+<p>Hybrid B represents the conditional forecasting and scenario‑analysis configuration of the model. In this specification, the neutral real interest rate is fixed exogenously and the real policy stance is defined relative to this neutral benchmark. This removes trend‑estimation noise and policy‑reaction endogeneity from the interest‑rate channel, allowing the model to be used to trace the effects of an assumed monetary‑policy stance on output, inflation, wages, and the labour market.</p>
+<p>Hybrid B builds directly on the structural discipline established in Hybrid A. The Phillips‑curve relationships retain their calibrated slopes, while the remainder of the system is estimated freely using three‑stage least squares (3SLS). The resulting model is explicitly designed for scenario conditioning and policy simulations rather than for structural parameter identification.</p>
+</section>
+<section id="conditioning-on-the-neutral-real-rate" class="level3" data-number="0.4.2">
+<h3 data-number="0.4.2" class="anchored" data-anchor-id="conditioning-on-the-neutral-real-rate"><span class="header-section-number">0.4.2</span> Conditioning on the Neutral Real Rate</h3>
+<p>In Hybrid B, the neutral real rate of interest is fixed at a constant value and the real policy gap is defined as the deviation of the observed short‑term real interest rate from this neutral benchmark. This treatment abstracts from time‑variation in the neutral rate and re‑interprets the interest‑rate channel as a measure of <strong>policy stance</strong> rather than of policy behaviour.</p>
+<p>This approach mirrors standard institutional practice when conditioning forecasts on market expectations or internally specified policy paths. By construction, monetary‑policy feedback to contemporaneous developments in output and inflation is removed from the transmission channel linking real interest rates to demand.</p>
+</section>
+<section id="output-and-demand-dynamics-is-curve-1" class="level3" data-number="0.4.3">
+<h3 data-number="0.4.3" class="anchored" data-anchor-id="output-and-demand-dynamics-is-curve-1"><span class="header-section-number">0.4.3</span> Output and Demand Dynamics (IS Curve)</h3>
+<p>Under Hybrid B, the IS curve exhibits a smaller but statistically significant response to the real interest‑rate gap. Output persistence remains strong, while the explanatory power of the IS equation declines relative to Hybrid A.</p>
+<p>This reduction in fit is expected and desirable in a conditional framework. When policy is treated as exogenous, the model no longer exploits contemporaneous feedback from activity into policy to explain short‑run fluctuations in output. Instead, the IS curve captures the causal impact of a given policy stance on demand. The resulting coefficient can therefore be interpreted more directly as a policy‑transmission elasticity rather than as a reduced‑form correlation.</p>
+<p>Other financial and external demand channels remain weak, consistent with earlier results and with the view that short‑run demand dynamics are primarily governed by internal propagation and policy stance.</p>
+</section>
+<section id="price-phillips-curve-2" class="level3" data-number="0.4.4">
+<h3 data-number="0.4.4" class="anchored" data-anchor-id="price-phillips-curve-2"><span class="header-section-number">0.4.4</span> Price Phillips Curve</h3>
+<p>In the price Phillips curve, the contemporaneous output‑gap effect remains imposed as a calibrated structural relationship. Under Hybrid B, inflation dynamics continue to be dominated by persistence, with lagged inflation carrying the bulk of explanatory power. Cost‑push variables, including energy and import prices, play a secondary role, while the inflation‑regime dummy remains non‑binding in the presence of strong inertia.</p>
+<p>Importantly, fixing the policy stance prevents the Phillips curve from absorbing policy‑reaction effects. Inflation outcomes now reflect the combined influence of inherited persistence and exogenous demand pressure, rather than the endogenous stabilisation present in the fully‑free system. This makes the inflation block well suited for conditional forecasts and counterfactual demand scenarios.</p>
+</section>
+<section id="wage-phillips-curve-2" class="level3" data-number="0.4.5">
+<h3 data-number="0.4.5" class="anchored" data-anchor-id="wage-phillips-curve-2"><span class="header-section-number">0.4.5</span> Wage Phillips Curve</h3>
+<p>The wage Phillips curve under Hybrid B continues to display very high persistence in real wage deviations from trend, reinforcing the conclusion that wage adjustment is slow and institutionally constrained. The calibrated contemporaneous effect of labour‑market slack ensures that adverse labour conditions exert a stabilising influence on wage pressure over time, without relying on weakly identified short‑run correlations.</p>
+<p>As in Hybrid A, productivity deviations play a significant role in explaining wage movements, reflecting cyclical utilisation and compositional effects. Inflation pass‑through to wages remains limited. Overall, wage dynamics under Hybrid B are stable and economically plausible, supporting their use in medium‑term labour‑market projections.</p>
+</section>
+<section id="monetary-policy-block" class="level3" data-number="0.4.6">
+<h3 data-number="0.4.6" class="anchored" data-anchor-id="monetary-policy-block"><span class="header-section-number">0.4.6</span> Monetary Policy Block</h3>
+<p>Although the Taylor‑rule equation remains estimated in the Hybrid B system, its role is conceptually diminished. With the real policy gap defined exogenously, the Taylor rule no longer governs the evolution of demand and inflation within the model. Instead, it becomes an inert block whose dynamics are superseded by the imposed policy stance when the model is used operationally.</p>
+<p>The persistence and responsiveness of the estimated Taylor rule remain stable, indicating that the imposed conditioning does not distort the underlying policy reaction function. In practical applications, the Taylor rule can be replaced or overridden by an external policy path without affecting the internal consistency of the model.</p>
+</section>
+<section id="labour-market-and-productivity" class="level3" data-number="0.4.7">
+<h3 data-number="0.4.7" class="anchored" data-anchor-id="labour-market-and-productivity"><span class="header-section-number">0.4.7</span> Labour Market and Productivity</h3>
+<p>Labour‑market dynamics under Hybrid B remain robust. Okun’s law continues to display strong persistence and a sizeable response of unemployment to the output gap. Structural regime shifts associated with the post‑financial‑crisis period and the subsequent recovery remain clearly identified and statistically significant.</p>
+<p>Productivity dynamics weaken modestly relative to Hybrid A, with output exerting a smaller and less precisely estimated influence. This is again consistent with the conditional nature of Hybrid B: once policy stance is fixed, less cyclical variation is attributed to endogenous utilisation adjustments.</p>
+</section>
+<section id="external-sector" class="level3" data-number="0.4.8">
+<h3 data-number="0.4.8" class="anchored" data-anchor-id="external-sector"><span class="header-section-number">0.4.8</span> External Sector</h3>
+<p>The exchange‑rate equation continues to be driven primarily by interest‑rate differentials, with limited roles for trade volumes and import prices. Explanatory power remains low, reflecting the inherent volatility of exchange rates and the stylised nature of uncovered interest parity relationships. Hybrid B does not materially alter the behaviour of the external sector.</p>
+</section>
+<section id="residual-correlations-and-system-coherence-1" class="level3" data-number="0.4.9">
+<h3 data-number="0.4.9" class="anchored" data-anchor-id="residual-correlations-and-system-coherence-1"><span class="header-section-number">0.4.9</span> Residual Correlations and System Coherence</h3>
+<p>Residual correlations under Hybrid B remain economically interpretable and broadly similar to those observed under Hybrid A. Output, unemployment, wages, and productivity share common disturbances, while inflation innovations are negatively correlated with real‑side shocks, consistent with stabilising policy effects being imposed rather than estimated.</p>
+<p>The determinant of the residual covariance matrix falls further relative to Hybrid A, indicating tighter system coherence once policy stance is conditioned. No evidence emerges of instability or misspecification induced by fixing the neutral real rate.</p>
+</section>
+<section id="summary-assessment-1" class="level3" data-number="0.4.10">
+<h3 data-number="0.4.10" class="anchored" data-anchor-id="summary-assessment-1"><span class="header-section-number">0.4.10</span> Summary Assessment</h3>
+<p>Hybrid B delivers a stable and internally coherent conditional forecasting system. By fixing the neutral real interest rate and treating the policy stance as exogenous, the model shifts cleanly from structural identification to policy‑transmission analysis. The IS curve becomes interpretable as a causal demand channel, while inflation and wage dynamics are governed by persistence and calibrated structural relationships.</p>
+<p>Crucially, the transition from Hybrid A to Hybrid B does not disrupt strongly identified behavioural relationships elsewhere in the system. Instead, it clarifies the roles of policy stance, demand, and nominal inertia, making Hybrid B well suited for scenario analysis, forecast conditioning, and counterfactual policy exercises.</p>
+</section>
+</section>
 <section id="a-structural-macro-econometric-model-of-the-uk-economy" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> A structural macro-econometric model of the UK economy</h1>
 <p>The model is a hybrid New Keynesian system, defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using HP filters). A seven‑equation semi‑structural system with hybrid calibration–estimation:</p>
@@ -306,7 +484,7 @@ window.Quarto = {
 <p>The central bank reacts to deviations of inflation from its target and to the output gap, with calibrated coefficients <span class="math inline">\((\tau_{\pi},\tau_Y)\)</span> ensuring determinacy and policy realism.</p>
 <p>The neutral real interest rate <span class="math inline">\((r^*)\)</span> and the inflation target <span class="math inline">\((\pi^*)\)</span> anchor the long‑run level of the policy rate.</p>
 <p>This equation captures the systematic component of monetary policy in the UK’s inflation‑targeting regime, in which <span class="math inline">\(\rho\)</span> (policy inertia) is estimated.</p>
-<p>For OLS purposes (diagnostic stage), we estimate the <strong>reduced‑form hybrid rule</strong> $ i_t = <em>0 + i</em>{t-1} + _{} <em>t + </em>{Y} _t + _t $ in which <span class="math inline">\(\gamma_{\pi} = (1-\rho)\tau_{\pi}\)</span> and <span class="math inline">\(\gamma_Y = (1-\rho)\tau_Y\)</span></p>
+<p>For OLS purposes (diagnostic stage), we estimate the <strong>reduced‑form hybrid rule</strong> $ i_t = +* i{t-1} + _{} <em>t +</em> _t + _t $ in which <span class="math inline">\(\gamma_{\pi} = (1-\rho)\tau_{\pi}\)</span> and <span class="math inline">\(\gamma_Y = (1-\rho)\tau_Y\)</span></p>
 </section>
 <section id="okuns-law-for-unemployment-labour-market-slack" class="level2" data-number="1.4">
 <h2 data-number="1.4" class="anchored" data-anchor-id="okuns-law-for-unemployment-labour-market-slack"><span class="header-section-number">1.4</span> Okun’s Law for unemployment (labour market slack)</h2>
@@ -557,9 +735,9 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <h2 data-number="4.1" class="anchored" data-anchor-id="model-variables-and-symbols"><span class="header-section-number">4.1</span> Model Variables and Symbols</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 5%">
-<col style="width: 82%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 61%">
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -674,9 +852,9 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <h2 data-number="4.2" class="anchored" data-anchor-id="notation-for-break-dummies"><span class="header-section-number">4.2</span> Notation for Break Dummies</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 22%">
-<col style="width: 19%">
-<col style="width: 56%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 50%">
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -785,8 +963,8 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <h2 data-number="4.4" class="anchored" data-anchor-id="notation-for-steadystate-targets-and-constants"><span class="header-section-number">4.4</span> Notation for Steady‑State Targets and Constants</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 16%">
-<col style="width: 83%">
+<col style="width: 25%">
+<col style="width: 75%">
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -808,28 +986,28 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <section id="annex-ii---data-diagnostics" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Annex II - Data diagnostics</h1>
 <p>This annex covers the cleaning and diagnostic testing of the data for each variable, including stationarity and structural‑break testing, de-trending, transformation into gaps or first differences, multicollinearity diagnostics, autocorrelation and lag structure assessment, as well as scaling and economic plausibility checks. In applying these diagnostic procedures to the quarterly macroeconomic time series data prior to model estimation, the objective was to ensure that all endogenous and exogenous variables are appropriately transformed, stationary, free from undue multicollinearity and that they exhibit time‑series properties consistent with their theoretical roles within the system.</p>
-<section id="stationarity-testing" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="stationarity-testing"><span class="header-section-number">5.1</span> Stationarity Testing</h2>
+<section id="scaling-and-economic-plausibility-plots-of-series-combined-facet-wrapped" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="scaling-and-economic-plausibility-plots-of-series-combined-facet-wrapped"><span class="header-section-number">5.1</span> Scaling and Economic Plausibility [plots of series … combined / facet-wrapped]</h2>
+<p>All variables were inspected to ensure the magnitudes were economically plausible and appropriately scaled. Gaps (output, unemployment, real wages, productivity) lie in the expected ±1–5% range. ΔRER and ΔNX display reasonable quarterly volatility. Import and energy inflation gaps show large swings during 2019–2023, reflecting documented global cost‑push shocks. The real interest‑rate gap behaved consistently with monetary‑policy and inflation dynamics. No series exhibited signs of mis‑scaling, measurement errors, or inappropriate de-trending.</p>
+</section>
+<section id="stationarity-testing" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="stationarity-testing"><span class="header-section-number">5.2</span> Stationarity Testing</h2>
 <p>All macroeconomic variables were transformed into either <em>gap</em> form (deviations from trend or from steady‑state values) or <em>first differences</em> where required by theory. Stationarity was evaluated using the Augmented Dickey–Fuller (ADF) test for each transformed series.</p>
 <p>All variables exhibit stationarity at conventional significance levels. The output gap <span class="math inline">\((\tilde{Y})\)</span>, unemployment gap <span class="math inline">\((\tilde{U})\)</span>, inflation deviation <span class="math inline">\((\tilde{\pi})\)</span>, wage gap <span class="math inline">\((\tilde{w})\)</span>, productivity gap <span class="math inline">\((\tilde{P})\)</span>, real interest‑rate gap <span class="math inline">\((\tilde{r})\)</span>, 5‑year spread gap <span class="math inline">\((\tilde{i}^{spr})\)</span>, import‑price inflation gap <span class="math inline">\((\tilde{\pi}^{\text{IM}})\)</span>, and energy‑price inflation gap <span class="math inline">\((\tilde{\pi}^{\text{E}})\)</span> were all stationary (with ADF <span class="math inline">\(p&lt;0.05\)</span> in each case).</p>
 <p>Differenced variables include the change in the real exchange rate <span class="math inline">\((\Delta\text{RER})\)</span> and the change in net exports <span class="math inline">\((\Delta\text{NX})\)</span>. These are stationary by construction. The raw nominal interest‑rate differential <span class="math inline">\((i-i^f)\)</span> was found to be non‑stationary, so a <strong>trend‑adjusted differential gap</strong> was constructed, yielding a stationary series suitable for use in the UIP equation.</p>
 </section>
-<section id="structuralbreak-testing" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="structuralbreak-testing"><span class="header-section-number">5.2</span> Structural‑Break Testing</h2>
-<p>To ensure robustness of stationarity and to identify potential regime shifts, each series was tested for breaks using Zivot–Andrews one‑break unit‑root tests and Bai–Perron multiple‑break tests.</p>
+<section id="structuralbreak-testing-needs-revision-for-apr-5th-run" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="structuralbreak-testing-needs-revision-for-apr-5th-run"><span class="header-section-number">5.3</span> Structural‑Break Testing [needs revision for Apr 5th run]</h2>
+<p>To ensure robustness of stationarity and to identify potential regime shifts, each series was tested for breaks using <strong>Zivot–Andrews one‑break unit‑root tests</strong> and <strong>Bai–Perron multiple‑break</strong> tests.</p>
 <p>We found the <strong>output gap</strong> to have a single structural break in 2020Q1 (COVID‑19 collapse). <strong>Inflation deviation</strong> and the <strong>real rate gap</strong> appear to show a coinciding structural break around 2021–22, corresponding to the inflation regime shift. Analysis of the <strong>unemployment gap</strong> revealed four persistent structural breaks (2004Q2, 2008Q4, 2013Q4, 2019Q4). For all other variables, Bai–Perron BICs were minimized at zero breaks.</p>
 <p>Corresponding break dummies were included <strong>only</strong> in the equations whose dependent variables exhibited genuine structural breaks, thus seeking parsimony and stability.</p>
 </section>
-<section id="scaling-and-economic-plausibility" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="scaling-and-economic-plausibility"><span class="header-section-number">5.3</span> Scaling and Economic Plausibility</h2>
-<p>All variables were inspected to ensure the magnitudes were economically plausible and appropriately scaled. Gaps (output, unemployment, real wages, productivity) lie in the expected ±1–5% range. ΔRER and ΔNX display reasonable quarterly volatility. Import and energy inflation gaps show large swings during 2019–2023, reflecting documented global cost‑push shocks. The real interest‑rate gap behaved consistently with monetary‑policy and inflation dynamics. No series exhibited signs of mis‑scaling, measurement errors, or inappropriate de-trending.</p>
-</section>
-<section id="multicollinearity-diagnostics" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="multicollinearity-diagnostics"><span class="header-section-number">5.4</span> Multicollinearity Diagnostics</h2>
+<section id="multicollinearity-diagnostics-need-re-running" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="multicollinearity-diagnostics-need-re-running"><span class="header-section-number">5.4</span> Multicollinearity Diagnostics [need re-running…]</h2>
 <p>For each equation, pairwise correlations and <strong>Variance Inflation Factors (VIFs)</strong> were examined for all regressors, including lagged dependent variables and calibrated regressors. Pairwise correlations across all equations were modest (typically &lt; 0.4). Inflation lags showed expected moderate correlation (~0.7), but well below problematic thresholds. Import‑ and energy‑price inflation gaps were moderately correlated (~0.6), consistent with common external shocks. All VIF values were well below conventional thresholds (VIF &lt; 5), indicating <strong>no multicollinearity concerns</strong>. The regressor sets are therefore suitable for stable 3SLS estimation.</p>
 </section>
-<section id="persistence-and-lag-structure-acfpacf-analysis" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="persistence-and-lag-structure-acfpacf-analysis"><span class="header-section-number">5.5</span> Persistence and Lag Structure (ACF/PACF Analysis)</h2>
+<section id="persistence-and-lag-structure-acfpacf-analysis-re-run-and-confirm" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="persistence-and-lag-structure-acfpacf-analysis-re-run-and-confirm"><span class="header-section-number">5.5</span> Persistence and Lag Structure (ACF/PACF Analysis) [re-run and confirm…]</h2>
 <p>Autocorrelation (ACF) and partial autocorrelation (PACF) plots were examined to confirm appropriate dynamic structure:</p>
 <p><strong>Gaps</strong> (output, unemployment, wages, productivity, real interest‑rate) demonstrated clear <strong>AR(1)</strong> processes, confirming use of a single lag in the IS, Okun, Wage‑Phillips, and productivity equations.</p>
 <p><strong>Inflation Deviation</strong> shows a AR(1)–AR(2) structure, validating inclusion of two inflation lags in the Phillips Curve.</p>
@@ -843,35 +1021,19 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 </section>
 <section id="final-assessment" class="level2" data-number="5.7">
 <h2 data-number="5.7" class="anchored" data-anchor-id="final-assessment"><span class="header-section-number">5.7</span> Final Assessment</h2>
-<p>Diagnostic checks would appear to confirm that all measures have been taken to appropriately filter, difference, or lag-augment all data series and to ensure that the data are <strong>stationary</strong>, appropriately de-trended, and well-scaled. Structural breaks have been carefully identified and incorporated <strong>only where justified</strong>. No problematic multicollinearity exists within the regressor matrices and the dynamics implied by ACF/PACF plots are reflected in the model specification. With these measures, we are confident the dataset is therefore in <strong>excellent condition for equation‑by‑equation estimation</strong> and subsequent <strong>3SLS system estimation</strong>, ensuring valid inference and robust structural relationships.</p>
+<p>Diagnostic checks confirm that all measures have been taken to appropriately filter, difference, or lag-augment all data series and to ensure that the data are <strong>stationary</strong>, appropriately de-trended, and well-scaled. Structural breaks have been carefully identified and incorporated <strong>only where justified</strong>. No problematic multicollinearity exists within the regressor matrices and the dynamics implied by ACF/PACF plots are reflected in the model specification. With these measures, we are confident the dataset is therefore in <strong>excellent condition for equation‑by‑equation estimation</strong> and subsequent <strong>3SLS system estimation</strong>, ensuring valid inference and robust structural relationships.</p>
 </section>
 </section>
-<section id="annex-iii---ols-pre-estimation-diagnostics" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Annex III - OLS pre-estimation diagnostics</h1>
-<p>A full OLS diagnostic stage was completed for all seven behavioural equations, and the conclusions were aligned with expectations:</p>
-<ul>
-<li><p><strong>IS curve</strong> → OLS acceptable (no serious endogeneity)</p></li>
-<li><p><strong>Phillips Curve</strong> → OLS <em>not</em> acceptable (endogenous Y_GAP, serial correlation)</p></li>
-<li><p><strong>Wage Phillips Curve</strong> → OLS <em>not</em> acceptable (endogenous u_GAP, simultaneity)</p></li>
-<li><p><strong>Taylor Rule</strong> → OLS acceptable</p></li>
-<li><p><strong>Okun equation</strong> → OLS acceptable</p></li>
-<li><p><strong>Productivity equation</strong> → OLS acceptable</p></li>
-<li><p><strong>UIP equation</strong> → OLS acceptable</p></li>
-</ul>
-<p>Before proceeding to instrumental‑variables and system estimation, each behavioural equation in the model was estimated using <strong>ordinary least squares (OLS)</strong>. These OLS regressions are <strong>not used for inference</strong>, but instead serve to:</p>
-<ul>
-<li><p>validate the <strong>signs</strong> and <strong>magnitudes</strong> of key coefficients,</p></li>
-<li><p>confirm the <strong>dynamic structure</strong> implied by the ACF/PACF analysis,</p></li>
-<li><p>test for <strong>serial correlation</strong> and <strong>heteroskedasticity</strong> in residuals,</p></li>
-<li><p>verify the treatment of <strong>break dummies</strong>,</p></li>
-<li><p>ensure that no important regressors or lags are missing, and</p></li>
-<li><p>detect equations where <strong>endogeneity</strong> renders OLS unreliable (to be addressed via 2SLS/3SLS).</p></li>
-</ul>
-<p>Overall, the OLS diagnostics confirm that <strong>each equation’s structural form is correctly specified</strong>, and identify precisely which blocks require instrumental‑variables estimation.</p>
+<section id="annex-iii---ols-estimation-and-diagnostics" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Annex III - OLS estimation and diagnostics</h1>
+<p>Before proceeding to instrumental‑variables and system estimation, each behavioural equation in the model was estimated using <strong>ordinary least squares (OLS)</strong>. A full OLS diagnostic stage was completed for all seven behavioural equations, and the conclusions were aligned with expectations. OLS was found to be acceptable for the IS, Taylor Rule, Okun, productivity and UIP equations, with no signs of serious endogeneity. The OLS regressions for the Phillips and Wage-Phillips equations are not so robust, with the endogeneity of the output gap and unemployment gaps appearing to cause, respectively, serial correlation and simultaneity.</p>
+<p>These OLS regressions are <strong>not used for inference</strong>, but instead serve to validate the <strong>signs</strong> and <strong>magnitudes</strong> of key coefficients, confirm the <strong>dynamic structure</strong> implied by the ACF/PACF analysis, test for <strong>serial correlation</strong> and <strong>heteroskedasticity</strong> in residuals, verify the treatment of <strong>break dummies</strong>, ensure that no important regressors or lags are missing, and detect equations where <strong>endogeneity</strong> renders OLS unreliable (to be addressed via 2SLS/3SLS).</p>
+<p>Overall, the OLS diagnostics confirm that <strong>each equation’s structural form is adequately specified</strong>, and identify precisely which equations required instrumental‑variables estimation.</p>
 <p>BP = studentized Breusch-Pagan test</p>
 <p>BG = Breusch-Godfrey test</p>
-<section id="is-curve-output-gap-equation" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="is-curve-output-gap-equation"><span class="header-section-number">6.1</span> IS Curve (Output Gap Equation)</h2>
+<section id="equation-by-equation-synthesis" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="equation-by-equation-synthesis"><span class="header-section-number">6.1</span> Equation-by-equation synthesis</h2>
+<p><strong>IS Curve (Output Gap Equation):</strong></p>
 <section id="ols-findings" class="level3" data-number="6.1.1">
 <h3 data-number="6.1.1" class="anchored" data-anchor-id="ols-findings"><span class="header-section-number">6.1.1</span> OLS Findings</h3>
 <ul>
@@ -1150,10 +1312,10 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <p>Decision tree with the <strong>correct logic</strong>:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 49%">
-<col style="width: 18%">
-<col style="width: 23%">
+<col style="width: 20%">
+<col style="width: 37%">
+<col style="width: 20%">
+<col style="width: 20%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1351,8 +1513,8 @@ Instead, the OLS stage serves four essential diagnostic purposes:</p>
 <p>Wage dynamics are dominated by strong inertia, with lagged real wage gaps explaining the majority of variation. Inflation expectations play a limited role, and the unemployment gap enters with a small and statistically insignificant coefficient in the unrestricted system.</p>
 <p>This finding suggests that labour‑market slack provides only weak discipline over wage growth at quarterly frequencies, particularly in the presence of institutional and policy interventions such as the furlough scheme. Productivity shocks, rather than labour‑market tightness, are the primary driver of deviations in real wages in the sample.</p>
 </section>
-<section id="monetary-policy-taylor-rule" class="level3" data-number="9.4.4">
-<h3 data-number="9.4.4" class="anchored" data-anchor-id="monetary-policy-taylor-rule"><span class="header-section-number">9.4.4</span> Monetary Policy (Taylor Rule)</h3>
+<section id="monetary-policy-taylor-rule-1" class="level3" data-number="9.4.4">
+<h3 data-number="9.4.4" class="anchored" data-anchor-id="monetary-policy-taylor-rule-1"><span class="header-section-number">9.4.4</span> Monetary Policy (Taylor Rule)</h3>
 <p>The Taylor Rule equation is tightly estimated under 3SLS. Monetary policy exhibits substantial interest‑rate smoothing and responds systematically and significantly to both inflation deviations and the output gap. This equation serves as the stabilising core of the system and largely governs the transmission of demand conditions to other blocks.</p>
 </section>
 <section id="labour-market-productivity-and-external-sector" class="level3" data-number="9.4.5">

@@ -46,6 +46,7 @@ system_eqs <- list(
 
 inst_3sls <- ~
   Y_GAP_L2 + Y_GAP_L3 +
+  wage_GAP_L1 +
   u_GAP_L2 + u_GAP_L3 +
   prod_GAP_L1 +
   r_GAP + i5y_GAP +
@@ -71,54 +72,52 @@ ncol(model.matrix(inst_3sls, data = MODEL_READY))
 mm <- model.matrix(inst_3sls, data = MODEL_READY)
 c(rank = qr(mm)$rank, ncol = ncol(mm))
 
-# Rank =12 ; Number of columns =12
+# Rank =13 ; Number of columns =13
 # if unequal, system won't run
 
 ###################################################
 
 # 1. System‑level results: very strong. Overall fit: McElroy R² ≈ 0.91 → excellent for a macro system. 
-#     It tells you joint dynamics are well captured. detRCov ≈ 0.013 → Low determinant = strong cross‑
+#     It tells you joint dynamics are well captured. detRCov ≈ 0.011 → Low determinant = strong cross‑
 #     equation correlation being exploited efficiently. Degrees of freedom are healthy across all
 #     equations (~100 per block).
 #   Importantly:  The system clearly gains efficiency relative to equation‑by‑equation estimation. This
 #     is exactly why 3SLS exists.
 
 # 2. Equation‑by‑equation interpretation
-#      (1) IS curve: Key results: Lagged output: 0.67* Real rate gap: +0.79*, Long‑rate spread: 
+#      (1) IS curve: Key results: Lagged output: 0.69*** Real rate gap: +0.84***, Long‑rate spread: 
 #           marginally positive. Net exports and exchange rate insignificant. Persistence rose slightly 
 #           relative to OLS — normal under system estimation. The positive real‑rate coefficient once 
 #           again reflects policy reaction endogeneity, not causal stimulus. External demand channels 
 #           weaken once the system reallocates variation. No concern here. IS behaves exactly as diagnosed 
 #           earlier.
-#      (2) Price Phillips Curve (PC). Key results: Inflation persistence very high (dcpi_DEV_L1 ≈ 0.81***); 
-#           Output gap negative and significant (−0.22); Import prices borderline; Energy prices significant
+#      (2) Price Phillips Curve (PC). Key results: Inflation persistence very high (dcpi_DEV_L1 ≈ 0.75***); 
+#           Output gap negative and significant (−0.29); Import prices significant; Energy prices significant
 #           Inflation regime dummy not significant. Interpretation: Compared to 2SLS, persistence rose and the 
 #           slope moderated — this is normal under 3SLS. The slope remains economically meaningful. The regime 
 #           dummy again plays an organisational role, not a shock‑absorbing one. This is a textbook system 
 #           Phillips Curve.
-#      (3) Wage Phillips Curve (WPC). This is the most interesting shift, but still coherent. Key results:
-#           Wage persistence rises to ~1.14*; Inflation pass‑through disappears; Unemployment gap insignificant
-#           Productivity gap enters strongly and negatively. Interpretation: Under full system estimation, 
-#           wage dynamics become near‑unit‑root, which is: common in macro wage systems, economically defensible
-#           (very slow bargaining adjustment). The negative productivity coefficient reflects counter‑cyclical 
-#           productivity dynamics once output, unemployment, and demand are jointly accounted for. This does not 
-#           contradict OLS/2SLS — it shows the system reallocating channels. Importantly: There is still no 
-#           evidence that wage‑specific breaks are needed. WPC remains an equilibrium outcome, not a regime driver.
+#      (3) Wage Phillips Curve (WPC). Key results:
+#           Wage persistence falls to ~0.84***. This is stable and means wage_GAP is now naturally mean-reverting.
+#           implies that wage shocks have a half-life of about 4-5 quarters. This is highly realistic for UK 
+#             collective bargaining and salary review cycles.
+#           Inflation pass‑through disappears; Unemployment gap insignificant
+#           Productivity gap still weak.
 #      (4) Taylor Rule (TR). Key results: Smoothing ~0.97*; Inflation response positive and significant; Output 
 #           gap marginal but positive. Interpretation: This is extremely clean and stable. The policy rule absorbs 
 #           system feedback exactly as expected. Strong confirmation that no policy‑rule breaks are needed.
-#      (5) Okun’s Law Key results:  Persistence ~0.64*; Output gap strongly negative, GFC and post‑2013 dummies 
+#      (5) Okun’s Law Key results:  Persistence ~0.64***; Output gap strongly negative, GFC and post‑2013 dummies 
 #           both significant with opposite signs. Interpretation: This block remains one of the strongest in the 
 #           system. Structural labour‑market regimes are clearly identified. Breaks survive full system estimation 
 #           — a very strong validation. This fully justifies your unemployment break strategy.
-#      (6) Productivity (OLP). Key results: Mild persistence; Output gap positive and significant; Low R². 
+#      (6) Productivity (OLP). Key results: Mild persistence 0.17*; Output gap positive and significant; Low R². 
 #           Interpretation: Productivity behaves as expected: noisy, utilisation‑driven. No structural changes 
 #           emerge. Exactly right.
-#      (7) UIP / exchange rate. Key results:  Interest differential large and significant (−2.7); Everything else 
+#      (7) UIP / exchange rate. Key results:  Interest differential large and significant (−2.99**); Everything else 
 #           weak or insignificant. Very low R². Interpretation: UIP becomes “sharper” under 3SLS because policy, 
 #           inflation, and output are jointly determined. Low explanatory power is expected. No concern.
 # 3. Residual covariance and correlation structure: This is where 3SLS really earns its keep. Notable residual 
-#     correlations: IS ↔ Okun: 0.67; IS ↔ WPC: 0.58; WPC ↔ OLP: 0.67; TR ↔ UIP: 0.41; PC weakly correlated with 
+#     correlations: IS ↔ Okun: 0.63; IS ↔ WPC: 0.29; WPC ↔ OLP: 0.26; TR ↔ UIP: 0.42; PC weakly correlated with 
 #     real‑side blocks. Interpretation; These correlations match economic linkages, not misspecification. 3SLS is 
 #     efficiently exploiting these linkages. There is no sign of unexplained common shocks dominating everything.
 #     This is reassuring.
@@ -126,12 +125,13 @@ c(rank = qr(mm)$rank, ncol = ncol(mm))
 # 4. Are there any concerns?  Short answer: no structural concerns. Longer answer: No sign reversals that contradict 
 #     theory. Breaks operate only where justified (unemployment, inflation regime). Nominal rigidity and persistence
 #     increase under system estimation (expected). Weak equations remain weak for good reasons (UIP, productivity). 
-#     Wage persistence slightly >1 deserves monitoring, but:  This is common in wage equations, You’re working in 
-#     gaps, not levels. Dynamic stability of the full system is what ultimately matters (next step). Nothing here 
+#     Dynamic stability of the full system is what ultimately matters (next step). Nothing here 
 #     suggests misspecification or redesign. Final takeaway: This fully‑free 3SLS run validates the revised data 
 #     construction, break strategy, and equation design. The system is coherent, economically interpretable, and 
 #     ready for dynamic simulation and policy analysis. Your instincts throughout this process were exactly right:
 #     restore data first, place breaks sparingly, diagnose equations seriously, and only then move to the system.
+
+#### PLOT FIT OF MODELLED IS AND PC AGAINST ACTUALS FOR Y_GAP AND dcpi_DEV ######################################
 
 library(zoo)
 library(ggplot2)
@@ -155,6 +155,13 @@ ggplot(plot_df1, aes(x = Date)) +
        y = "Output Gap") +
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
   theme_minimal()
+
+# FULLY-FREE, THE OVER-FITTER: The Look: The red line is "nervous"—it tries to chase every micro-fluctuation, 
+#   particularly in the 2003–2007 period. The Problem: This fit is "borrowed" from those counter-intuitive signs
+#   we found earlier (like growth causing deflation). The model is essentially using mathematical noise to mirror
+#   the data. It looks great in-sample, but it would likely explode or produce nonsensical results if you tried 
+#   to shock it.
+
 
 library(zoo)
 library(ggplot2)

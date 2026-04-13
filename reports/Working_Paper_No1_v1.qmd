@@ -19,17 +19,19 @@ library(car)
 MODEL_READY <- read.csv("C:\\Users\\hogan\\OneDrive\\Documents\\1 OLLIE\\0. R\\UK_economic_model\\reports\\MODEL_READY.csv")
 ```
 
-## April 5th Data Revision, Structural Breaks, and Diagnostic Results
+# A structural macro-econometric model of the UK economy
+
+The model is a hybrid New Keynesian system, defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using HP filters). A seven‑equation semi‑structural system with hybrid calibration–estimation:.
 
 $$
 \begin{aligned}
-\text{IS (agg dem):} \quad \tilde{Y}_t &= \alpha_1 \tilde{Y}_{t-1} - \phi_r \tilde{r}_t - \phi_{i_{spr}} \tilde{i}^{spr}_t + \alpha_2 \Delta\text{NX}_t + \alpha_3 \Delta\text{RER}_{t-1} + \epsilon^{\text{IS}}_t \\
-\text{PC (inflation):} \quad \tilde{\pi}_t &= \beta_1 \tilde{\pi}_{t-1} + \beta_2 \tilde{\pi}_{t-2} + \kappa_Y \tilde{Y}_t + \beta_3 \tilde{\pi}^{\text{IM}}_t + \beta_4 \tilde{\pi}^{\text{E}}_t + \beta_5 \text{BP}^{\pi}_t + \epsilon^{\text{PC}}_t \\
-\text{TR (mon pol)}: \quad i_t &= \rho i_{t-1} + (1 - \rho) (r^* + \pi^* + \tau_{\pi}  \tilde{\pi}_t + \tau_Y \tilde{Y}_t) + \epsilon^{\text{TR}}_t \\
-\text{OLU (lab dem):} \quad \tilde{U}_t &= \delta_1 \tilde{U}_{t-1} - \delta_2 \tilde{Y}_t + \delta_3 \text{BP}^{U1}_t + \delta_4 \text{BP}^{U2}_t +  \epsilon^{\text{OLU}}_t \\
-\text{WPC (lab sup):} \quad \tilde{w}_t &= \theta_1 \tilde{w}_{t-1} + \lambda_{\pi} \tilde\pi_{t-1} + \lambda_U \tilde U_t + \theta_2 \tilde{P}_t + \epsilon^{\text{WPC}}_t \\
-\text{OLP (produc):} \quad \tilde{P}_t &= \eta_1 \tilde{P}_{t-1} + \eta_2 \tilde{Y}_t + \epsilon^{\text{OLP}}_t \\
-\text{UIP (exch rate):} \quad \Delta \text{RER}_t &= \mu_1 \Delta \text{RER}_{t-1} + \psi \tilde i^{diff}_t + \mu_2 \Delta \text{NX}_t + \mu_3 \tilde \pi^{\text{IM}}_t + \epsilon^{\text{UIP}}_t
+\text{IS (agg dem):} \quad & \tilde{Y}_t = \alpha_1 \tilde{Y}_{t-1} - \phi_r \tilde{r}_t - \phi_{i^{spr}} \tilde{i}^{spr}_t + \alpha_2 \Delta \text{NX}_t + \alpha_3 \Delta \text{RER}_{t-1} + \epsilon_t^{\text{IS}} \\
+\text{PC (inflation):} \quad & \tilde{\pi}_t = \beta_1 \tilde{\pi}_{t-1} + \beta_2 \tilde{\pi}_{t-2} + \kappa_Y \tilde{Y}_t + \beta_3 \tilde{\pi}_t^{\text{IM}} + \beta_4 \tilde{\pi}_t^{\text{E}} + \beta_5 \text{BP}_t^{\pi} + \epsilon_t^{\text{PC}} \\
+\text{TR (mon pol):} \quad & i_t = \rho i_{t-1} + (1-\rho)(r^* + \pi^* + \tau_{\pi} \tilde{\pi}_t + \tau_Y \tilde{Y}_t) + \epsilon_t^{\text{TR}} \\
+\text{OLU (lab dem):} \quad & \tilde{U}_t = \delta_1 \tilde{U}_{t-1} - \delta_2 \tilde{Y}_t + \delta_3 \text{BP}_t^{U1} + \delta_4 \text{BP}_t^{U2} + \epsilon_t^{\text{OLU}} \\
+\text{WPC (lab sup):} \quad & \tilde{w}_t = \theta_1 \tilde{w}_{t-1} + \lambda_{\pi} \tilde{\pi}_{t-1} + \lambda_U \tilde{U}_t + \theta_2 \tilde{P}_t + \epsilon_t^{\text{WPC}} \\
+\text{OLP (produc):} \quad & \tilde{P}_t = \eta_1 \tilde{P}_{t-1} + \eta_2 \tilde{Y}_t + \epsilon_t^{\text{OLP}} \\
+\text{UIP (exch rate):} \quad & \Delta \text{RER}_t = \mu_1 \Delta \text{RER}_{t-1} + \psi \tilde{i}_t^{diff} + \mu_2 \Delta \text{NX}_t + \mu_3 \tilde{\pi}_t^{\text{IM}} + \epsilon_t^{\text{UIP}}
 \end{aligned}
 $$
 
@@ -195,6 +197,30 @@ Hybrid B delivers a stable and internally coherent conditional forecasting sys
 
 Crucially, the transition from Hybrid A to Hybrid B does not disrupt strongly identified behavioural relationships elsewhere in the system. Instead, it clarifies the roles of policy stance, demand, and nominal inertia, making Hybrid B well suited for scenario analysis, forecast conditioning, and counterfactual policy exercises.
 
+## APRIL 11TH - HYBRID G
+
+Introduces output potential
+
+## Variable 1 (essential): Potential output / capacity
+
+### Option A: Potential output level (`Y_POT`)
+
+Define a potential level that evolves with productivity:
+
+\$\$ Y\^{pot}*t = Y\^{pot}*{t−1} + \psi\tilde{P}\_t\$\$
+
+​Interpretation: productivity permanently raises capacity; potential output drifts upward after supply shocks. This is conceptually clean, but requires a new level state.
+
+### Option B (recommended for your setup): Potential growth component (`Y_POT_G`)
+
+Instead of a level, track **potential output growth**:
+
+Ytpot_g=ρ⋅Yt−1pot_g+ϕ⋅prod_GAPt ​
+
+Then redefine the gap **net of potential growth**.
+
+This is lighter, numerically more stable, and fits your “gap‑based” philosophy better.
+
 # A structural macro-econometric model of the UK economy
 
 The model is a hybrid New Keynesian system, defined by the following system of seven stochastic equations, following the semi-structural traditions of OBR(2012) where variables are defined in gap form (tilde) as deviations from their respective trends (using HP filters). A seven‑equation semi‑structural system with hybrid calibration–estimation:
@@ -251,7 +277,7 @@ The neutral real interest rate $(r^*)$ and the inflation target $(\pi^*)$ anchor
 
 This equation captures the systematic component of monetary policy in the UK’s inflation‑targeting regime, in which $\rho$ (policy inertia) is estimated.
 
-For OLS purposes (diagnostic stage), we estimate the **reduced‑form hybrid rule** \$ i_t = \gamma*0 +* \rho i{t-1} + \gamma\_{\pi} \tilde{\pi}*t +* \gamma{Y} \tilde{Y}\_t + \epsilon\_t \$ in which $\gamma_{\pi} = (1-\rho)\tau_{\pi}$ and $\gamma_Y = (1-\rho)\tau_Y$
+For OLS purposes (diagnostic stage), we estimate the **reduced‑form hybrid rule** \$ i_t = \gamma*0 +\* \rho i{t-1} + \gamma\_{\pi} \tilde{\pi}*t +* \gamma{Y} \tilde{Y}\_t + \epsilon\_t \$ in which $\gamma_{\pi} = (1-\rho)\tau_{\pi}$ and $\gamma_Y = (1-\rho)\tau_Y$
 
 ## Okun's Law for unemployment (labour market slack)
 
@@ -486,7 +512,7 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 ## UK Semi‑Structural Calibration Set
 
 |  |  |  |  |  |
-|---------|---------|---------|---------|-------------------------------------|
+|----|----|----|----|----|
 | **Parameter** | **Meaning** | **Our fully free 3SLS estimates** | **Recommended UK Value** | **Evidence** |
 | $\kappa_Y$ | Phillips Curve slope (slack→inflation) | -0.21 \*\* | **0.03–0.07** | BoE 2025 convexity paper; Fed 2024; ECB PC review [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf), [\[federalreserve.gov\]](https://www.federalreserve.gov/econres/feds/files/2024043pap.pdf), [\[ecb.europa.eu\]](https://www.ecb.europa.eu/pub/pdf/scpops/ecb.op377en.pdf) |
 | $\lambda_U$ | Wage Phillips Curve slope | 0.02 (ns) | **0.2–0.3** | BoE wage convexity evidence; UK labour tightness shifts [\[bankofengland.co.uk\]](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2025/how-curvy-is-the-phillips-curve.pdf), [\[ecb.europa.eu\]](https://www.ecb.europa.eu/press/conferences/ecbforum/shared/pdf/2023/Pill_paper.pdf) |
@@ -501,7 +527,7 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 ## Model Variables and Symbols
 
 |  |  |  |
-|-----------|-----------|--------------------------------------------------|
+|----|----|----|
 | **Symbol** | **Code** | **Description** |
 | $\tilde{Y}_t$ | `Y_GAP` | Output gap today (time $t$ percentage deviation of real national output from potential, in which real national output is represented by the chained volume measure of GVA at basic prices). |
 | $\tilde{U}_t$ | `u_GAP` | Unemployment gap (percentage point deviation from NAIRU (non-accelerating inflationary rate of unemployment). |
@@ -527,7 +553,7 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 ## Notation for Break Dummies
 
 |  |  |  |
-|-----------------|-----------------|--------------------------------------|
+|----|----|----|
 | **Symbol** | **Break Date** | **Interpretation** |
 | $\text{BP}^{U1}$ | 2004Q2 | Labour‑market regime shift (EU enlargement) |
 | $\text{BP}^{U2}$ | 2008Q4 | GFC unemployment behaviour shift |
@@ -540,7 +566,7 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 ## Notation for Parameters
 
 |  |  |
-|--------------------------------|----------------------------------------|
+|----|----|
 | **Symbol** | **Interpretation** |
 | $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5$ | Estimated IS‑curve coefficients |
 | $\phi_r, \phi_{i^{spr}}$ | Calibrated semi‑elasticities to real rate and financial spread |
@@ -557,7 +583,7 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 ## Notation for Steady‑State Targets and Constants
 
 |  |  |
-|----------------|--------------------------------------------------------|
+|----|----|
 | **Symbol** | **Description** |
 | $r^*$ | Long‑run real neutral rate |
 | $\pi^*$ | Inflation target (2.25% target for domestic inflation measured by GDP deflator) |
@@ -961,7 +987,7 @@ is **too strong for quarterly macro data**. Sargan is asking for *exact orthogon
 Decision tree with the **correct logic**:
 
 | Step | Question | Your result | Action |
-|--------------|------------------------------|--------------|--------------|
+|----|----|----|----|
 | 1 | Are instruments relevant? | Yes (F ≫ 10) | Proceed |
 | 2 | Is OLS inconsistent? | Yes (Wu–Hausman) | IV justified |
 | 3 | Does Sargan pass? | Maybe no | Diagnose, don’t panic |

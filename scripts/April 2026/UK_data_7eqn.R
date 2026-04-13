@@ -528,7 +528,6 @@ MODEL_READY <- MODEL_READY %>%
 tail(MODEL_READY %>% select(date, GVA_bp, Y_star, Y_GAP), 5)
 
 
-
 ### REPEAT FOR UNEMPLOYMENT GAP ################
 
 hp_U <- hpfilter(MODEL_READY$u_RATE, freq = 1600)
@@ -591,6 +590,12 @@ MODEL_READY <- MODEL_READY %>%
   mutate(
     drer_L1     = lag(drer, 1)
   )
+MODEL_DF %>% 
+  select(date, er_IDX) %>% 
+  tail(5)
+MODEL_READY %>% 
+  select(date, er_IDX, cpi_IDX_imf, fcpi_WIDX, drer, i_UK, i_FOR) %>% 
+  tail(5)
 #  NOTE ON RER ####
 
 # RER rising indicates a Real Appreciation of the Pound—either because the nominal exchange rate 
@@ -654,15 +659,145 @@ MODEL_READY <- MODEL_READY %>%
 # The "Wage-Push" Channel: In the UK, recent data from 2024 and early 2025 shows real wages growing 
 #   by approximately 2% even as output per worker fell. Modeling this as growth allows you to see 
 #   how much "catch-up" pressure exists from previous high-inflation periods. 
-
-### QUICK NOTE ON APPROACH TO PRODUCTIVITY AND WAGES #########
-# For a consistent New Keynesian / Structural model: 
-#   Productivity: Use the Gap. It represents "Supply-side slack." If productivity is below trend 
-#     (negative gap), it puts upward pressure on unit labor costs and inflation.
-#   Real Wages: Use Real Wage Growth. In the UK, wages are often "sticky." Modeling the growth of 
-#     wages relative to the gap in productivity is a classic way to show how "Wage-Push Inflation" 
-#     works.
 # N.B. FOUND THAT REAL WAGE GROWTH FAILS STATIONARITY TESTS
+
+
+
+
+### HYBRID G ONLY ##########################################################
+
+# need one new state                Y_POT_G
+# Y_gPOT = productivity‑driven potential output growth component. It is the he flow component of 
+#   output growth that the economy can absorb without generating inflationary pressure. 
+#   Equivalently, Y_gPOT is the part of Y_GAP that should not trigger policy or inflation responses.
+#  The long-run anchor we're missing from the SOE Hybrids (D,E,F,G)
+# Levels vs growth: what should Y_gPOT respond to?
+#   Option A: Y_gPOT responds to levels of productivity: Y_gPOT_t = ρ · Y_gPOT_{t−1} + φ · prod_GAP_t
+#         Interpretation: A permanent productivity improvement permanently raises potential growth.
+#         Problems: Over‑amplifies productivity shocks. Blurs level vs growth effects. Leads to 
+#         “double counting” because you already have prod_GAP in levels. Hard to stabilise numerically 
+#         in IRFs. Not recommended in a gap‑based semi‑structural model
+#   Option B (Best practice): Y_gPOT responds to changes in productivity. 
+#         Y_gPOT_t = ρ · Y_gPOT_{t−1} + φ · Δprod_GAP_t in which 
+#         Δprod_GAP_t = prod_GAP_t − prod_GAP_{t−1}
+#         Interpretation: Acceleration in productivity growth raises potential growth. Level shifts 
+#         do not permanently push potential growth higher. Balanced growth stabilises naturally.
+#          CB practice for semi-struc models. Integrates smoothly with your existing OLP block
+#          Should fix the pathology we're seeing
+#   RECOMMENDATION: Use Δprod_GAP, not prod_GAP levels, to drive Y_gPOT. Best for Hybrid G given: 
+#         gap‑based structure, no expectations, strong desire for long‑run neutrality, open‑economy
+#         + UIP dynamics.
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    dprod_GAP = prod_GAP - prod_GAP_L1,
+    )
+rho_gpot <- 0.7   # persistence of potential growth; productivity growth affects potential growth for 2–3 years
+phi_gpot <- 0.5   # responsiveness to productivity growth; partial pass‑through (not one‑for‑one)
+MODEL_READY$Y_gPOT <- NA_real_
+
+# initialise at zero (balanced growth at sample start)
+MODEL_READY$Y_gPOT[1] <- 0
+
+for (t in 2:nrow(MODEL_READY)) {
+  MODEL_READY$Y_gPOT[t] <-
+    rho_gpot * MODEL_READY$Y_gPOT[t - 1] +
+    phi_gpot * MODEL_READY$dprod_GAP[t]
+}
+# CHECK: Does it move only when productivity growth changes? You should see: spikes around productivity 
+#   accelerations, gradual decay back toward zero, no permanent drift.
+plot(MODEL_READY$Y_gPOT, type = "l",
+     main = "Potential output growth component (Y_gPOT)")
+mean(MODEL_READY$Y_gPOT, na.rm = TRUE)
+cor(cumsum(MODEL_READY$Y_gPOT), 1:nrow(MODEL_READY), use = "complete.obs")
+
+# Does it correlate with productivity growth but not levels? Expected: high-ish correlation with dprod_GAP
+#   much lower correlation with prod_GAP. If it tracks levels too closely, rho is too high.
+cor(MODEL_READY$Y_gPOT, MODEL_READY$dprod_GAP, use = "complete.obs")
+cor(MODEL_READY$Y_gPOT, MODEL_READY$prod_GAP, use = "complete.obs")
+
+
+
+# need one transformed variable     YGAP_EFF = Y_GAP − κ · Y_POT_G    
+#                         where κ is a calibration parameter (typically 0.7–1.0)
+
+# Construct the effective output gap
+kappa <- 1.0   # full removal of potential growth from the gap
+MODEL_READY$YGAP_EFF <-
+  MODEL_READY$Y_GAP - kappa * MODEL_READY$Y_gPOT
+# THIS IS THE VARIABLE WE'LL SUB Phillips curve and Taylor rule. Everything else still uses Y_GAP.
+# So, we won't be changing IS curve, Okun’s law, Wage Phillips curve, OLP equation, UIP, PLG error 
+#   correction
+MODEL_READY %>% 
+  select(date, Y_GAP, prod_GAP, dprod_GAP, Y_gPOT, YGAP_EFF) |>  
+  tail(10)
+
+
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    dprod_GAP_L1 = lag(dprod_GAP, 1),
+    Y_gPOT_L1    = lag(Y_gPOT, 1)
+  )
+
+
+
+
+###  HYBRID H ONLY - BUILDS ON HYBRID G ######################################
+
+# Hybrid H closes the real system in levels, not just growth, so that permanent productivity level 
+#   shocks are fully accommodated and the output gap converges to zero in the long run — giving you 
+#   a credible SOE over all timeframes. Hybrid G fixed growth misclassification. Hybrid H fixes level 
+#   mis‑anchoring.
+# The principle (very important): Permanent productivity levels must shift potential output levels, 
+#   not generate permanent output gaps. Formally, Hybrid H enforces: as t approaches infinity, limit of 
+#   Y_GAP_t =0. In other words, after a permanent productivity shock. The missing SOE equilibrium condition.
+# 🔧 New variable (one only): Potential output level gap.  Call it: Y_potL
+# Interpretation: slow‑moving level of potential output relative to baseline. Absorbs permanent productivity 
+#   shifts. distinct from Y_gPOT (which absorbs growth)
+# Dynamics of the new variable. Simplest credible closure: Y_potL_t = Y_potL_t-1 + ψ . prod_GAP_t in which
+#   ψ ∈ (0,1) (start with 0.05–0.10 quarterly). Permanent productivity raises potential levels gradually
+# ✅ Balanced growth✅ Long‑run neutrality✅ No explosions✅ No DSGE machinery
+# Redefine the effective output gap (Hybrid H)
+#   Currently (Hybrid G): YGAP_EFF = Y_GAP − Y_gPOT
+#   Hybrid H            : YGAP_EFF = Y_GAP − Y_gPOT − Y_potL
+
+# CREATE NEW VARIABLE HERE AND NEW YGAP_EFF HERE => MINIMAL CODE CHANGES
+
+psi_potL <- 0.07   # start conservative
+
+MODEL_READY$Y_potL <- NA_real_
+MODEL_READY$Y_potL[1] <- 0
+
+for (t in 2:nrow(MODEL_READY)) {
+  MODEL_READY$Y_potL[t] <-
+    MODEL_READY$Y_potL[t-1] +
+    psi_potL * MODEL_READY$prod_GAP[t]
+}
+
+plot(MODEL_READY$Y_potL, type = "l",
+     main = "Potential output gap level (Y_potL)")
+mean(MODEL_READY$Y_potL, na.rm = TRUE)
+cor(cumsum(MODEL_READY$Y_potL), 1:nrow(MODEL_READY), use = "complete.obs")
+
+MODEL_READY <- MODEL_READY |> 
+  mutate(
+    YGAP_EFF_H = Y_GAP - Y_gPOT - Y_potL
+  )
+MODEL_READY <- MODEL_READY |> 
+  mutate(
+    Y_potL_L1 = lag(Y_potL, 1)
+  )
+
+MODEL_READY <- MODEL_READY %>% 
+  slice(-1)
+
+MODEL_READY %>% 
+  select(date, Y_GAP, prod_GAP, dprod_GAP, Y_gPOT, YGAP_EFF, Y_potL, YGAP_EFF_H) |>  
+  tail(10)
+
+
+####################################################################################################
+
 
 
 
@@ -712,6 +847,20 @@ MODEL_READY <- MODEL_READY %>%
 MODEL_READY <- MODEL_READY %>%
   slice(-(1:4))
 
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    PLG = cumsum(dcpi_DEV),
+    PLG_L1 = lag(PLG, 1)
+  )
+
+MODEL_READY %>% 
+  select(date, dcpi_DEV, PLG) |>  
+  tail(10)
+
+
+
+
+
 
 
 ## REAL RATE GAP
@@ -751,6 +900,16 @@ hp_IMcpi_INFL<- hpfilter(MODEL_READY$IMcpi_INFL, freq = 1600)
 # 3. Extract the 'cycle' as your PROD_GAP
 MODEL_READY$IMcpi_GAP <- hp_IMcpi_INFL$cycle
 
+### FOR HYBRID E ONLY  ###################
+MODEL_READY <- MODEL_READY %>%
+  mutate(
+    IMcpi_GAP_L1 = lag(IMcpi_GAP, 1)
+  )
+
+
+
+
+
 hp_ecpi_INFL<- hpfilter(MODEL_READY$ecpi_INFL, freq = 1600)
 
 # 3. Extract the 'cycle' as your PROD_GAP
@@ -779,7 +938,6 @@ MODEL_READY <- MODEL_READY %>%
 
 str(MODEL_READY)
 ################################################################################
-
 
 
 

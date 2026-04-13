@@ -15,7 +15,8 @@
 #   models, because they want to see where the economy can drift if nothing corrects it. (i.e., if policy doesn't
 #   react any differently to how it currently reacts).
 # Hybrid B is retained for baseline and scenario analysis, where persistence and incomplete mean reversion 
-#   are informative features of the data (in the case of a demand shock). Hybrid C is introduced for policy simulation, where monotone 
+#   are informative features of the data (in the case of a demand shock). Hybrid C is introduced for policy 
+#   simulation, where monotone 
 #   adjustment paths and clear transmission narratives are required. The distinction reflects differences 
 #   in intended use rather than deficiencies in either specification.
 
@@ -45,14 +46,13 @@
 #   but awkward for policy simulation.
 
 ########## HYBRID B: second-STAGE CALIBRATION #################################
-mm <- model.matrix(inst_3sls_HB, data = MODEL_READY)
-c(rank = qr(mm)$rank, ncol = ncol(mm))
+
 
 
 
 # IS curve
 eq_IS <- Y_GAP ~ 
-  Y_GAP_L1 + r_GAP_cal + i5y_GAP + dNX + drer_L1
+  Y_GAP_L1 + r_GAP_cal + i5y_GAP + dNX + drer_L1       # r_GAP_cal replaces r_GAP
 
 # Phillips Curve
 eq_PC <- dcpi_DEV - 0.05 * Y_GAP ~ 
@@ -90,6 +90,7 @@ system_eqs_HB <- list(
 
 inst_3sls_HB <- ~
   Y_GAP_L2 + Y_GAP_L3 +
+  wage_GAP_L1 +
   u_GAP_L2 + u_GAP_L3 +
   prod_GAP_L1 +
   r_GAP_cal + i5y_GAP +
@@ -105,7 +106,94 @@ fit_3sls_HB <- systemfit(
   data = MODEL_READY
 )
 
+mm <- model.matrix(inst_3sls_HB, data = MODEL_READY)
+c(rank = qr(mm)$rank, ncol = ncol(mm))
+
+
 summary(fit_3sls_HB)
+
+# NOTABLE RESULT: COEFFICIENT ON r_GAP_cal is 0.14 vs. 0.68 for r_GAP in Hybrid A and even higher in fully-free
+# Inflation persistence steadily rising from 0.75 in fully-free to 0.92*** in Hybrid A, back down slightly to 0.90
+#     in Hyrbrid B.
+
+#### PLOT FIT OF MODELLED IS AND PC AGAINST ACTUALS FOR Y_GAP AND dcpi_DEV ######################################
+
+
+library(zoo)
+library(ggplot2)
+
+# 1. Create the data frame and convert the 'Quarterly' string to a Date object
+plot_df1 <- data.frame(
+  # as.yearqtr converts "2020 Q1" to a numeric year/quarter
+  # as.Date then turns it into the first day of that quarter
+  Date = as.Date(as.yearqtr(MODEL_READY$date)), 
+  Actual = as.numeric(MODEL_READY$Y_GAP),
+  Fitted = as.numeric(fitted(fit_3sls_HB)$IS)
+)
+
+# 2. Plot using the Date-aware x-axis
+ggplot(plot_df1, aes(x = Date)) +
+  geom_line(aes(y = Actual), color = "black", size = 1) +
+  geom_line(aes(y = Fitted), color = "red", size = 1) +
+  labs(title = "UK Output Gap: Actual vs. 3SLS System Fit - Hybrid B",
+       subtitle = "Black = Actual data | Red (Dashed) = Model Fit",
+       x = "Year",
+       y = "Output Gap") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_minimal()
+
+# The evolution across these three charts tells a compelling story of structural discipline. While a 
+#   casual observer might see a "worse" fit in the Hybrid models because the red line doesn't hug every 
+#   peak, an economist sees a model that is becoming significantly more credible.
+# Hybrid B: The "Policy Anchor": The Change: Fixing r* and auditing the instruments. The Payoff: Look 
+#   at the 2021-2024 recovery. Hybrid B tracks the "return to zero" much more accurately than Hybrid A. 
+#   By anchoring the neutral rate, you've helped the model correctly identify how much of the recovery was 
+#   "natural" vs. how much was driven by the interest rate environment. The GFC (2008): Hybrid B has a much 
+#   cleaner "peak" and "trough." It doesn't overshoot the 2008 boom as much as the fully-free version did, 
+#   which is more consistent with the narrative that the 2008 bubble was partly a "financial/credit" shock 
+#   rather than a pure "output demand" shock.
+
+
+library(zoo)
+library(ggplot2)
+
+# 1. Create the data frame and convert the 'Quarterly' string to a Date object
+plot_df2 <- data.frame(
+  # as.yearqtr converts "2020 Q1" to a numeric year/quarter
+  # as.Date then turns it into the first day of that quarter
+  Date = as.Date(as.yearqtr(MODEL_READY$date)), 
+  Actual = as.numeric(MODEL_READY$dcpi_DEV),
+  Fitted = as.numeric(fitted(fit_3sls_HB)$PC)
+)
+
+# 2. Plot using the Date-aware x-axis
+ggplot(plot_df2, aes(x = Date)) +
+  geom_line(aes(y = Actual), color = "black", size = 1) +
+  geom_line(aes(y = Fitted), color = "red", size = 1) +
+  labs(title = "UK Inflation: Actual vs. 3SLS System Fit - Hybrid B",
+       subtitle = "Black = Actual data | Red (Dashed) = Model Fit",
+       x = "Year",
+       y = "Inflation deviation from 2%") +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  theme_minimal()
+
+# The improvement in Hybrid B is clearly visible, especially in how the model handles the persistence of inflation.
+#   By fixing r* you’ve given the Taylor Rule (and the entire system) a "long-run anchor" that prevents the fit 
+#   from drifting too far from the data in stable periods. Why Hybrid B looks "Sharper": The 2023 Peak Correction: 
+#   In your Hybrid A discussion, the model was slightly over-attributing the peak. In this Hybrid B plot, the red 
+#   line is tracking the downward turn of 2024 much more accurately. This suggests that anchoring helped the model 
+#   better identify the restrictiveness of monetary policy during that period. Reduced "Echoes": Look at the 2011–
+#   2015 period. In many free models, you get "ghost" oscillations where the model tries to find cycles that aren't
+#   there. Here, the red line is much more disciplined—it follows the data without the "jitter" we saw in the fully
+#   -free estimation. The 2021 Recovery: The tracking of the post-COVID rebound is excellent. It shows that by 
+#   anchoring expectations and the neutral rate, you've allowed the systemic shocks (the actual economic events) 
+#   to drive the fit, rather than mathematical noise. The "Forecasting Ready" Look: What makes this plot "better" 
+#   from a working paper perspective is the residual behavior at the very end of the sample (2024–2025). The red 
+#   line is converging back toward the data trend. This is exactly what you want to see before moving to Stage 2; 
+#   it means your starting conditions for the forecast are grounded in a model that is currently "in sync" with the
+#   real economy.
+
+
 
 # EXAMINE SOME IRFs TO SEE IF HYBRID C ACTUALLY REQUIRED #######################
 coef_sys <- coef(fit_3sls_HB)
@@ -258,3 +346,4 @@ plot_irf(irf_demand,
 plot_irf(irf_supply,
          vars = c("Y_GAP", "dcpi_DEV", "u_GAP"),
          title = "Supply Shock – Hybrid B")
+
