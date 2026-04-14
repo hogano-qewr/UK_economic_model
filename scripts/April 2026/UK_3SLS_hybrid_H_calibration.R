@@ -15,40 +15,7 @@
 #   Currently (Hybrid G): YGAP_EFF = Y_GAP − Y_gPOT
 #   Hybrid H            : YGAP_EFF = Y_GAP − Y_gPOT − Y_potL
 
-# CREATE NEW VARIABLE HERE AND NEW YGAP_EFF HERE => MINIMAL CODE CHANGES
-
-psi_potL <- 0.07   # start conservative
-
-MODEL_READY$Y_potL <- NA_real_
-MODEL_READY$Y_potL[1] <- 0
-
-for (t in 2:nrow(MODEL_READY)) {
-  MODEL_READY$Y_potL[t] <-
-    MODEL_READY$Y_potL[t-1] +
-    psi_potL * MODEL_READY$prod_GAP[t]
-}
-
-plot(MODEL_READY$Y_potL, type = "l",
-     main = "Potential output gap level (Y_potL)")
-mean(MODEL_READY$Y_potL, na.rm = TRUE)
-cor(cumsum(MODEL_READY$Y_potL), 1:nrow(MODEL_READY), use = "complete.obs")
-
-MODEL_READY <- MODEL_READY |> 
-  mutate(
-    YGAP_EFF_H = Y_GAP - Y_gPOT - Y_potL
-  )
-MODEL_READY <- MODEL_READY |> 
-  mutate(
-    Y_potL_L1 = lag(Y_potL, 1)
-  )
-
-MODEL_READY <- MODEL_READY %>% 
-  slice(-1)
-
-MODEL_READY %>% 
-  select(date, Y_GAP, prod_GAP, dprod_GAP, Y_gPOT, YGAP_EFF, Y_potL, YGAP_EFF_H) |>  
-  tail(10)
-
+# THESE VARIABLES NOW CREATED IN DATA SCRIPT 
 
 
 
@@ -273,8 +240,6 @@ state_0 <- c(
 names(state_0)
 length(state_names)   # should be 10
 length(state_0)       # should be 10
-names(step_system_H(state_0, shock_0, t = 1))
-names(step_system_H(state_0, shock_0, t = 1)) == state_names
 
 
 
@@ -307,6 +272,8 @@ length(state_names)            # 10
 length(state_0)                # 10
 names(state_0) == state_names  # TRUE
 length(shock_names)            # 8
+names(step_system_H(state_0, shock_0, t = 1))
+names(step_system_H(state_0, shock_0, t = 1)) == state_names
 
 
 
@@ -444,6 +411,7 @@ plot_irf_stacked(
 
 
 
+
 irf_demand_tidy <- irf_to_tidy(irf_demand, "Demand shock")
 
 plot_irf_stacked(
@@ -474,7 +442,7 @@ plot_irf_stacked(
 
 
 
-irf_prod_H <- simulate_irf("OLP", 1, H = 60)
+irf_prod_H <- simulate_irf("OLP", 1, H = 80)
 
 ygap_eff_H <- irf_prod_H[, "Y_GAP"] -
   Y_gPOT_path[1:61] -
@@ -486,4 +454,65 @@ abline(h = 0, lty = 2)
 # Hybrid G corrects for productivity growth but leaves residual level imbalances, while Hybrid H 
 #   absorbs permanent productivity level shifts into potential output, restoring long‑run equilibrium
 #   in the effective output gap.
-# Hybrid G corrects for productivity growth but leaves residual level imbalances, while Hybrid H absorbs permanent productivity level shifts into potential output, restoring long‑run equilibrium in the effective output gap.
+# Hybrid G corrects for productivity growth but leaves residual level imbalances, while Hybrid H absorbs 
+#   permanent productivity level shifts into potential output, restoring long‑run equilibrium in the effective 
+#   output gap.
+
+
+r_gap_cal_H <- irf_prod_H[, "i_UK"] -
+  irf_prod_H[, "dcpi_DEV"] -
+  r_star
+plot(
+  r_gap_cal_H,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real interest rate gap",
+  main = "Real rate gap after productivity shock (Hybrid H)"
+)
+abline(h = 0, lty = 2)
+
+
+plg_H <- irf_prod_H[, "PLG"]
+plot(
+  plg_H,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Price-level gap",
+  main = "Price-level gap after productivity shock (Hybrid H)"
+)
+abline(h = 0, lty = 2)
+
+
+
+drer_H <- irf_prod_H[, "drer"]
+
+plot(
+  drer_H,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real exchange rate gap",
+  main = "Exchange rate response after productivity shock (Hybrid H)"
+)
+abline(h = 0, lty = 2)
+
+
+par(mfrow = c(2, 2))
+
+plot(ygap_eff_H, type="l", main="YGAP_EFF_H"); abline(h=0,lty=2)
+plot(r_gap_cal_H, type="l", main="r_GAP_cal"); abline(h=0,lty=2)
+plot(plg_H, type="l", main="PLG"); abline(h=0,lty=2)
+plot(drer_H, type="l", main="drer"); abline(h=0,lty=2)
+
+par(mfrow = c(1, 1))
+
+# After a permanent productivity shock, the effective output gap is stationary, the real policy gap 
+#   remains bounded, the price level is disciplined via error correction, and the exchange rate adjusts 
+#   persistently but without drift.”
+# reports impulse responses to a productivity shock under the Hybrid‑H construction. Output slack rises 
+#   temporarily and fully reverts, while inflation, the policy rate gap, and real exchange‑rate changes
+#   display bounded, mean‑reverting dynamics. The absence of persistent nominal or external responses 
+#   mirrors the stationarity of YGAP_EFF_H and confirms that Hybrid‑H removes level and growth‑rate 
+#   components that would otherwise induce spurious long‑run effects.”

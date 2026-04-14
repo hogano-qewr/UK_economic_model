@@ -534,9 +534,10 @@ plot_irf_stacked(
 #     closure assumptions — exactly how real policy modellers work in practice. Your instinct to step back, 
 #     reassess purpose, and then move on is exactly the right one.
 
-irf_prod_G <- simulate_irf("OLP", shock_size = 1, H = 60)
+irf_prod_G <- simulate_irf("OLP", shock_size = 1, H = 80)
+
 ygap_eff_G <- irf_prod_G[, "Y_GAP"] -
-  Y_gPOT_path[1:61]
+  Y_gPOT_path[1:81]
 plot(
   ygap_eff_G,
   type = "l",
@@ -546,3 +547,52 @@ plot(
   main = "Effective output gap after productivity shock (Hybrid G)"
 )
 abline(h = 0, lty = 2)
+
+r_gap_cal_G <- irf_prod_G[, "i_UK"] -
+  irf_prod_G[, "dcpi_DEV"] -
+  r_star
+plot(
+  r_gap_cal_G,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real interest rate gap",
+  main = "Real rate gap after productivity shock (Hybrid G)"
+)
+abline(h = 0, lty = 2)
+
+
+plg_G <- irf_prod_G[, "PLG"]
+plot(
+  plg_G,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Price-level gap",
+  main = "Price-level gap after productivity shock (Hybrid G)"
+)
+abline(h = 0, lty = 2)
+
+
+
+drer_G <- irf_prod_G[, "drer"]
+
+plot(
+  drer_G,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real exchange rate gap",
+  main = "Exchange rate response after productivity shock (Hybrid G)"
+)
+abline(h = 0, lty = 2)
+
+
+par(mfrow = c(2, 2))
+
+plot(ygap_eff_G, type="l", main="YGAP_EFF_G"); abline(h=0,lty=2)
+plot(r_gap_cal_G, type="l", main="r_GAP_cal"); abline(h=0,lty=2)
+plot(plg_G, type="l", main="PLG"); abline(h=0,lty=2)
+plot(drer_G, type="l", main="drer"); abline(h=0,lty=2)
+
+par(mfrow = c(1, 1))

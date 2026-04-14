@@ -728,6 +728,11 @@ MODEL_READY$YGAP_EFF <-
 # THIS IS THE VARIABLE WE'LL SUB Phillips curve and Taylor rule. Everything else still uses Y_GAP.
 # So, we won't be changing IS curve, Okun’s law, Wage Phillips curve, OLP equation, UIP, PLG error 
 #   correction
+plot(MODEL_READY$YGAP_EFF, type = "l",
+     main = "Hybrid G: Effective output gap (YGAP_EFF)")
+
+
+
 MODEL_READY %>% 
   select(date, Y_GAP, prod_GAP, dprod_GAP, Y_gPOT, YGAP_EFF) |>  
   tail(10)
@@ -783,13 +788,15 @@ MODEL_READY <- MODEL_READY |>
   mutate(
     YGAP_EFF_H = Y_GAP - Y_gPOT - Y_potL
   )
+plot(MODEL_READY$YGAP_EFF_H, type = "l",
+     main = "Hybrid H: Effective output gap (YGAP_EFF_H)")
+
+
+
 MODEL_READY <- MODEL_READY |> 
   mutate(
     Y_potL_L1 = lag(Y_potL, 1)
   )
-
-MODEL_READY <- MODEL_READY %>% 
-  slice(-1)
 
 MODEL_READY %>% 
   select(date, Y_GAP, prod_GAP, dprod_GAP, Y_gPOT, YGAP_EFF, Y_potL, YGAP_EFF_H) |>  
@@ -843,6 +850,9 @@ MODEL_READY <- MODEL_READY %>%
     i_UK_L1     = lag(i_UK, 1),
     )
 
+
+
+
 # REMOVE FIRST 4 ROWS (now NA due to df loss)
 MODEL_READY <- MODEL_READY %>%
   slice(-(1:4))
@@ -852,6 +862,10 @@ MODEL_READY <- MODEL_READY %>%
     PLG = cumsum(dcpi_DEV),
     PLG_L1 = lag(PLG, 1)
   )
+
+plot(MODEL_READY$PLG, type = "l",
+     main = "Price level GAP (PLG)")
+
 
 MODEL_READY %>% 
   select(date, dcpi_DEV, PLG) |>  
@@ -878,6 +892,10 @@ MODEL_READY <- MODEL_READY |>
     r_STAR_cal = 0.5,
     r_GAP_cal  = r_UK - r_STAR_cal
   )
+
+plot(MODEL_READY$r_GAP_cal, type = "l",
+     main = "Real interest rate GAP (calibrated =>")
+
 
 MODEL_READY %>% 
   select(date, i_UK, dcpi_INFL, r_UK, r_STAR_cal, r_GAP_cal) %>% 
@@ -947,8 +965,8 @@ str(MODEL_READY)
 ###   TESTING    ################
 
 
-vars_to_test <- c("Y_GAP", "u_GAP", "dcpi_DEV", "r_GAP", "drer", "prod_GAP", "wage_GAP", 
-                  "i5y_GAP", "i_DIFFL_GAP","IMcpi_GAP", "ecpi_GAP", "dNX")
+vars_to_test <- c("Y_GAP", "u_GAP", "dNX", "drer", "wage_GAP", "prod_GAP", "dprod_GAP", "Y_gPOT", "YGAP_EFF",
+                  "Y_potL", "YGAP_EFF_H", "dcpi_DEV", "r_GAP", "i_DIFFL_GAP", "i5y_GAP", "IMcpi_GAP", "ecpi_GAP")
 # Loop through and print p-values
 for (v in vars_to_test) {
   # Remove NAs to avoid errors
@@ -988,6 +1006,28 @@ for (v in vars_to_test) {
 # IMcpi_GAP ADF p-value: 0.0522 
 # ecpi_GAP ADF p-value: 0.01 
 # dNX ADF p-value: 0.01 
+
+# re-run post-Hybrid E 13/04/2026
+#Y_GAP ADF p-value: 0.01 
+#u_GAP ADF p-value: 0.0293 
+#dNX ADF p-value: 0.01 
+#drer ADF p-value: 0.01 
+#wage_GAP ADF p-value: 0.0225 
+#prod_GAP ADF p-value: 0.01 
+#dprod_GAP ADF p-value: 0.01 
+#Y_gPOT ADF p-value: 0.01 
+#YGAP_EFF ADF p-value: 0.01 
+#Y_potL ADF p-value: 0.0209 
+#YGAP_EFF_H ADF p-value: 0.01 
+#dcpi_DEV ADF p-value: 0.0453 
+#r_GAP ADF p-value: 0.01 
+#i_DIFFL_GAP ADF p-value: 0.0406 
+#i5y_GAP ADF p-value: 0.01 
+#IMcpi_GAP ADF p-value: 0.0522 
+#ecpi_GAP ADF p-value: 0.01 
+
+# All equilibrium‑relevant gap variables are stationary. Non‑stationarity in price‑level and 
+#   interest‑rate stock variables is intentional and disciplined via error‑correction terms.”
 
 MODEL_READY %>% 
   select(date, Y_GAP, u_GAP, dcpi_DEV, r_GAP, drer, prod_GAP, wage_GAP, 

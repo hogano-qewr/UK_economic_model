@@ -488,3 +488,65 @@ plot_irf_stacked(
 #   productivity term from the output gap used in policy and PC, or allow productivity to raise r_star. This 
 #   closes the system without expectations or DSGE. Realistic. Minimal. Consistent with overall hybrid (semi-
 #   structural) framework
+
+irf_prod_F <- simulate_irf("OLP", shock_size = 1, H = 80)
+
+y_gap_F <- irf_prod_F[, "Y_GAP"]
+plot(
+  y_gap_F,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Y_GAP",
+  main = "Output gap after productivity shock (Hybrid F)"
+)
+abline(h = 0, lty = 2)
+
+r_gap_cal_F <- irf_prod_F[, "i_UK"] -
+  irf_prod_F[, "dcpi_DEV"] -
+  r_star
+plot(
+  r_gap_cal_F,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real interest rate gap",
+  main = "Real rate gap after productivity shock (Hybrid F)"
+)
+abline(h = 0, lty = 2)
+
+
+plg_F <- irf_prod_F[, "PLG"]
+plot(
+  plg_F,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Price-level gap",
+  main = "Price-level gap after productivity shock (Hybrid F)"
+)
+abline(h = 0, lty = 2)
+
+
+
+drer_F <- irf_prod_F[, "drer"]
+
+plot(
+  drer_F,
+  type = "l",
+  lwd  = 2,
+  xlab = "Horizon (quarters)",
+  ylab = "Real exchange rate gap",
+  main = "Exchange rate response after productivity shock (Hybrid F)"
+)
+abline(h = 0, lty = 2)
+
+
+par(mfrow = c(2, 2))
+
+plot(y_gap_F, type="l", main="Y_GAP"); abline(h=0,lty=2)
+plot(r_gap_cal_F, type="l", main="r_GAP_cal"); abline(h=0,lty=2)
+plot(plg_F, type="l", main="PLG"); abline(h=0,lty=2)
+plot(drer_F, type="l", main="drer"); abline(h=0,lty=2)
+
+par(mfrow = c(1, 1))
