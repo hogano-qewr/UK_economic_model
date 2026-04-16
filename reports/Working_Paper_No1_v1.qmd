@@ -17,6 +17,25 @@ format: html
 library(car)
 
 MODEL_READY <- read.csv("C:\\Users\\hogan\\OneDrive\\Documents\\1 OLLIE\\0. R\\UK_economic_model\\reports\\MODEL_READY.csv")
+
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(purrr)
+library(forecast)
+library(AER)
+library(tsbox)
+library(gridExtra)
+library(tseries)
+library(zoo)
+library(vars)
+library(lubridate)
+library(mFilter)
+library(stringr)
+library(systemfit)
+library(tsibble)
+library(stats)
+select <- dplyr::select
 ```
 
 # Introduction \[DRAFTING NOTES\]
@@ -53,23 +72,73 @@ $$
 \end{aligned}
 $$
 
-# Data diagnostics and estimation strategy
+# Data diagnostics
 
-## The data used and diagnostic tests results
+## The data used 
 
 We use quarterly data spanning the period 1997-2024. It was not possible to include 2025 as these data were not yet available for some variables. We have sought to minimise degrees of freedom lost to ldata transformation and lagging choices. The minimum loss was six and, as such, the model is able to use 106 observations for each variable, spanning 1998 Q3 to 2024 Q4. The continuous maintenance of the data preparation coding script and the continuous recovery of degrees of freedom lost to further transformations and lagging as we evolved through model development materially improved regime identification and equation behaviour across the system, allowing a clearer separation between persistent structural changes and large transitory shocks.
 
-Structural break tests (Zivot–Andrews and Bai–Perron) and subsequent equation‑level diagnostics motivated our **minimal and targeted structural break strategy**. Persistent regime shifts are identified only where economically meaningful and empirically robust: a Global Financial Crisis (GFC) break and a post‑2013 repair regime in the unemployment gap, and a single inflation‑regime break dating from early 2020. Breaks are explicitly rejected for output gaps, wages, productivity, exchange rates, and monetary policy, where apparent instability reflects shock volatility rather than changes in underlying structure.
+This annex covers the cleaning and diagnostic testing of the data for each variable, including stationarity and structural‑break testing, de-trending, transformation into gaps or first differences, multicollinearity diagnostics, autocorrelation and lag structure assessment, as well as scaling and economic plausibility checks. In applying these diagnostic procedures to the quarterly macroeconomic time series data prior to model estimation, the objective was to ensure that all endogenous and exogenous variables are appropriately transformed, stationary, free from undue multicollinearity and that they exhibit time‑series properties consistent with their theoretical roles within the system.
 
-Single‑equation OLS diagnostics show strong internal coherence across blocks. Real‑side equations (IS, Okun’s law, and productivity) exhibit heteroskedastic but serially uncorrelated residuals, consistent with state‑dependent shock amplitudes during crisis periods but stable adjustment dynamics. Nominal and institutional equations (price Phillips curve, wage Phillips curve, and Taylor rule) display residual serial correlation but fail to reject homoskedasticity, reflecting expected inertia in inflation, wage setting, and policy adjustment rather than misspecification.
+## Scaling and Economic Plausibility
 
-Heteroskedasticity‑robust inference sharpens interpretation without altering substantive conclusions. Core structural slopes remain stable across specifications, while marginal significance attached to later crisis dummies dissipates under robust standard errors—correctly distinguishing regime change from shock realisation. In the wage Phillips curve, labour‑market slack affects wage dynamics primarily by slowing mean reversion rather than inducing contemporaneous wage declines, eliminating the need for wage‑specific regime dummies.
-
-Overall, the revised data construction reduces the reliance on ad‑hoc structural adjustments, improves interpretability of break tests, and yields cleaner reduced‑form behaviour across equations. The final specification is parsimonious, economically transparent, and diagnostically stable, providing a sound basis for system estimation and policy analysis.
+All variables were inspected to ensure the magnitudes were economically plausible and appropriately scaled. Gaps (output, unemployment, real wages, productivity) lie in the expected ±1–5% range.
 
 ```{r}
-#| label: data diagnostics (Augmented Dickey-Fuller; stationarity)
+#| label: "GAPS: data diagnostics - scaling and economic plausibility"
 #| include: true
+
+MODEL_READY %>% 
+  select(date, Y_GAP, u_GAP, prod_GAP, wage_GAP) |>  
+  tail(20)
+```
+
+ΔRER and ΔNX display reasonable quarterly volatility.
+
+```{r}
+#| label: "DIFFERENCED: data diagnostics - scaling and economic plausibility"
+#| include: true
+
+MODEL_READY %>% 
+  select(date, drer, dNX) |>  
+  tail(20)
+```
+
+Import and energy inflation gaps show large swings during 2019–2023, reflecting documented global cost‑push shocks.
+
+```{r}
+#| label: "INFLATION GAPS: data diagnostics - scaling and economic plausibility"
+#| include: true
+
+MODEL_READY %>% 
+  select(date, IMcpi_GAP, ecpi_GAP) |>  
+  tail(20)
+```
+
+The real interest‑rate gap behaved consistently with monetary‑policy and inflation dynamics.
+
+```{r}
+#| label: "INFL DEV & INTEREST RATE GAPS: data diagnostics - scaling and economic plausibility"
+#| include: true
+
+MODEL_READY %>% 
+  select(date, dcpi_DEV, r_GAP, i5y_GAP, i_DIFFL_GAP) |>  
+  tail(20)
+```
+
+No series exhibited signs of mis‑scaling, measurement errors, or inappropriate de-trending.
+
+## Stationarity Testing
+
+### Augmented Dickey-Fuller
+
+All macroeconomic variables were transformed into either *gap* form (deviations from trend or from steady‑state values) or *first differences* where required by theory. Stationarity was evaluated using the Augmented Dickey–Fuller (ADF) test for each transformed series.
+
+```{r}
+#| label: "data diagnostics - (Augmented Dickey-Fuller - stationarity)"
+#| include: true
+
+library(tseries)
 
 vars_to_test <- c("Y_GAP", "u_GAP", "dNX", "drer", "wage_GAP", "prod_GAP", "dprod_GAP", "Y_gPOT", "YGAP_EFF", "Y_potL", "YGAP_EFF_H", "dcpi_DEV", "r_GAP", "i_DIFFL_GAP", "i5y_GAP", "IMcpi_GAP", "ecpi_GAP")
 
@@ -81,10 +150,22 @@ for (v in vars_to_test) {
 }
 ```
 
-### Endogenous variables
+All variables exhibit stationarity at conventional significance levels. The output gap $(\tilde{Y})$, unemployment gap $(\tilde{U})$, inflation deviation $(\tilde{\pi})$, wage gap $(\tilde{w})$, productivity gap $(\tilde{P})$, real interest‑rate gap $(\tilde{r})$, 5‑year spread gap $(\tilde{i}^{spr})$, import‑price inflation gap $(\tilde{\pi}^{\text{IM}})$, and energy‑price inflation gap $(\tilde{\pi}^{\text{E}})$ were all stationary (with ADF $p<0.05$ in each case).
+
+Differenced variables include the change in the real exchange rate $(\Delta\text{RER})$ and the change in net exports $(\Delta\text{NX})$. These are stationary by construction. The raw nominal interest‑rate differential $(i-i^f)$ was found to be non‑stationary, so a **trend‑adjusted differential gap** was constructed, yielding a stationary series suitable for use in the UIP equation.
+
+### Stationarity with Structural Breaks Testing
+
+To ensure robustness of stationarity and to identify potential regime shifts, each series was tested for breaks using **Zivot–Andrews one‑break unit‑root tests** and **Bai–Perron multiple‑break** tests.
+
+Structural break tests (Zivot–Andrews and Bai–Perron) and subsequent equation‑level diagnostics motivated our **minimal and targeted structural break strategy**. Persistent regime shifts are identified only where economically meaningful and empirically robust: a Global Financial Crisis (GFC) break and a post‑2013 repair regime in the unemployment gap, and a single inflation‑regime break dating from early 2020. Breaks are explicitly rejected for output gaps, wages, productivity, exchange rates, and monetary policy, where apparent instability reflects shock volatility rather than changes in underlying structure.
+
+Corresponding break dummies were included **only** in the equations whose dependent variables exhibited genuine structural breaks, thus seeking parsimony and stability.
+
+#### Endogenous variables (ZA and BP tests)
 
 ```{r}
-#| label: OUTPUT GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "OUTPUT GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -104,7 +185,7 @@ summary(struc)
 ```
 
 ```{r}
-#| label: UNEMPLOYMENT GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "UNEMPLOYMENT GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -128,8 +209,6 @@ MODEL_READY$date[c(24, 42, 62, 86)] # = ["2004-04-01" "2008-10-01" "2013-10-01" 
 
 # While multiple breakpoints are detectable in unemployment‑gap data, the baseline specification includes only a GFC‑era regime shift. A secondary post‑crisis breakpoint is examined in robustness checks. Pandemic‑era movements are treated as transitory disturbances rather than structural changes in labour‑market equilibrium
 
-
-
 # FOUNDATIONAL REMINDERS
 # Standard unit‑root tests (ADF, ZA) assume 0 or 1 break. U_GAP has 4 breaks in our sample. So these tests incorrectly classify U_GAP as non‑stationary but it's not a real non‑stationarity problem. It’s simply a multiple‑break problem, which is normal in macro labour market data. The correct interpretation is rather that U_GAP is stationary because: 
 #         It has a stable mean-reverting structure within regimes.
@@ -141,7 +220,7 @@ MODEL_READY$date[c(24, 42, 62, 86)] # = ["2004-04-01" "2008-10-01" "2013-10-01" 
 ```
 
 ```{r}
-#| label: INFLATION DEVIATION: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "INFLATION DEVIATION: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -156,7 +235,7 @@ summary(struc)
 ```
 
 ```{r}
-#| label: REAL RATE GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "REAL INTEREST RATE GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -171,7 +250,7 @@ summary(struc)
 ```
 
 ```{r}
-#| label: REAL EXCHANGE RATE (Delta): data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "REAL EXCHANGE RATE Delta: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -186,7 +265,7 @@ summary(struc)
 ```
 
 ```{r}
-#| label: REAL WAGE GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "REAL WAGE GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -198,10 +277,11 @@ summary(za_wage_GAP)
 struc <- breakpoints(MODEL_READY$wage_GAP ~ 1)
 summary(struc)
 # BIC suggets three structural breaks (24, 51, 66) [2004Q2, 2011Q1, 2014Q4]. TENTATIVE NEW CONCLUSION: Although multiple structural breaks are detectable in the wage gap, these largely reflect endogenous responses to changes in labour‑market slack, productivity, and inflation regimes. Accordingly, the baseline specification does not impose wage‑specific regime dummies, allowing wage dynamics to adjust through the system’s structural channels.
+# # Wage dynamics are driven by: Persistence, Inflation regime, Labour‑market outcomes (captured elsewhere) Once those are in place: explicit wage break dummies add little, and risk double‑counting labour‑market regimes already captured in u_GAP. 
 ```
 
 ```{r}
-#| label: PRODUCTIVITY GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "PRODUCTIVITY GAP: data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -215,10 +295,10 @@ summary(struc)
 # Bai–Perron BIC clearly rejects the inclusion of breaks, making a zero‑break specification optimal. Therefore, no break dummies are required in the produc‑gap equation, with pandemic‑era volatility treated as a transitory disturbance rather than a structural shift. Measured productivity fluctuated violently during COVID, but its deviation from trend did not permanently re‑anchor at a different level.
 ```
 
-### Exogenous variables
+#### Exogenous variables (ZA and BP tests)
 
 ```{r}
-#| label: SPREAD IN NOMINAL 5-YR GILT YIELD (GAP): data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "SPREAD IN NOMINAL 5-YR GILT YIELD (GAP): data diagnostics (Zivot0Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -232,7 +312,7 @@ summary(struc)
 ```
 
 ```{r}
-#| label: RATE DIFFERENTIAL GAP (UK vs ROW): data diagnostics (Zivot-Andrews and Bai-Perrons; stationarity & structural breaks)
+#| label: "RATE DIFFERENTIAL GAP (UK vs ROW): data diagnostics (Zivot-Andrews and Bai-Perrons; stationarity & structural breaks)"
 #| include: true
 
 library(urca)
@@ -246,19 +326,234 @@ summary(struc)
 # Suggesting 3 structural breaks 19,42,57 [2003Q1, 2008Q4, 2012Q3]. Although multiple breakpoints are detectable in short‑term interest‑rate differentials, these primarily reflect periods of international monetary policy coordination rather than persistent regime shifts. Accordingly, interest‑rate spread gaps are modelled without structural break dummies, with regime effects captured through inflation and policy‑reaction dynamics. Bai–Perron is detecting: periods when UK and ROW policy were moving together, periods when they diverged, periods when they re‑converged.
 ```
 
-## Estimation Strategy
+```{r}
+#| label: "IMPORT PRICE INFLATION GAP: data diagnostics (Zivot-Andrews and Bai-Perrons; stationarity & structural breaks)"
+#| include: true
+
+library(urca)
+
+za_IMcpi_GAP <- ur.za(MODEL_READY$IMcpi_GAP, model = "both", lag = NULL)
+summary(za_IMcpi_GAP)
+struc <- breakpoints(MODEL_READY$IMcpi_GAP ~ 1)
+summary(struc)
+```
+
+```{r}
+#| label: "ENERGY PRICE INFLATION GAP: data diagnostics (Zivot-Andrews and Bai-Perrons; stationarity & structural breaks)"
+#| include: true
+
+library(urca)
+
+za_ecpi_GAP <- ur.za(MODEL_READY$ecpi_GAP, model = "both", lag = NULL)
+summary(za_ecpi_GAP)
+struc <- breakpoints(MODEL_READY$ecpi_GAP ~ 1)
+summary(struc)
+```
+
+```{r}
+#| label: "NET EXPORTS Delta: data diagnostics (Zivot-Andrews and Bai-Perrons; stationarity & structural breaks)"
+#| include: true
+
+library(urca)
+
+za_dNX <- ur.za(MODEL_READY$dNX, model = "both", lag = NULL)
+summary(za_dNX)
+struc <- breakpoints(MODEL_READY$dNX ~ 1)
+summary(struc)
+```
+
+## Multicollinearity Diagnostics
+
+For each equation, pairwise correlations and **Variance Inflation Factors (VIFs)** were examined for all regressors, including lagged dependent variables and regressors intended to be calibrated.
+
+The pairwise correlations are shown below, and show that they are modest (typically \< 0.4) across all equations. Inflation lags showed expected moderate correlation (\~0.7), but well below problematic thresholds. Import‑ and energy‑price inflation gaps were moderately correlated (\~0.6), consistent with common external shocks.
+
+VIFs shown with OLS single-equation estimation workflows. They are well below conventional thresholds (VIF \< 5) for all variables in all equations, indicating **no multicollinearity concerns**. The regressor sets are therefore suitable for stable 3SLS estimation.
+
+```{r}
+#| label: data diagnostics - multicollinearity (pairwise correlations)
+#| include: true
+
+
+# IS relation
+cor(MODEL_READY[, c("Y_GAP_L1", "r_GAP", "r_GAP_cal", "i5y_GAP","drer","dNX")], use = "pairwise.complete.obs")
+
+# PC relation
+cor(MODEL_READY[, c("dcpi_DEV_L1", "dcpi_DEV_L2", "Y_GAP", "IMcpi_GAP", "ecpi_GAP")], 
+    use = "pairwise.complete.obs")
+
+# TR relation
+cor(MODEL_READY[, c("i_UK_L1", "dcpi_DEV", "Y_GAP")], use = "pairwise.complete.obs")
+
+# OLU 
+cor(MODEL_READY[, c("u_GAP_L1", "Y_GAP")], use = "pairwise.complete.obs")
+
+# WPC
+cor(MODEL_READY[, c("wage_GAP_L1", "dcpi_DEV_L1", "u_GAP", "prod_GAP")], use = "pairwise.complete.obs")
+
+# OLP
+cor(MODEL_READY[, c("prod_GAP_L1", "Y_GAP")], use = "pairwise.complete.obs")
+
+# UIP
+cor(MODEL_READY[, c("drer_L1", "i_DIFFL_GAP", "dNX", "IMcpi_GAP")], use = "pairwise.complete.obs")
+
+```
+
+## Persistence and Lag Structure
+
+Autocorrelation (ACF) and partial autocorrelation (PACF) plots were examined to confirm appropriate dynamic structure:
+
+**Gaps** (output, unemployment, wages, productivity, real interest‑rate) demonstrated clear **AR(1)** processes, confirming use of a single lag in the IS, Okun, Wage‑Phillips, and productivity equations.
+
+**Inflation Deviation** shows a AR(1)–AR(2) structure, validating inclusion of two inflation lags in the Phillips Curve.
+
+**ΔRER and ΔNX** both showed minimal autocorrelation beyond lag 1 with no strong case for additional dynamics to be added.
+
+**Import and Energy Price Gaps:** AR(1)–AR(2) persistence but no evidence of higher‑order dynamics.
+
+No variable exhibited long‑memory behaviour or seasonality requiring deseasonalisation.
+
+### Endogenous variables
+
+```{r}
+#| label: "OUTPUT GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$Y_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$Y_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "UNEMPLOYMENT GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$u_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$u_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "INFLATION DEVIATION: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$dcpi_DEV, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$dcpi_DEV, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "REAL INTEREST RATE GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$r_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$r_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "REAL EXCHANGE RATE Delta: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$drer, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$drer, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "REAL WAGE GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$wage_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$wage_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "PRODUCTIVITY GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$prod_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$prod_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+### Exogenous variables
+
+```{r}
+#| label: "SPREAD IN NOMINAL 5-YR GILT YIELD (GAP): data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$i5y_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$i5y_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "RATE DIFFERENTIAL GAP (UK vs ROW): data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$i_DIFFL_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$i_DIFFL_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "IMPORT PRICE INFLATION GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$IMcpi_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$IMcpi_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "ENERGY PRICE INFLATION GAP: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$ecpi_GAP, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$ecpi_GAP, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+```{r}
+#| label: "NET EXPORTS Delta: data diagnostics - autocorrelation (ACF, PACF)"
+#| include: true
+
+par(mfrow = c(1, 2))
+acf(MODEL_READY$dNX, main = "ACF Plot", na.action = na.pass)
+pacf(MODEL_READY$dNX, main = "PACF Plot")
+par(mfrow = c(1, 1))
+```
+
+## Outliers and Shock Episodes
+
+Visual inspection and residual diagnostics identified several periods of extreme volatility, including COVID‑19 (2020Q1-Q2), the post‑pandemic inflation shock (2021–22) and commodity‑price spikes (2022–23). These episodes correspond precisely to detected structural breaks and are handled through appropriately placed break dummies in the relevant equations.
+
+## Final Assessment
+
+Diagnostic checks confirm that all measures have been taken to appropriately filter, difference, or lag-augment all data series and to ensure that the data are **stationary**, appropriately de-trended, and well-scaled. Structural breaks have been carefully identified and incorporated **only where justified**. No problematic multicollinearity exists within the regressor matrices and the dynamics implied by ACF/PACF plots are reflected in the model specification. With these measures, we are confident the dataset is therefore in **excellent condition for equation‑by‑equation estimation** and subsequent **3SLS system estimation**, ensuring valid inference and robust structural relationships.
+
+# Equation and System Estimation Strategy
 
 The estimation of the semi‑structural macroeconomic model proceeds in several structured stages.\
-The goal is to ensure that each behavioural equation is statistically well‑specified, dynamically coherent, and suitable for joint estimation within a system that accounts for cross‑equation relationships and endogeneity.
+The goal is to ensure that each behavioural equation is statistically well‑specified, dynamically coherent, and suitable for joint estimation within a system that accounts for cross‑equation relationships and endogeneity. The overall approach follows standard practice in semi‑structural modelling: **(i) single‑ equation OLS diagnostics → (ii) limited‑information IV estimation (2SLS) → (iii) full‑information system estimation (3SLS) → (iv) calibration and normalisation.**
 
-The overall approach follows standard practice in semi‑structural modelling:\
-**(i) single‑equation OLS diagnostics → (ii) limited‑information IV estimation (2SLS) → (iii) full‑information system estimation (3SLS) → (iv) combine estimation with calibration.**
-
-### Single‑Equation OLS Diagnostics
+## Single‑Equation OLS Diagnostics
 
 As a first step, each behavioural equation is estimated individually using ordinary least squares (OLS).\
-OLS estimates are *not* used for inference or for constructing the final parameter set.\
-Instead, the OLS stage serves four essential diagnostic purposes:
+OLS estimates are *not* used for inference or for constructing the final parameter set. Instead, the OLS stage serves four essential diagnostic purposes:
 
 1.  **Sign and magnitude validation** Coefficients are checked against theoretical priors (e.g., negative response of unemployment to the output gap; positive inflation persistence).
 
@@ -270,7 +565,7 @@ Instead, the OLS stage serves four essential diagnostic purposes:
 
 The remaining equations (IS, Okun, Productivity, UIP, and the Taylor Rule) display well‑behaved OLS diagnostics, validating their structural form.
 
-### Limited‑Information Instrumental‑Variables Estimation (2SLS)
+## Limited‑Information Instrumental‑Variables Estimation (2SLS)
 
 OLS estimation is inconsistent when regressors are endogenous. Based on the OLS diagnostic stage, two equations require instrumental‑variables treatment:
 
@@ -278,19 +573,17 @@ OLS estimation is inconsistent when regressors are endogenous. Based on the OLS 
 
 -   **Wage Phillips Curve** — unemployment is endogenous due to labour‑market simultaneity, and the COVID furlough episode amplifies the bias.
 
-For each of these equations, we estimate a **Two‑Stage Least Squares (2SLS)** model using only the equation of interest (“limited‑information” IV estimation). This involves:
+For each of these equations, we estimate **Two‑Stage Least Squares (2SLS)** models using only the equations of interest (“limited‑information” IV estimation). This involves:
 
 1.  **Identifying endogenous regressors:** $\tilde{Y}_t$ in the Price Phillips Curve and $\tilde{U}_t$ in the Wage Phillips Curve.
 2.  **Constructing an instrument set from:** the lagged values of the gaps, $\tilde{Y}_{t-2}$ and $\tilde{Y}_{t-3}$ for output and $\tilde{U}_{t-2}$ and $\tilde{U}_{t-3}$ for unemployment.
-3.  **Estimating each equation separately using `ivreg()`** This provides more consistent coefficient estimates, a correction for simultaneity bias and cleaned up residual dynamics.
+3.  **Estimating each equation separately using`ivreg() in R`:** provides more consistent coefficient estimates, a correction for simultaneity bias and cleaned up residual dynamics.
 
 This stage ensures that, prior to system estimation, the most problematic equations (the Phillips Curves) are already structurally identified.
 
-### Full‑Information System Estimation (3SLS)
+## Full‑Information System Estimation (3SLS)
 
-With the structural equations validated and simultaneity addressed, we estimate the **entire 7‑equation model jointly** using **Three‑Stage Least Squares (3SLS)** via the `systemfit()` framework.
-
-Full‑information estimation is appropriate for this model because:
+With the structural equations validated and simultaneity addressed, we estimate the **entire 7‑equation model jointly** using **Three‑Stage Least Squares (3SLS)** via the `systemfit()` framework in R. Full‑ information estimation is appropriate for this model because:
 
 1.  **Equations are linked through shared endogenous variables** (e.g. output gap interacts with inflation, real interest rates, unemployment, wages).
 
@@ -304,17 +597,21 @@ Full‑information estimation is appropriate for this model because:
 
 3SLS therefore provides joint estimation, improved precision, correction for remaining endogeneity, and a coherent set of system‑consistent shocks for analysis and forecasting.
 
-### Calibration and Normalisation
+## Calibration and Normalisation
 
 Following fully unrestricted 3SLS estimation, coefficients are calibrated gradually and in sequential steps, represented by eight different hybrid versions of the original model (Hybrid A-H). Each hybrid is an extension or augmentation of the previous and each is an attempt to extend and strengthen its credibility as a small open economy model over all time horizons.
 
 Calibrated values are standard in semi‑structural models; they improve identification and stabilise system estimation. The hybrid model works because **some things are stable and estimable**, while others are **unstable and should be calibrated**. Calibrations include policy‑rule coefficients in the Taylor Rule, small elasticity parameters where identification is weak (e.g., IS curve’s long-term spread term), and steady‑state relationships (e.g., neutral real interest rate, inflation target).
 
-Extensions and augmentations are necessary when we awaken UIP for explicit SOE dynamics, which requires the supply-side and slack to be specified more thoroughly.
+Extensions and augmentations are necessary when we awaken UIP for explicit SOE dynamics, which requires the supply-side and slack to be specified more thoroughly. The parameter sets for each model variant provide the basis for impulse‑response analysis, historical shock decomposition, counterfactual simulations, and model‑based forecasting.
 
-This parameter sets for each model variant provide the basis for impulse‑response analysis, historical shock decomposition, counterfactual simulations, and model‑based forecasting.
+# Single-equation OLS diagnostics
 
-# First-stage estimation: OLS, 2SLS and 'free' 3SLS
+Single‑equation OLS diagnostics show strong internal coherence across blocks. Real‑side equations (IS, Okun’s law, and productivity) exhibit heteroskedastic but serially uncorrelated residuals, consistent with state‑dependent shock amplitudes during crisis periods but stable adjustment dynamics. Nominal and institutional equations (price Phillips curve, wage Phillips curve, and Taylor rule) display residual serial correlation but fail to reject homoskedasticity, reflecting expected inertia in inflation, wage setting, and policy adjustment rather than misspecification.
+
+Heteroskedasticity‑robust inference sharpens interpretation without altering substantive conclusions. Core structural slopes remain stable across specifications, while marginal significance attached to later crisis dummies dissipates under robust standard errors—correctly distinguishing regime change from shock realisation. In the wage Phillips curve, labour‑market slack affects wage dynamics primarily by slowing mean reversion rather than inducing contemporaneous wage declines, eliminating the need for wage‑specific regime dummies.
+
+Overall, the revised data construction reduces the reliance on ad‑hoc structural adjustments, improves interpretability of break tests, and yields cleaner reduced‑form behaviour across equations. The final specification is parsimonious, economically transparent, and diagnostically stable, providing a sound basis for system estimation and policy analysis.
 
 ## The IS relation (aggregate demand)
 
@@ -329,7 +626,72 @@ The lagged output gap term $(\tilde{Y}_{t-1})$ captures the intrinsic persistenc
 Together, these elements form a semi‑structural representation of the UK business cycle, linking demand to financial conditions and external shocks. Estimated dynamics include $\alpha_1, \alpha_2, \space \text{and} \space \alpha_3$. Following unrestricted 3SLS estimation, we calibrate the demand sensitivities: $\phi_r, \space \text{and} \space \phi_{i^{spr}}$.
 
 ```{r}
+#| label: "IS relation: OLS regression"
+#| include: true
 
+IS_formula <- Y_GAP ~
+  Y_GAP_L1 + 
+  r_GAP + 
+  i5y_GAP +
+  dNX + 
+  drer_L1
+
+IS_ols <- lm(IS_formula, data = MODEL_READY)
+summary(IS_ols)
+
+## Wrong signs but informative and arguably doing what it should at this diagnostic stage. Wrong signs are interpretable. Its purpose is to answer: Conditional on contemporaneous relationships and without system feedbacks, does the demand block look sensible, stable, and usable as an input to staged system estimation? It is not meant to: identify causal elasticities, give you the policy multiplier, or satisfy theoretical sign restrictions. 
+
+#That work happens later (Hybrids B/C). With that framing in place, this regression looks healthy. 
+# Y_GAP_L1: strong persistence but well below 1 @ 0.49877. 
+# r_GAP: 'wrong' sign is expected at this stage. Positive coeff. = 0.98, highly signif. It is capturing policy reacting to demand, not demand reacting to policy. In UK data, especially post‑inflation targeting: strong demand → higher inflation expectations → tighter policy, a correlation that tends to dominate in single‑equation OLS. This is the result that justified Hybrid C and confirmation is provided here. OLS cannot separate: policy tightens → demand falls from: demand strengthens → policy tightens. So the regression recovers correlation, not causation. 
+# i5y_GAP: Weakly significant; Positive coeff. (0.62); Large standard error. Suggests long‑rate expectations co‑move with strong demand periods, but are noisy and partly collinear with other financial conditions. This is why it belongs in the IS equation, but why it must be disciplined later rather than taken literally.
+# dNX: negative coeff.(-0.14) => in the data, a worsening net‑export change accompanies domestic demand booms (imports surge), so the negative sign is not incorrect or unexpected. 
+# drer_L1: negative coeff (-0.16), marginal significance. Exchange rate effects are slow, noisy, conditional on pass‑through. 
+
+# A good informal diagnostic is to ask: Do the regressors now represent distinct economic channels, rather than competing explanations for the same variation? The answer is yes. We previously had two structural break dummies in the equation. Here we have removed endogenous breaks from what is a reaction equation.
+```
+
+```{r}
+#| label: "IS relation: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(IS_formula, data = MODEL_READY))
+
+# all < 5
+```
+
+```{r}
+#| label: "IS relation: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(IS_ols, order = 4)
+
+# Breusch–Godfrey tests up to four lags fail to reject the null of no residual autocorrelation in the IS equation, indicating that dynamic behaviour is adequately captured without the need for additional lag structure or ad‑hoc break dummies.
+```
+
+```{r}
+#| label: "IS relation: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(IS_ols)
+
+# While residuals in the IS equation show no evidence of autocorrelation, Breusch– Pagan tests strongly reject homoskedasticity, reflecting the presence of larger demand shocks during crisis periods. Robust covariance estimators are therefore employed for inference.
+```
+
+```{r}
+#| label: "IS relation: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(IS_ols, vcov. = vcovHC(IS_ols, type = "HC1"))
+
+# While several demand‑side variables are significant under conventional OLS inference, #   heteroskedasticity‑robust standard errors indicate that some effects are episodic rather than uniformly present across the sample. These variables are therefore retained as part of the transmission mechanism but not interpreted as stable marginal effects at the single‑equation stage.
+```
+
+```{r}
+#| label: "IS relation: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(IS_ols)
 ```
 
 ## Phillips curve relation (domestic price inflation)
@@ -346,6 +708,72 @@ The inflation equation links price dynamics to their own persistence, domestic s
 
 This specification results in a hybrid Phillips Curve where domestic cyclical pressure plays a modest role, while external price shocks and persistence dominate short‑run inflation movements. Inflation persistence parameters $(\beta_1, \beta_2)$ are estimated. Import and energy price pass‑through $(\beta_3, \beta_4)$ are also estimated. The Phillips curve slope $(\kappa_Y)$ is later calibrated (at a small but positive value, reflecting the evidence and conclusions of policymakers of a flattening of the Phillips curve in the UK).
 
+```{r}
+#| label: "PC relation: OLS regression"
+#| include: true
+
+PC_formula <- dcpi_DEV ~
+  dcpi_DEV_L1 +
+  dcpi_DEV_L2 +
+  Y_GAP +
+  IMcpi_GAP +
+  ecpi_GAP +
+  bpp_BEG       # better, cleaner, more significant than bpp_LAT
+
+PC_ols <- lm(PC_formula, data = MODEL_READY)
+summary(PC_ols)
+
+# dcpi_DEV_L1 ≈ 0.45–0.47, highly significant:  Inflation is persistent but not explosive and no sensitivity to break location. Y_GAP is negative and strongly significant in both regressions: −0.183 (earlier break); −0.208 (later break) - a “sacrifice ratio” but stable across break choice. IMcpi_GAP and ecpi_GAP: positive, statistically significant, very similar magnitudes in both specifications. External and energy price channels are robust, confirming the absence of a need for breaks in those series themselves. 
+# Fit: Adjusted R²: 0.61–0.63; Residual SE: ≈ 1.1. Essentially identical explanatory power. Structurally, nothing breaks when the break dummy is switched. 
+# bpp_BEG: Clear positive level shift. Statistically significant at 5%. Magnitude economically meaningful. A discrete upward shift in the inflation deviation regime beginning around the pandemic onset. Lines up with: disappearance of low‑inflation credibility, supply‑side disturbances, persistence effects kicking in early (even before headline inflation peaked).
+# bpp_LAT: Smaller effect, Only marginally significant (10% level), Coefficient less precisely estimated. Capturing the realisation of inflation pressure rather than the regime change itself. This dummy starts after supply chains already disrupted, volatility already elevated, inflation expectations already shifting. So statistically and economically, it is a weaker representation of regime change.
+# Conceptual distinction (crucial): in 2020Q1–Q2, the regime shifts - breakdown of prior inflation environment; monetary policy constraints bind, expectations formation changes. 2021–22 is shock manifestation: energy prices surge, imported inflation peaks, headline inflation explodes. A Phillips Curve dummy should represent the first, not the second and the two regressions demonstrate this: the earlier dummy is cleaner, stronger, and better behaved, the later dummy is noisier because it overlaps with large transitory shocks already captured by IMcpi_GAP and ecpi_GAP. So, for the baseline Phillips Curve, we use bpp_BEG (2020Q1) as the structural inflation‑regime dummy.
+```
+
+```{r}
+#| label: "PC relation: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(PC_formula, data = MODEL_READY))
+```
+
+```{r}
+#| label: "PC relation: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(PC_ols, order = 4)
+
+# Breusch–Godfrey tests suggest residuals that exhibit serial correlation consistent with inflation persistence; robust covariances are employed later in system estimation consistent with well‑known persistence in inflation dynamics. This is accommodated through robust covariance estimation and system estimation, rather than through the inclusion of additional ad‑hoc lags or breaks.
+# FOUNDATIONAL REMINDER: formally, we strongly reject null of no serial correlation in the Phillips Curve residuals (p-value is tiny). Not a modelling failure and does not force a redesign of the Phillips Curve. It is expected in inflation equations. Statistically, serial correlation remaining in the Phillips Curve residuals is unambiguous. This is because inflation is inherently persistent. Inflation dynamics are driven by: expectations formation, wage bargaining, indexation, price‑setting frictions and slow diffusion of cost shocks. Even after including two lags of inflation, demand pressure, import prices, energy prices, and an inflation‑regime dummy, there is still residual persistence in the single‑equation PCs. This is not unusual, arguably empirically normal. We are estimating a reduced‑form PC, not the full inflation process. The PC equation is intentionally semi‑structural, not DSGE‑complete. It does not include explicit expectations terms, forward‑looking inflation, wage growth feedback loops or indexation parameters. Those mechanisms are partially proxied by inflation lags, regime dummies, external price gaps. Residual serial correlation is the price paid for tractability. We hope this is viewed as standard and acceptable.
+```
+
+```{r}
+#| label: "PC relation: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(PC_ols)
+
+# The test fails to reject the null hypothesis of homoskedasticity in the Phillips Curve residuals. H₀ (null): the residual variance is constant (homoskedastic); H₁ (alternative): the residual variance depends on the regressors (heteroskedasticity). Our output is BP = 7.7554; df = 6; p-value = 0.2566, well above conventional significance level (10%, 5%, 1%). In plain language, there is no statistical evidence that the variance of the Phillips Curve residuals depends systematically on the regressors. Might look surprising with the Phillips Curve showing residual serial correlation (BG test rejected), inflation is clearly volatile around crises, and earlier HC tests inflated standard errors. But these facts can coexist without contradiction. You can easily have serial correlation and no systematic heteroskedasticity conditional on regressors. In a semi‑structural Phillips Curve, some residual persistence is normal and expected. Constant conditional variance is acceptable because Volatility clustering that is time‑based rather than regressor‑based will not necessarily trigger BP rejections. In other words, inflation shocks may vary over time (crises vs calm periods) without being strongly tied to the levels of output gaps, import prices, or energy prices in a simple linear way.
+```
+
+```{r}
+#| label: "PC relation: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(PC_ols, vcov. = vcovHC(PC_ols, type = "HC1"))
+
+# Inflation regime dummies are weakened under heteroskedasticity‑robust inference due to crisis‑era variance, but the early‑2020 break remains the preferred structural dating based on break tests, economic narrative, and system behaviour.
+# Once we allow for heteroskedasticity, the early inflation‑regime dummy (bpp_BEG, 2020Q1) is positive, economically meaningful in magnitude, BUT not statistically significant at conventional levels under HC1. A statistical fact, BUT how to interpret (not the p‑value). HC1 penalises variance‑driven precision; it is not rejecting the existence of a regime change. BP and BG already told us about strong heteroskedasticity and serial correlation - standard OLS severely overstate precision on level shifts. HC1 corrects that by inflating SEs during high‑ volatility periods. HC1 suggests that, once we stop pretending the pandemic and energy‑shock period had the same variance as tranquil years, the level shift is harder to pin down precisely, which can be expected empirically. 
+# NOTE: A structural dummy does not have to be HC‑significant in OLS to be justified. We are including bpp_BEG because ZA and Bai–Perron identify a regime change, the economic narrative clearly supports it and the dummy stabilises  persistence and prevents shock over‑fitting. It also improves interpretability and system behaviour. IRFs and forecasts depend on regime discipline, not OLS t‑stats.
+```
+
+```{r}
+#| label: "PC relation: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(PC_ols)
+```
+
 ## Taylor rule (monetary policy)
 
 The Taylor Rule establishes the central bank reaction function, describing how it sets the policy interest rate in response to economic conditions.
@@ -356,9 +784,67 @@ $$
 
 Policy inertia is captured by the coefficient $(\rho)$ on the lagged nominal policy rate, reflecting gradualism in the Monetary Policy Committee’s decision-making and the desire to avoid unnecessary volatility in financial markets. The central bank reacts to deviations of inflation from its target and to the output gap, with calibrated coefficients $(\tau_{\pi},\tau_Y)$ ensuring determinacy and policy realism. The neutral real interest rate $(r^*)$ and the inflation target $(\pi^*)$ anchor the long‑run level of the policy rate.
 
-This equation captures the systematic component of monetary policy in the UK’s inflation‑targeting regime, in which $\rho$ (policy inertia) is estimated.
+This equation captures the systematic component of monetary policy in the UK’s inflation‑targeting regime, in which $\rho$ (policy inertia) is estimated. For OLS purposes, we estimate the **reduced‑form hybrid rule** $i_t = \gamma_0 + \rho i_{t-1} + \gamma_{\pi}\tilde{\pi}_t + \gamma_Y \tilde{Y}_t + \epsilon^{\text{TR}}_t$, in which $\gamma_{\pi} = (1-\rho)\tau_{\pi}$ and $\gamma_Y = (1-\rho)\tau_Y$.
 
-For OLS purposes, we estimate the **reduced‑form hybrid rule** $i_t = \gamma_0 + \rho i_{t-1} + \gamma_{\pi}\tilde{\pi}_t + \gamma_Y \tilde{Y}_t + \epsilon^{\text{TR}}_t$, in which $\gamma_{\pi} = (1-\rho)\tau_{\pi}$ and $\gamma_Y = (1-\rho)\tau_Y$.
+```{r}
+#| label: "Taylor Rule: OLS regression"
+#| include: true
+
+TR_formula <- i_UK ~
+  i_UK_L1 +
+  dcpi_DEV +
+  Y_GAP
+
+TR_ols <- lm(TR_formula, data = MODEL_READY)
+summary(TR_ols)
+
+# Strong stable results that have proved resilient to all model variations [TBC]
+```
+
+```{r}
+#| label: "Taylor Rule: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(TR_formula, data = MODEL_READY))
+
+# These look good and support stable coefficient estimates, clear interpretation of regressors and no masking of heteroskedasticity by collinearity.
+```
+
+```{r}
+#| label: "Taylor Rule: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(TR_ols, order = 4)
+# Breusch–Godfrey tests indicate serial correlation in Taylor‑rule residuals, reflecting strong interest-rate smoothing, with the lag coefficient close to unity. Consistent with this gradualism, the Breusch–Godfrey test indicates substantial serial correlation in the residuals. This is structural and consistent with central bank 'gradualism': (i) Near‑unit‑root smoothing; (ii) Policy shocks are persistent by construction.
+```
+
+```{r}
+#| label: "Taylor Rule: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(TR_ols)
+
+# The studentized Breusch–Pagan test fails to reject homoskedasticity, suggesting that, conditional on the inflation deviation and output gap, the magnitude of policy shocks does not vary systematically across states. 
+
+# FOUNDATIONAL NOTES: Fail to reject H₀ of homoskedasticity (p = 0.26). Precisely, that means there is no statistical evidence of heteroskedasticity as specified by the test or, equivalently, no evidence against homoskedasticity conditional on the regressors tested. This indicates that there is no evidence that the variance of the residuals depends on the included regressors. This, in turn, suggests that, conditional on the specified information set, the magnitude of policy shocks does not vary systematically with inflation or the output gap.
+```
+
+```{r}
+#| label: "Taylor Rule: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(TR_ols, vcov. = vcovHC(TR_ols, type = "HC1"))
+
+# Strong result for a reduced‑form Taylor Rule: tight fit, correct signs, stable parameters.
+```
+
+```{r}
+#| label: "Taylor Rule: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(TR_ols)
+
+```
 
 ## Okun's Law for Unemployment (labour demand)
 
@@ -371,6 +857,67 @@ $$
 The lagged unemployment gap $(\tilde{U}_{t-1})$ reflects persistence in labour‑market conditions, which adjust more slowly than output. The negative output‑gap coefficient $(-\delta_2)$ embodies the traditional Okun’s Law relationship: when the economy operates above potential, the unemployment gap closes; when output is weak, labour-market slack widens.
 
 Structural‑break dummies $(\text{BP}^{U1} \space \text{and} \space \text{BP}^{U2})$ allow for long‑run shifts in the natural rate of unemployment or in the responsiveness of unemployment to output. This specification recognises that the UK labour market has undergone substantial structural changes over the past two decades and embeds these into the dynamics of unemployment.$\text{BP}^{U1}$ is the GFC 2008 Q4 break and $\text{BP}^{U2}$ is the 2013 Q4 break. These were the two statistically confirmed unemployment‑gap breaks.
+
+```{r}
+#| label: "Okun Unemployment: OLS regression"
+#| include: true
+
+OKUN_formula <- u_GAP ~
+  u_GAP_L1 +
+  Y_GAP +
+  bpu1_GFC +
+  bpu2_POST
+
+OKUN_ols <- lm(OKUN_formula, data = MODEL_READY)
+summary(OKUN_ols)
+
+# We ran the regression with and without the second structural break dummy (bpu2_POST). With only the GFC dummy, the model says portrays unemployment as persistent. But, once that persistence and activity are accounted for, a single post‑2008 level shift is not clearly distinguishable. Suggests that the impact of the GFC on unemployment cannot be reduced to a simple one‑off upward shift. Instead the GFC altered the dynamic structure of the labour market. The second regression, which includes the second breakpoint. During the GFC regime (2009-2013), for a given output gap, unemployment is persistently higher, matching efficiency is worse, hysteresis effects dominate, consistent with UK experienced - long spells of unemployment, weak job matching and scarring effects. In the post-GFC regime (labour market repair from the end of 2013) For a given output gap: unemployment is lower than in the GFC regime, labour‑market efficiency improves, participation and matching recover. This aligns perfectly with: strong employment growth despite weak productivity, migration and participation effects, lower NAIRU‑type behaviour.
+# The symmetry matters: The fact that the two coefficients are similar in absolute magnitude and opposite in sign is not accidental. It reflects the labour market experiencing a genuine regime distortion after the GFC, followed by a genuine (partial) reversal in the 2010s. That is exactly what Bai–Perron was picking up earlier — and this is visible structurally in the equation.
+# With two well‑chosen breaks, the labour‑market story becomes: empirically tight, economically intuitive, and dynamically meaningful. The pair of regressions provide evidence that unemployment is certainly a variable for which regime breaks matter - the GFC producing hysteresis, the post‑2013 period representing real labour‑market repair. Break timing looks appropriate and serves our broader philosophy of minimal but targeted breaks. Strengthens our confidence that the model architecture is now correctly aligned with UK macroeconomic history.
+```
+
+```{r}
+#| label: "Okun Unemployment: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(OKUN_formula, data = MODEL_READY))
+```
+
+```{r}
+#| label: "Okun Unemployment: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(OKUN_ols, order = 4)
+
+# Fail to reject the null of no serial correlation up to lag 4. Residuals are effectively white noise in time. This means the dynamic structure of the Okun equation is well specified - persistence is being picked up by u_GAP_L1 and no sign of missing lags or omitted regime dynamics.
+```
+
+```{r}
+#| label: "Okun Unemployment: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(OKUN_ols)
+
+# Strongly reject null hypothesis (homoskedasticity). Residual variance changes across the sample, which means the size of unemployment shocks varies over time, but their timing is not systematically misspecified - the same diagnostic pattern found with the IS equation. Both equations describe real‑side adjustment driven by shocks: demand shocks (IS), labour‑market shocks (Okun). For these processes in UK data:   crisis periods generate very large shocks (GFC, COVID), tranquil periods generate small shocks, but the propagation mechanism is stable. Hence: no residual autocorrelation, strong heteroskedasticity. In the Okun block, rejecting homoskedasticity is not only acceptable — it’s almost expected. 
+# Economically: unemployment adjustment is nonlinear across states, recessions generate much larger labour‑market dislocation than booms, recovery phases show smaller, gradual movements. Statistically, that appears as: residual variance rising in crises, without any need to change coefficients or dynamics. Crucially: if this heteroskedasticity were due to misspecification,  serial correlation would have been found. But it was not, as per BG test above. Okun residuals exhibit no serial correlation but strong heteroskedasticity, mirroring the behaviour of the IS equation. This indicates stable adjustment dynamics with state‑dependent shock volatility, consistent with large labour‑market dislocations during crises rather than structural instability.
+
+```
+
+```{r}
+#| label: "Okun Unemployment: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(OKUN_ols, vcov. = vcovHC(OKUN_ols, type = "HC1"))
+
+# INTERPRET Y_GAP LOSING SIGNIFICANCE UNDER MORE ROBUST INFERENCE
+```
+
+```{r}
+#| label: "Okun Unemployment: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(OKUN_ols)
+```
 
 ## Wage Phillips curve (labour supply)
 
@@ -386,6 +933,69 @@ Expected inflation (deviation from target) $[\text{E}_t(\tilde{\pi}_{t+1}) = \ti
 
 The wage Phillips curve slopes $(\lambda_{\pi}, \lambda_U)$ are the first parameters to be calibrated to establish discipline at the most fundmental level. The dynamic persistence and productivity coefficients $(\theta_1, \theta_2)$ are estimated from the data.
 
+```{r}
+#| label: "Wage Phillips: OLS regression"
+#| include: true
+
+WPC_formula <- wage_GAP ~
+  wage_GAP_L1 +
+  dcpi_DEV_L1 +
+  u_GAP +
+  prod_GAP
+
+WPC_ols <- lm(WPC_formula, data = MODEL_READY)
+summary(WPC_ols)
+
+# Wage persistence dominates with wage_GAP_L1 ≈ 0.88 (t ≈ 16).  Wages adjust slowly even when unemployment or activity move sharply, consistent with 'noisy' wage “break tests” - persistence overwhelms short‑run variation. Inflation enters modestly but significantly dcpi_DEV_L1 ≈ 0.06   (p ≈ 0.048). Wage setters reacting to inflation deviations, but only weakly. Indexation is incomplete. Pass‑through is slow. Fits with UK institutional wage setting and Phillips Curve results (inflation persistence dominates). Inflation matters for wages — but it does not dominate.
+# Unemployment gap: right sign [?FOR THE DATA?], weak precision with u_GAP ≈ +0.20 (p ≈ 0.11). The lack of strong significance is expected: The wage equation already conditions on: wage inertia, inflation and productivity. Much of unemployment’s effect on wages operates indirectly, not contemporaneously. 
+# Unemployment regimes are already handled in the Okun block, not duplicated here. Slack in the labour market causes real wage gaps to close more slowly, so negative wage gaps persist for longer and that shows up as a positive coefficient on u_GAP in a highly persistent wage‑gap equation. unemployment works through adjustment speed, not through a static level effect. [UNCERTAIN HERE...]
+# [SLIGHTLY MORE CONVINCING] What slack actually does in practice: When u_GAP is positive (unemployment above equilibrium): firms have bargaining power, wage increases are postponed, catch‑up is delayed, downward deviations from equilibrium linger. That behaviour is captured mathematically as: a drag on mean reversion, not an extra negative shock. A positive coefficient on u_GAP in a persistent equation does exactly that: it offsets part of the mean‑reversion force, slowing the return of wages to equilibrium. A negative coefficient would be wrong here as it would imply: unemployment causes extra downward jumps in real wages, sharp, immediate wage cuts, very fast adjustment in downturns. That’s not how UK wage bargaining works. Empirically: wages freeze rather than collapse, adjustment is asymmetric, recovery is slow when slack is present. Your positive sign captures that reality. Slack does not mean wages rise. Slack does not mean wages fall instantly. Slack MEANS slow wage recovery. Slow recovery = higher current wage gap than would otherwise occur, given yesterday’s gap. That’s why the coefficient is positive.
+# Productivity gap enters weakly: prod_GAP ≈ 0.06   (p ≈ 0.24). This is plausible: Short‑run productivity deviations are noisy. Wage bargaining responds much more to trend productivity than to cyclical gaps. Any productivity‑wage link here is correctly second‑order. No need for re‑specification.
+# Adj. R² ≈ 0.71; Residual SE ≈ 0.48; For a quarterly wage equation in gap form, this is very strong but not suspicious: Persistence explains most of the fit. Nothing looks over‑fitted.
+# This OLS result is strong ex‑post evidence that wages are an equilibrium outcome, not a regime‑defining state variable. The WPC is anchoring nominal adjustment, smoothing inflation–labour interactions, without introducing new regimes.
+```
+
+```{r}
+#| label: "Wage Phillips: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(WPC_formula, data = MODEL_READY))
+```
+
+```{r}
+#| label: "Wage Phillips: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(WPC_ols, order = 4)
+
+# Hypotheses: H₀ (null) no serial correlation in the residuals up to lag 4. H₁ (alternative): residuals are serially correlated. Decision p‑value ≈ 0.00003, This is far below 1%, 5%, and 10%. Reject the null hypothesis of no serial correlation. There is statistically significant residual autocorrelation in the WPC residuals. 
+# Expected for the Wage Phillips Curve, given very high wage persistence (0.88), slow institutional wage adjustment, staggered bargaining and contract structures, omitted forward‑looking expectations terms (by design).
+# Serial correlation is a structural feature of wage dynamics, putting the WPC squarely alongside the Phillips Curve and the Taylor Rule, and distinctly unlike the IS or Okun equations. Coherent with a pattern of real‑side adjustment equations that show no residual serial correlation and nominal / institutional equations that demonstrate residual serial correlation. This reflects the intentional modelling of wages as: highly inertial, institutionally rigid, only slowly responsive to labour‑market slack.
+```
+
+```{r}
+#| label: "Wage Phillips: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(WPC_ols)
+# H₀ (null): residuals are homoskedastic. H₁ (alternative): residual variance depends on regressors. Decision p‑value ≈ 0.45, which is far above 10%, 5%, or 1%. You fail to reject the null hypothesis of homoskedasticity.  Statistically, there is no evidence that the variance of WPC residuals depends on the regressors. 
+# BG/BP combination means Wage shocks propagate through time, not through state‑dependent amplitude. This matches institutional wage setting: contracts are staggered, bargaining norms change slowly, wages freeze rather than collapse in downturns, crises affect persistence, not variance. If wages behaved like output or unemployment, you would see heteroskedasticity. The fact that you don’t is strong evidence that the WPC is specified correctly.
+```
+
+```{r}
+#| label: "Wage Phillips: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(WPC_ols, vcov. = vcovHC(WPC_ols, type = "HC1"))
+```
+
+```{r}
+#| label: "Wage Phillips: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(WPC_ols)
+```
+
 ## Okun's Law for Productivity
 
 The second Okun equation models cyclical productivity as a function of its own persistence and contemporaneous output.
@@ -395,6 +1005,60 @@ $$
 $$
 
 Productivity tends to be highly persistent due to slow-moving technological and organisational adjustments. The positive output‑gap coefficient reflects pro-cyclical productivity: during expansions, firms utilise capital more intensively, and labour inputs become more efficient; whereas during downturns, capacity utilisation falls. This equation provides a parsimonious representation of productivity fluctuations without specifying technology shocks explicitly. We have kept this simple and consistent with macro theory.
+
+```{r}
+#| label: "Okun Productivity: OLS regression"
+#| include: true
+
+OLP_formula <- prod_GAP ~
+  prod_GAP_L1 +
+  Y_GAP
+
+OLP_ols <- lm(OLP_formula, data = MODEL_READY)
+summary(OLP_ols)
+
+# prod_GAP_L1 ≈ 0.17 (p ≈ 0.067). Low‑to‑moderate persistence. Only marginally significant. Economically sensible. Cyclical productivity effects are not very persistent once you control for output. Productivity gaps mostly reflect short‑run utilisation, not slow institutional adjustment. That contrasts nicely with wages and inflation (high persistence), and reinforces that productivity behaves like a real‑side utilisation variable, not a nominal or institutional one.
+# Y_GAP ≈ 0.13  (p < 0.001). This is the key coefficient. Strongly significant. Correct sign. Plausible magnitude. Can be interpreted as when the economy runs hot, measured productivity rises (labour hoarding, utilisation, reallocation). When the economy is weak, productivity falls - standard Okun‑for‑productivity logic.
+# Adj. R² ≈ 0.18. This is not low for a cyclical productivity equation. Productivity gaps are noisy, measurement error is substantial, most variation is transitory.
+```
+
+```{r}
+#| label: "Okun Productivity: OLS diagnostics (VIFs)"
+#| include: true
+
+vif(lm(OLP_formula, data = MODEL_READY))
+```
+
+```{r}
+#| label: "Okun Productivity: OLS diagnostics (serial correlation BG test)"
+#| include: true
+
+lmtest::bgtest(OLP_ols, order = 4)
+# strongly reject null of no serial correlation. This puts OLP firmly in the same category as: Phillips Curve, Wage Phillips urve, Taylor Rule. Why this is expected: Productivity responds slowly to cyclical conditions. Utilisation and labour hoarding adjust gradually. Measurement error is persistent. So residuals naturally propagate through time.
+```
+
+```{r}
+#| label: "Okun Productivity: OLS diagnostics (homoskedasticity BP test)"
+#| include: true
+
+lmtest::bptest(OLP_ols)
+# BP = 14.57, p ≈ 0.0007, reject homoskedasticity. The variance of productivity shocks depends on the state of the cycle. That is orthodox: productivity shocks are much larger in recessions and crises, especially during: GFC restructuring, COVID shutdowns, reopening phases. This matches IS equation, Okun equation. So OLP behaves like a real‑side shock‑driven process, not like a nominal/ institutional one. This is coherent. Real‑side blocks → heteroskedastic shocks. Nominal/institutional blocks → persistence, stable variance. Productivity sits in between → both persistent and state‑dependent. Exactly what theory and empirics would predict and places productivity in between real‑side demand and nominal adjustment.
+```
+
+```{r}
+#| label: "Okun Productivity: OLS diagnostics (robust covariance estimators)"
+#| include: true
+
+coeftest(OLP_ols, vcov. = vcovHC(OLP_ols, type = "HC1"))
+
+```
+
+```{r}
+#| label: "Okun Productivity: OLS diagnostics (residuals)"
+#| include: true
+
+checkresiduals(OLP_ols)
+```
 
 ## Uncovered Interest Parity (UIP)
 
@@ -712,56 +1376,6 @@ These can be chosen from: BoE papers, IMF models, OECD semi‑structural models,
 | **Symbol** | **Description** |
 | $r^*$ | Long‑run real neutral rate |
 | $\pi^*$ | Inflation target (2.25% target for domestic inflation measured by GDP deflator) |
-
-# Annex II - Data diagnostics
-
-This annex covers the cleaning and diagnostic testing of the data for each variable, including stationarity and structural‑break testing, de-trending, transformation into gaps or first differences, multicollinearity diagnostics, autocorrelation and lag structure assessment, as well as scaling and economic plausibility checks. In applying these diagnostic procedures to the quarterly macroeconomic time series data prior to model estimation, the objective was to ensure that all endogenous and exogenous variables are appropriately transformed, stationary, free from undue multicollinearity and that they exhibit time‑series properties consistent with their theoretical roles within the system.
-
-## Scaling and Economic Plausibility \[plots of series ... combined / facet-wrapped\]
-
-All variables were inspected to ensure the magnitudes were economically plausible and appropriately scaled. Gaps (output, unemployment, real wages, productivity) lie in the expected ±1–5% range. ΔRER and ΔNX display reasonable quarterly volatility. Import and energy inflation gaps show large swings during 2019–2023, reflecting documented global cost‑push shocks. The real interest‑rate gap behaved consistently with monetary‑policy and inflation dynamics. No series exhibited signs of mis‑scaling, measurement errors, or inappropriate de-trending.
-
-## Stationarity Testing
-
-All macroeconomic variables were transformed into either *gap* form (deviations from trend or from steady‑state values) or *first differences* where required by theory. Stationarity was evaluated using the Augmented Dickey–Fuller (ADF) test for each transformed series.
-
-All variables exhibit stationarity at conventional significance levels. The output gap $(\tilde{Y})$, unemployment gap $(\tilde{U})$, inflation deviation $(\tilde{\pi})$, wage gap $(\tilde{w})$, productivity gap $(\tilde{P})$, real interest‑rate gap $(\tilde{r})$, 5‑year spread gap $(\tilde{i}^{spr})$, import‑price inflation gap $(\tilde{\pi}^{\text{IM}})$, and energy‑price inflation gap $(\tilde{\pi}^{\text{E}})$ were all stationary (with ADF $p<0.05$ in each case).
-
-Differenced variables include the change in the real exchange rate $(\Delta\text{RER})$ and the change in net exports $(\Delta\text{NX})$. These are stationary by construction. The raw nominal interest‑rate differential $(i-i^f)$ was found to be non‑stationary, so a **trend‑adjusted differential gap** was constructed, yielding a stationary series suitable for use in the UIP equation.
-
-## Structural‑Break Testing \[needs revision for Apr 5th run\]
-
-To ensure robustness of stationarity and to identify potential regime shifts, each series was tested for breaks using **Zivot–Andrews one‑break unit‑root tests** and **Bai–Perron multiple‑break** tests.
-
-We found the **output gap** to have a single structural break in 2020Q1 (COVID‑19 collapse). **Inflation deviation** and the **real rate gap** appear to show a coinciding structural break around 2021–22, corresponding to the inflation regime shift. Analysis of the **unemployment gap** revealed four persistent structural breaks (2004Q2, 2008Q4, 2013Q4, 2019Q4). For all other variables, Bai–Perron BICs were minimized at zero breaks.
-
-Corresponding break dummies were included **only** in the equations whose dependent variables exhibited genuine structural breaks, thus seeking parsimony and stability.
-
-## Multicollinearity Diagnostics \[need re-running...\]
-
-For each equation, pairwise correlations and **Variance Inflation Factors (VIFs)** were examined for all regressors, including lagged dependent variables and calibrated regressors. Pairwise correlations across all equations were modest (typically \< 0.4). Inflation lags showed expected moderate correlation (\~0.7), but well below problematic thresholds. Import‑ and energy‑price inflation gaps were moderately correlated (\~0.6), consistent with common external shocks. All VIF values were well below conventional thresholds (VIF \< 5), indicating **no multicollinearity concerns**. The regressor sets are therefore suitable for stable 3SLS estimation.
-
-## Persistence and Lag Structure (ACF/PACF Analysis) \[re-run and confirm...\]
-
-Autocorrelation (ACF) and partial autocorrelation (PACF) plots were examined to confirm appropriate dynamic structure:
-
-**Gaps** (output, unemployment, wages, productivity, real interest‑rate) demonstrated clear **AR(1)** processes, confirming use of a single lag in the IS, Okun, Wage‑Phillips, and productivity equations.
-
-**Inflation Deviation** shows a AR(1)–AR(2) structure, validating inclusion of two inflation lags in the Phillips Curve.
-
-**ΔRER and ΔNX** both showed minimal autocorrelation beyond lag 1 with no strong case for additional dynamics to be added.
-
-**Import and Energy Price Gaps:** AR(1)–AR(2) persistence but no evidence of higher‑order dynamics.
-
-No variable exhibited long‑memory behaviour or seasonality requiring deseasonalisation.
-
-## Outliers and Shock Episodes
-
-Visual inspection and residual diagnostics identified several periods of extreme volatility, including COVID‑19 (2020Q1-Q2), the post‑pandemic inflation shock (2021–22) and commodity‑price spikes (2022–23). These episodes correspond precisely to detected structural breaks and are handled through appropriately placed break dummies in the relevant equations.
-
-## Final Assessment
-
-Diagnostic checks confirm that all measures have been taken to appropriately filter, difference, or lag-augment all data series and to ensure that the data are **stationary**, appropriately de-trended, and well-scaled. Structural breaks have been carefully identified and incorporated **only where justified**. No problematic multicollinearity exists within the regressor matrices and the dynamics implied by ACF/PACF plots are reflected in the model specification. With these measures, we are confident the dataset is therefore in **excellent condition for equation‑by‑equation estimation** and subsequent **3SLS system estimation**, ensuring valid inference and robust structural relationships.
 
 # Annex III - OLS estimation and diagnostics
 

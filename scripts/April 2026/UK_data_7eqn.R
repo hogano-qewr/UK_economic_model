@@ -1039,190 +1039,116 @@ MODEL_READY %>%
 library(urca)
 
 # ENDOGENOUS VARIABLES
-# With the ZA and BP (struc breaks) tests, we are asking the question "Is there evidence that the mean 
-#   (or trend) of the output gap changed permanently in a way that requires modelling a regime break?"
-# for both intercept and trend ('both')
 za_Y_GAP <- ur.za(MODEL_READY$Y_GAP, model = "both", lag = NULL)
 summary(za_Y_GAP)
-# Y_GAP is stationary with a break (position 2020 Q1)
+
 struc <- breakpoints(MODEL_READY$Y_GAP ~ 1)
 summary(struc)
-# case not strong for break...BIC minimised at m = 0 ; is it worth it for RSS reduction?
-# Unit‑root tests with endogenous breaks strongly reject non‑stationarity in the output gap when
-#  allowing for a COVID‑period disruption. However, multiple‑break tests with information‑criterion
-#  selection show no evidence of a persistent regime shift in the mean of the output gap. Accordingly, 
-#  the output gap is treated as stationary without an explicit structural break in the baseline 
-#  specification.
-# Although the COVID period generates large residuals in the output‑gap equation, multiple‑break tests 
-#  do not support a persistent regime shift in the mean of the gap. The episode is therefore treated 
-#  as an extreme transitory shock rather than as a structural break in the equilibrium relationship.
-# At the data‑generating‑process level, the correct conclusion is: Y_GAP is I(0) with large transitory 
-#   shocks, not a broken equilibrium process.
 
 
 
 za_u_GAP <- ur.za(MODEL_READY$u_GAP, model = "both", lag = NULL)
 summary(za_u_GAP)
-# ZA says: Unemployment gap is highly persistent; A single break at the GFC is not enough to restore stationarity
 
-# Bai–Perron multiple breakpoints test
 struc <- breakpoints(MODEL_READY$u_GAP ~ 1)
 summary(struc)
-# Bai–Perron says: Multiple mean shifts significantly improve fit. Penalised fit strongly prefers several regimes.
-# Together, they imply: u_GAP is best thought of as a stationary‑around‑shifting‑means process, not a single
-#   regime gap.
-# U_GAP has foUr major structural breaks
 MODEL_READY$date[c(24, 42, 62, 86)] # = ["2004-04-01" "2008-10-01" "2013-10-01" "2019-10-01"]
 
-# APRIL 5TH: CREATE TWO STRUCTURAL BREAK DUMMIES for GFC and 2013 Q4 - GFC definite; 2013 Q4 to test
-# This is a change from previous run in which we created 4 break dummies for U_GAP, as we now seek optimal
-# model design.
-
-# Why 2008Q4 is unquestionably the primary break. It is: the ZA break, the dominant Bai–Perron breakpoint,
-#  the largest labour‑market shock in the sample, and a clearly interpretable regime change.
-# Economically, it marks: the collapse of financial intermediation, employment destruction, a change in 
-#  job‑finding and matching dynamics, hysteresis effects widely documented for the UK.
-# 2008Q4 is a structural regime break in unemployment dynamics, not just a large shock and, as such, should be 
-#  hard‑coded into the baseline.
-
-# Economic meaning of 2013Q4: corresponds to: the end of GFC/post‑crisis adjustment, labour‑market repair 
-#   and re‑matching, immigration and participation changes, welfare and labour‑market institutional reforms,
-#   the return of employment growth without wage pressure. This is widely seen as a new labour‑market regime, 
-#   not a temporary disturbance.
-# Statistical role: Appears as a stable Bai–Perron breakpoint; Far enough from both GFC and COVID to matter 
-#   independently. Not driven by extreme outliers.
-# Modeling implications: Captures a persistent shift in unemployment dynamics; Does not contaminate short‑
-#   sample inference; Does not force you to treat COVID as a permanent regime
-
-# TENTATIVE CONCLUSION: “While multiple breakpoints are detectable in unemployment‑gap data, the baseline 
-#   specification includes only a GFC‑era regime shift. A secondary post‑crisis breakpoint is examined in 
-#   robustness checks. Pandemic‑era movements are treated as transitory disturbances rather than structural 
-#   changes in labour‑market equilibrium.”
-
-# FOUNDATIONAL REMINDERS
-# Standard unit‑root tests (ADF, ZA) assume 0 or 1 break. U_GAP has 4 breaks in our sample. So these tests 
-#     incorrectly classify U_GAP as non‑stationary but it's not a real non‑stationarity problem.
-# It’s simply a multiple‑break problem, which is normal in macro labour market data. # The correct interpretation 
-#     is rather that U_GAP is stationary because: 
-#         It has a stable mean-reverting structure within regimes.
-#         Labour gaps are constructed to be I(0).
-#         Bai–Perron shows clear discrete regime shifts.
-#         ZA fails because it only handles 1 break.
-#         ADF fails because it assumes no breaks at all.
-#         U_GAP is I(0) with multiple structural breaks, not I(1).
 
 
 
-
-# for both intercept and trend ('both')
 za_dcpi_DEV <- ur.za(MODEL_READY$dcpi_DEV, model = "both", lag = NULL)
 summary(za_dcpi_DEV)
-# DEFL_dev is stationary with a break at position 95 (2022 Q1)
+
 struc <- breakpoints(MODEL_READY$dcpi_DEV ~ 1)
 summary(struc)
-# Inflation deviation exhibits a dominant structural break @ 87 2020Q1 for all m>=1
-# 2022Q1 (ZA) or 2020 Q1 (BP). ESTABLISH BREAK AT 87 [AND TEST 2021Q1 FOR ROBUSTNESS]
-# TENTATIVE CONCLUSION: “Unit‑root tests with endogenous breaks strongly reject non‑stationarity in 
-#   inflation deviations, identifying a sharp change in persistence associated with the post‑pandemic 
-#   inflation episode. Multiple‑break tests with information‑criterion selection indicate a single 
-#   dominant structural shift marking the end of the low‑inflation regime. Accordingly, the baseline 
-#   specification includes a post‑2020 inflation‑regime dummy, while treating the 2022 inflation surge 
-#   itself as a large realisation of that regime rather than as a separate structural break.”
+
 
 
 
 za_r_GAP <- ur.za(MODEL_READY$r_GAP, model = "both", lag = NULL)
 summary(za_r_GAP)
-# r_GAP is stationary with a break at position 95 (2022 Q1) [same as DEFL_dev]
-# Bai–Perron multiple breakpoints test
+
 struc <- breakpoints(MODEL_READY$r_GAP ~ 1)
 summary(struc)
-# BIC minimised with no break [Treat post‑pandemic tightening as an endogenous response, not a regime shift]
+
 
 
 
 
 za_drer <- ur.za(MODEL_READY$drer, model = "both", lag = NULL)
 summary(za_drer)
-# D_RER is stationary with a potential break at position 43 (2009 Q1)
-# Bai–Perron multiple breakpoints test
+
 struc <- breakpoints(MODEL_READY$drer ~ 1)
 summary(struc)
-# suggests that no breakpoint is required. 
-# “Despite large crisis‑era movements, changes in the real exchange rate are strongly stationary, 
-#   and information‑criterion‑based breakpoint tests provide no evidence of persistent regime shifts. 
-#   Accordingly, exchange‑rate dynamics are modelled without structural break dummies.”
 
 
-# note that WAGE_GAP passed the ADF test
+
+
+
 za_wage_GAP <- ur.za(MODEL_READY$wage_GAP, model = "both", lag = NULL)
 summary(za_wage_GAP)
-# fails to reject null hypothesis that WAGE_GAP has a unit root and suggests break at position 95 (2022 Q1)
-# Bai–Perron multiple breakpoints test
+
 struc <- breakpoints(MODEL_READY$wage_GAP ~ 1)
 summary(struc)
-#### APRIL 5TH RUN .... NOW BIC SUGGESTING THREE STRUCTURAL BREAKD REQUIRED (24, 51, 66) [2004Q2, 2011Q1, 2014Q4]
-# TENTATIVE NEW CONCLUSION: Although multiple structural breaks are detectable in the wage gap, these largely 
-#   reflect endogenous responses to changes in labour‑market slack, productivity, and inflation regimes. 
-#   Accordingly, the baseline specification does not impose wage‑specific regime dummies, allowing wage dynamics 
-#   to adjust through the system’s structural channels.”
-## PREVIOUS RUN CONCLUSION:
-# Statistically, no breaks required. BIC lowest with no breaks, despite dip at m=2 and m=3. 
-# Why wage gap can be stationary without clear breakpoints. Wage behaviour in the UK changed over time due to:
-#   post‑GFC low productivity; Brexit labour‑supply shifts; post‑Covid tight labour market; 2022–23 wage–price 
-#   dynamics. BUT these changes were gradual, not sudden: firms adjust wages with delays; contracts are staggered; 
-#   expectations adapt slowly; bargaining power shifts smoothly. # Thus: ADF sees stable mean reversion → stationary. ZA cannot detect one dominant crash or spike → no strong 
-#   break. BP detects lots of small, unimportant changes → no break optimal. This is consistent with how wage gaps 
-#   tend to behave in real semi‑structural models.
+
+
+
 
 
 za_prod_GAP <- ur.za(MODEL_READY$prod_GAP, model = "both", lag = NULL)
 summary(za_prod_GAP)
+
 struc <- breakpoints(MODEL_READY$prod_GAP ~ 1)
 summary(struc)
-# ADF confirms that the productivity gap is stationary. Zivot–Andrews suggests one break in 2020Q2, consistent
-# with COVID distortions. Bai–Perron BIC clearly rejects the inclusion of breaks, making 
-#   a zero‑break specification optimal. Therefore, no break dummies are required in the productivity‑gap 
-#   equation, with pandemic‑era volatility treated as a transitory disturbance rather than a structural shift.
-# NO CHANGE IN CONCLUSION BASED ON APRIL 5TH RUN....;
-# Measured productivity fluctuated violently during COVID, but its deviation from trend did not permanently 
-#   re‑anchor at a different level.
+
+
+
+
 
 
 # EXOGENOUS VARIABLES
 za_i5y_GAP <- ur.za(MODEL_READY$i5y_GAP, model = "both", lag = NULL)
 summary(za_i5y_GAP)
-# TEST-STAT FAIL...POTENTIAL BREAK AT 41 (2008Q3)
+
 struc <- breakpoints(MODEL_READY$i5y_GAP ~ 1)
 summary(struc)
-# STILL POINTING TO NO STRUCTURAL BREAKS BEING REQUIRED
+
+
+
 
 za_i_DIFFL_GAP <- ur.za(MODEL_READY$i_DIFFL_GAP, model = "both", lag = NULL)
 summary(za_i_DIFFL_GAP)
-# test-stat only passes at 10% level [...potential break at 42, 2008Q4] 
+
 struc <- breakpoints(MODEL_READY$i_DIFFL_GAP ~ 1)
 summary(struc)
-# april 5 run...now suggesting 3 structural breaks 19,42,57 [2003Q1, 2008Q4, 2012Q3]
 
-# Although multiple breakpoints are detectable in short‑term interest‑rate differentials, these 
-#   primarily reflect periods of international monetary policy coordination rather than persistent 
-#   regime shifts. Accordingly, interest‑rate spread gaps are modelled without structural break dummies, 
-#   with regime effects captured through inflation and policy‑reaction dynamics. Bai–Perron is detecting:
-#       periods when UK and ROW policy were moving together, periods when they diverged, periods when 
-#       they re‑converged.
+
+
+
 
 za_IMcpi_GAP <- ur.za(MODEL_READY$IMcpi_GAP, model = "both", lag = NULL)
 summary(za_IMcpi_GAP)
+
 struc <- breakpoints(MODEL_READY$IMcpi_GAP ~ 1)
 summary(struc)
 
+
+
+
+
 za_ecpi_GAP <- ur.za(MODEL_READY$ecpi_GAP, model = "both", lag = NULL)
 summary(za_ecpi_GAP)
+
 struc <- breakpoints(MODEL_READY$ecpi_GAP ~ 1)
 summary(struc)
 
+
+
+
 za_dNX <- ur.za(MODEL_READY$dNX, model = "both", lag = NULL)
 summary(za_dNX)
+
 struc <- breakpoints(MODEL_READY$dNX ~ 1)
 summary(struc)
 
